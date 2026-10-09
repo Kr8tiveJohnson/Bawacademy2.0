@@ -253,50 +253,62 @@ button, input, textarea, select {
     justify-content: center;
     align-items: center;
     gap: 5px;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(216, 255, 0, 0.35);
     border-radius: 10px;
     cursor: pointer;
     padding: 0;
-    transition: background var(--transition-fast);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    position: relative;
+    z-index: 1001;
 }
 
-.menu-toggle:hover {
-    background: rgba(255, 255, 255, 0.13);
+.menu-toggle:hover,
+.menu-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: #d8ff00;
 }
 
 .ham-line {
     display: block;
-    width: 20px;
-    height: 1.8px;
-    background: rgba(255, 255, 255, 0.9);
+    width: 22px;
+    height: 2px;
+    background: #ffffff;
     border-radius: 2px;
     transition: transform 0.28s ease, opacity 0.2s ease, width 0.28s ease;
     transform-origin: center;
+    pointer-events: none;
 }
 
-/* Active (X) state driven by JS class .is-open on header */
+/* Active (X) state driven by aria-expanded on button */
 .menu-toggle[aria-expanded="true"] .ham-line:nth-child(1) {
-    transform: translateY(6.8px) rotate(45deg);
+    transform: translateY(7px) rotate(45deg);
 }
 .menu-toggle[aria-expanded="true"] .ham-line:nth-child(2) {
     opacity: 0;
     transform: scaleX(0);
 }
 .menu-toggle[aria-expanded="true"] .ham-line:nth-child(3) {
-    transform: translateY(-6.8px) rotate(-45deg);
+    transform: translateY(-7px) rotate(-45deg);
 }
 
 /* ── Mobile Nav Drawer ────────────────────────── */
 .mobile-nav {
     display: none;
-    background: rgba(5, 22, 14, 0.97);
-    border-top: 1px solid rgba(230, 183, 73, 0.1);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    background: rgba(3, 20, 11, 0.98);
+    border-top: 1px solid rgba(216, 255, 0, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+    position: relative;
+    z-index: 999;
 }
 
 .mobile-nav.is-open {
@@ -2419,7 +2431,7 @@ button, input, textarea, select {
     }
     
     .menu-toggle {
-        display: flex;
+        display: flex !important;
     }
     
     .brand-logo-bridge {

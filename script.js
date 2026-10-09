@@ -20,20 +20,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const mobileNav = document.querySelector("#mobile-nav");
 
     if (menuToggle && mobileNav) {
-        menuToggle.addEventListener("click", () => {
-            const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
-            menuToggle.setAttribute("aria-expanded", String(!isExpanded));
-            mobileNav.classList.toggle("is-open", !isExpanded);
-            mobileNav.setAttribute("aria-hidden", String(isExpanded));
-        });
-
-        // Close on link click
-        mobileNav.addEventListener("click", (event) => {
-            if (event.target instanceof Element && event.target.closest("a")) {
-                menuToggle.setAttribute("aria-expanded", "false");
-                mobileNav.classList.remove("is-open");
-                mobileNav.setAttribute("aria-hidden", "true");
+        const toggleMenu = (e) => {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
+            const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
+            const willExpand = !isExpanded;
+            menuToggle.setAttribute("aria-expanded", String(willExpand));
+            mobileNav.classList.toggle("is-open", willExpand);
+            mobileNav.setAttribute("aria-hidden", String(!willExpand));
+        };
+
+        menuToggle.addEventListener("click", toggleMenu);
+
+        // Smooth navigation and delayed close on mobile link click so the browser navigates cleanly
+        const mobileLinks = mobileNav.querySelectorAll("a");
+        mobileLinks.forEach((link) => {
+            link.addEventListener("click", (event) => {
+                const href = link.getAttribute("href");
+                if (href && href.startsWith("#")) {
+                    const targetEl = document.querySelector(href);
+                    if (targetEl) {
+                        event.preventDefault();
+                        targetEl.scrollIntoView({ behavior: "smooth" });
+                    }
+                }
+                // Close after slight delay so smooth scroll initiates cleanly
+                setTimeout(() => {
+                    menuToggle.setAttribute("aria-expanded", "false");
+                    mobileNav.classList.remove("is-open");
+                    mobileNav.setAttribute("aria-hidden", "true");
+                }, 180);
+            });
         });
 
         // Close on ESC key
@@ -43,6 +62,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 mobileNav.classList.remove("is-open");
                 mobileNav.setAttribute("aria-hidden", "true");
                 menuToggle.focus();
+            }
+        });
+
+        // Close when clicking outside of header
+        document.addEventListener("click", (event) => {
+            const header = document.querySelector("#header");
+            if (menuToggle.getAttribute("aria-expanded") === "true" && header && !header.contains(event.target)) {
+                menuToggle.setAttribute("aria-expanded", "false");
+                mobileNav.classList.remove("is-open");
+                mobileNav.setAttribute("aria-hidden", "true");
             }
         });
     }
