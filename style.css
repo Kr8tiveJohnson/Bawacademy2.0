@@ -2568,53 +2568,49 @@ button, input, textarea, select {
    -------------------------------------------------------------------------- */
 
 .footer-hotlines {
-    margin-top: 1.25rem;
+    margin-top: 0.75rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 0.5rem;
-}
-
-.footer-hotlines .footer-col-title {
-    display: block;
-    margin-bottom: 0.4rem;
 }
 
 .footer-hotline-link {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: rgba(255, 255, 255, 0.82);
+    gap: 0.4rem;
+    color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
-    font-size: 0.92rem;
+    font-size: 0.85rem;
     font-weight: 600;
     letter-spacing: 0.01em;
-    padding: 0.45rem 0.7rem;
-    border-radius: 8px;
-    border: 1px solid rgba(230, 183, 73, 0.2);
-    background: rgba(230, 183, 73, 0.06);
+    padding: 0.35rem 0.65rem;
+    border-radius: 7px;
+    border: 1px solid rgba(230, 183, 73, 0.25);
+    background: rgba(230, 183, 73, 0.07);
     transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
     flex-wrap: wrap;
 }
 
 .footer-hotline-link:hover {
-    background: rgba(230, 183, 73, 0.16);
-    border-color: rgba(230, 183, 73, 0.5);
+    background: rgba(230, 183, 73, 0.18);
+    border-color: rgba(230, 183, 73, 0.55);
     color: var(--gold-light);
 }
 
 .footer-hotline-link .hotline-icon {
-    font-size: 1rem;
+    font-size: 0.9rem;
     flex-shrink: 0;
 }
 
 .footer-hotline-link small {
     display: block;
     width: 100%;
-    margin-left: 1.5rem;
-    font-size: 0.72rem;
+    margin-left: 1.4rem;
+    font-size: 0.68rem;
     font-weight: 400;
     color: var(--gold-primary);
-    opacity: 0.85;
+    opacity: 0.9;
     letter-spacing: 0.02em;
 }
 
