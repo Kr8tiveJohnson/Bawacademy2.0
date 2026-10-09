@@ -312,11 +312,12 @@ button, input, textarea, select {
     max-height: calc(100vh - 72px);
     overflow-y: auto;
     position: relative;
-    z-index: 999;
+    z-index: 1000;
+    width: 100%;
 }
 
 .mobile-nav.is-open {
-    display: block;
+    display: block !important;
     animation: slideDown 0.25s ease;
 }
 

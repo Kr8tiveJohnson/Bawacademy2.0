@@ -4,24 +4,90 @@
  * Interactive Application Script
  */
 
-// ── Global Helper: Toggle Mobile Navigation Drawer ──────────
-window.toggleMobileNav = function(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
-    const btn = document.querySelector("#menu-toggle");
-    const nav = document.querySelector("#mobile-nav");
-    if (!btn || !nav) return;
-    const isExpanded = btn.getAttribute("aria-expanded") === "true";
-    const willExpand = !isExpanded;
-    btn.setAttribute("aria-expanded", String(willExpand));
-    if (willExpand) {
-        nav.classList.add("is-open");
-        nav.setAttribute("aria-hidden", "false");
-    } else {
+// ── Mobile Nav Toggle (bulletproof, runs immediately on script load) ──
+(function () {
+    function doToggle() {
+        var btn = document.getElementById("menu-toggle");
+        var nav = document.getElementById("mobile-nav");
+        if (!btn || !nav) return;
+        var isOpen = nav.classList.contains("is-open");
+        if (isOpen) {
+            nav.classList.remove("is-open");
+            nav.setAttribute("aria-hidden", "true");
+            btn.setAttribute("aria-expanded", "false");
+        } else {
+            nav.classList.add("is-open");
+            nav.setAttribute("aria-hidden", "false");
+            btn.setAttribute("aria-expanded", "true");
+        }
+    }
+
+    function closeMobileNav() {
+        var btn = document.getElementById("menu-toggle");
+        var nav = document.getElementById("mobile-nav");
+        if (!btn || !nav) return;
         nav.classList.remove("is-open");
         nav.setAttribute("aria-hidden", "true");
+        btn.setAttribute("aria-expanded", "false");
     }
-};
+
+    function attachMenuToggle() {
+        var btn = document.getElementById("menu-toggle");
+        if (!btn) return;
+        // Remove any inline onclick to avoid double-firing
+        btn.removeAttribute("onclick");
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            doToggle();
+        });
+    }
+
+    function attachMobileLinkClose() {
+        var nav = document.getElementById("mobile-nav");
+        if (!nav) return;
+        var links = nav.querySelectorAll("a");
+        links.forEach(function (link) {
+            link.addEventListener("click", function () {
+                setTimeout(closeMobileNav, 180);
+            });
+        });
+    }
+
+    function attachOutsideClose() {
+        document.addEventListener("click", function (e) {
+            var nav = document.getElementById("mobile-nav");
+            var btn = document.getElementById("menu-toggle");
+            var header = document.getElementById("header");
+            if (nav && nav.classList.contains("is-open") && header && !header.contains(e.target)) {
+                closeMobileNav();
+            }
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                closeMobileNav();
+            }
+        });
+    }
+
+    // Also expose globally for any potential inline use
+    window.toggleMobileNav = doToggle;
+    window.closeMobileNav = closeMobileNav;
+
+    // Attach when DOM is ready
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () {
+            attachMenuToggle();
+            attachMobileLinkClose();
+            attachOutsideClose();
+        });
+    } else {
+        // DOM already ready
+        attachMenuToggle();
+        attachMobileLinkClose();
+        attachOutsideClose();
+    }
+}());
 
 // ── Global Helper: Poster Lightbox Modal ───────────────────
 window.openFlyerModal = function(e) {
@@ -76,55 +142,9 @@ document.addEventListener("DOMContentLoaded", () => {
         onScroll();
     }
 
-    // 2. Mobile Menu Drawer Toggle
-    const menuToggle = document.querySelector("#menu-toggle");
-    const mobileNav = document.querySelector("#mobile-nav");
+    // 2. Mobile nav handlers are set up in the IIFE above (before DOMContentLoaded)
 
-    if (menuToggle && mobileNav) {
-        menuToggle.addEventListener("click", window.toggleMobileNav);
-
-        // Smooth navigation and delayed close on mobile link click
-        const mobileLinks = mobileNav.querySelectorAll("a");
-        mobileLinks.forEach((link) => {
-            link.addEventListener("click", (event) => {
-                const href = link.getAttribute("href");
-                if (href && href.startsWith("#")) {
-                    const targetEl = document.querySelector(href);
-                    if (targetEl) {
-                        event.preventDefault();
-                        targetEl.scrollIntoView({ behavior: "smooth" });
-                    }
-                }
-                setTimeout(() => {
-                    menuToggle.setAttribute("aria-expanded", "false");
-                    mobileNav.classList.remove("is-open");
-                    mobileNav.setAttribute("aria-hidden", "true");
-                }, 180);
-            });
-        });
-
-        // Close on ESC key
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
-                menuToggle.setAttribute("aria-expanded", "false");
-                mobileNav.classList.remove("is-open");
-                mobileNav.setAttribute("aria-hidden", "true");
-                menuToggle.focus();
-            }
-        });
-
-        // Close when clicking outside of header
-        document.addEventListener("click", (event) => {
-            const header = document.querySelector("#header");
-            if (menuToggle.getAttribute("aria-expanded") === "true" && header && !header.contains(event.target)) {
-                menuToggle.setAttribute("aria-expanded", "false");
-                mobileNav.classList.remove("is-open");
-                mobileNav.setAttribute("aria-hidden", "true");
-            }
-        });
-    }
-
-    // 2. Dynamic Year Update
+    // 3. Dynamic Year Update
     const currentYearSpan = document.querySelector("#current-year");
     if (currentYearSpan) {
         currentYearSpan.textContent = String(new Date().getFullYear());
