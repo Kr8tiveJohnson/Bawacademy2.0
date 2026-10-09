@@ -4,7 +4,68 @@
  * Interactive Application Script
  */
 
+// ── Global Helper: Toggle Mobile Navigation Drawer ──────────
+window.toggleMobileNav = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+    const btn = document.querySelector("#menu-toggle");
+    const nav = document.querySelector("#mobile-nav");
+    if (!btn || !nav) return;
+    const isExpanded = btn.getAttribute("aria-expanded") === "true";
+    const willExpand = !isExpanded;
+    btn.setAttribute("aria-expanded", String(willExpand));
+    if (willExpand) {
+        nav.classList.add("is-open");
+        nav.setAttribute("aria-hidden", "false");
+    } else {
+        nav.classList.remove("is-open");
+        nav.setAttribute("aria-hidden", "true");
+    }
+};
+
+// ── Global Helper: Poster Lightbox Modal ───────────────────
+window.openFlyerModal = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const modal = document.querySelector("#flyerModal");
+    if (modal) {
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+};
+
+window.closeFlyerModal = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const modal = document.querySelector("#flyerModal");
+    if (modal) {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+};
+
+// ── Universal Smooth Scroll for all Anchor Links ──────────
+function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function(e) {
+            const targetId = this.getAttribute("href");
+            if (targetId && targetId !== "#" && targetId !== "#top") {
+                const targetEl = document.querySelector(targetId);
+                if (targetEl) {
+                    e.preventDefault();
+                    targetEl.scrollIntoView({ behavior: "smooth" });
+                }
+            } else if (targetId === "#top") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        });
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    initSmoothScroll();
+
     // 1. Scrolled header state
     const siteHeader = document.querySelector("#header");
     if (siteHeader) {
@@ -20,21 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const mobileNav = document.querySelector("#mobile-nav");
 
     if (menuToggle && mobileNav) {
-        const toggleMenu = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
-            const willExpand = !isExpanded;
-            menuToggle.setAttribute("aria-expanded", String(willExpand));
-            mobileNav.classList.toggle("is-open", willExpand);
-            mobileNav.setAttribute("aria-hidden", String(!willExpand));
-        };
+        menuToggle.addEventListener("click", window.toggleMobileNav);
 
-        menuToggle.addEventListener("click", toggleMenu);
-
-        // Smooth navigation and delayed close on mobile link click so the browser navigates cleanly
+        // Smooth navigation and delayed close on mobile link click
         const mobileLinks = mobileNav.querySelectorAll("a");
         mobileLinks.forEach((link) => {
             link.addEventListener("click", (event) => {
@@ -46,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         targetEl.scrollIntoView({ behavior: "smooth" });
                     }
                 }
-                // Close after slight delay so smooth scroll initiates cleanly
                 setTimeout(() => {
                     menuToggle.setAttribute("aria-expanded", "false");
                     mobileNav.classList.remove("is-open");

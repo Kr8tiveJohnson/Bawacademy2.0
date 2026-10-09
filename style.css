@@ -57,8 +57,12 @@
 
 html {
     scroll-behavior: smooth;
-    scroll-padding-top: 130px;
+    scroll-padding-top: 80px;
     -webkit-text-size-adjust: 100%;
+}
+
+section[id] {
+    scroll-margin-top: 80px;
 }
 
 body {
