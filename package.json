@@ -1,0 +1,20 @@
+{
+  "name": "bawacademy2.0",
+  "version": "1.0.0",
+  "description": "The Bridge Business Academy x Spotless Connect - Business & Skill Up Acquisition 2.0 Workshop",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'Static build ready'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "workshop",
+    "business-academy",
+    "spotless-connect"
+  ],
+  "author": "The Bridge Business Academy",
+  "license": "ISC"
+}

@@ -1,0 +1,18 @@
+services:
+  # Option 1: Render Static Site (Recommended: 100% Free, Global CDN, No spin-down)
+  - type: web
+    name: the-bridge-business-academy
+    env: static
+    buildCommand: ""
+    staticPublishPath: .
+
+  # Option 2: Render Node Web Service
+  - type: web
+    name: the-bridge-business-academy-server
+    env: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20
