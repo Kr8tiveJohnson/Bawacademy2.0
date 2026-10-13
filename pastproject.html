@@ -18,6 +18,380 @@
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Gallery & Lightbox Custom Styling */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .filter-pill {
+            padding: 9px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(230, 183, 73, 0.22);
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .filter-pill:hover,
+        .filter-pill.is-active {
+            background: var(--gold-primary);
+            color: var(--forest-darkest);
+            border-color: var(--gold-primary);
+            box-shadow: 0 4px 16px rgba(230, 183, 73, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 28px;
+        }
+
+        .project-card {
+            background: rgba(5, 24, 15, 0.85);
+            border: 1px solid rgba(230, 183, 73, 0.22);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--gold-primary);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6), 0 0 20px rgba(230, 183, 73, 0.2);
+        }
+
+        .project-card-media {
+            position: relative;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .project-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .project-card:hover .project-card-img {
+            transform: scale(1.05);
+        }
+
+        .card-photo-count-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(3, 20, 11, 0.85);
+            color: var(--gold-light);
+            border: 1px solid rgba(230, 183, 73, 0.4);
+            backdrop-filter: blur(8px);
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-timeline-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(3, 20, 11, 0.85);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .project-card-body {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .project-card-category {
+            color: var(--gold-primary);
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .project-card-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .project-card-partner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .project-card-partner img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .project-card-summary {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.9rem;
+            line-height: 1.55;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .project-card-action {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--gold-light);
+            font-size: 0.86rem;
+            font-weight: 700;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Fullscreen Lightbox Modal */
+        .lightbox-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 12, 7, 0.94);
+            backdrop-filter: blur(20px);
+            z-index: 100000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .lightbox-modal.is-open {
+            display: flex;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .lightbox-dialog {
+            background: var(--admin-surface, #051a10);
+            border: 1.5px solid rgba(230, 183, 73, 0.35);
+            border-radius: 24px;
+            max-width: 960px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85);
+            position: relative;
+        }
+
+        .lightbox-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1.5px solid rgba(230, 183, 73, 0.4);
+            color: #fff;
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .lightbox-close-btn:hover {
+            background: var(--gold-primary);
+            color: #03140b;
+        }
+
+        /* Carousel Component */
+        .carousel-view {
+            position: relative;
+            background: #000;
+            aspect-ratio: 16 / 10;
+            max-height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-top-left-radius: 22px;
+            border-top-right-radius: 22px;
+        }
+
+        .carousel-main-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(3, 20, 11, 0.75);
+            border: 1.5px solid rgba(230, 183, 73, 0.4);
+            color: #ffffff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 5;
+        }
+
+        .carousel-btn:hover {
+            background: var(--gold-primary);
+            color: #03140b;
+        }
+
+        .carousel-btn-prev { left: 16px; }
+        .carousel-btn-next { right: 16px; }
+
+        .carousel-counter {
+            position: absolute;
+            bottom: 14px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--gold-light);
+            border: 1px solid rgba(230, 183, 73, 0.3);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .carousel-thumbs {
+            display: flex;
+            gap: 10px;
+            padding: 12px 24px;
+            background: rgba(3, 20, 11, 0.95);
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .carousel-thumb-item {
+            width: 60px;
+            height: 44px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.5;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .carousel-thumb-item.is-selected {
+            opacity: 1;
+            border-color: var(--gold-primary);
+        }
+
+        .lightbox-info {
+            padding: 28px 32px 36px;
+        }
+
+        .lightbox-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .lightbox-pill {
+            background: rgba(230, 183, 73, 0.15);
+            border: 1px solid rgba(230, 183, 73, 0.3);
+            color: var(--gold-light);
+            font-size: 0.76rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .lightbox-title {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.25;
+            margin-bottom: 10px;
+        }
+
+        .lightbox-company {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lightbox-desc {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.02rem;
+            line-height: 1.65;
+        }
+
+        /* Empty state */
+        .gallery-empty-box {
+            grid-column: 1 / -1;
+            padding: 60px 24px;
+            text-align: center;
+            background: rgba(5, 22, 14, 0.6);
+            border: 2px dashed rgba(230, 183, 73, 0.3);
+            border-radius: 20px;
+        }
+    </style>
 </head>
 
 <body id="top">
@@ -97,36 +471,33 @@
                     Past Projects &amp; <span class="title-gold">Partner Companies</span>
                 </h1>
                 <p class="section-sub" style="max-width: 760px; margin: 0 auto; color: rgba(255, 255, 255, 0.78); font-size: 1.1rem; line-height: 1.6;">
-                    A curated archive of impactful past editions, youth empowerment workshops, media productions, and corporate brand partnerships executed and packaged by Spotless Connect.
+                    Explore our track record of youth empowerment workshops, corporate brand activations, media productions, and corporate alliances packaged by Spotless Connect.
                 </p>
+
+                <!-- Admin shortcut button -->
+                <div style="margin-top: 20px;">
+                    <a href="admin.html" class="button button-outline" style="font-size: 0.8rem; padding: 6px 14px; border-radius: 999px;">
+                        <span>🔒 Admin: Add / Manage Projects</span>
+                    </a>
+                </div>
             </div>
         </section>
 
-        <!-- Image Gallery Placeholder Section -->
-        <section class="section past-projects-section" style="padding: 60px 0 80px;">
+        <!-- Dynamic Gallery Section -->
+        <section class="section past-projects-section" style="padding: 50px 0 80px;">
             <div class="section-container">
-                <!-- Status Notice -->
-                <div class="past-projects-placeholder" style="padding: 48px 32px; border: 2px dashed rgba(230, 183, 73, 0.35); background: rgba(5, 22, 14, 0.6); border-radius: 20px; text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 16px;" aria-hidden="true">📸 🏢</div>
-                    <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.8rem; margin-bottom: 12px;">
-                        Image Gallery &amp; Brand Showcase Workspace
-                    </h2>
-                    <p style="color: rgba(255, 255, 255, 0.8); max-width: 680px; margin: 0 auto 24px; font-size: 1.05rem; line-height: 1.6;">
-                        This area is prepared to receive and display past project photographs, event highlight reels, and partner company logos. Awaiting your instructions and images to populate the gallery grid!
-                    </p>
-                    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
-                        <a class="button button-gold" href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank" rel="noopener noreferrer">
-                            <span>Join WhatsApp Community</span>
-                            <span class="btn-arrow" aria-hidden="true">↗</span>
-                        </a>
-                        <a class="button button-outline" href="index.html">
-                            <span>← Return to Workshop Homepage</span>
-                        </a>
-                    </div>
+                <!-- Filter Pills -->
+                <div class="filter-bar" id="categoryFilterBar">
+                    <button class="filter-pill is-active" onclick="filterCategory('All')">All Projects</button>
+                </div>
+
+                <!-- Gallery Grid -->
+                <div class="gallery-grid" id="projectsGrid">
+                    <!-- Project cards will be dynamically injected here -->
                 </div>
 
                 <!-- Spotless Connect Contact Capsule -->
-                <div style="margin-top: 48px; padding: 28px 32px; background: rgba(230, 183, 73, 0.08); border: 1px solid rgba(230, 183, 73, 0.25); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div style="margin-top: 60px; padding: 28px 32px; background: rgba(230, 183, 73, 0.08); border: 1px solid rgba(230, 183, 73, 0.25); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                     <div>
                         <strong style="display: block; color: var(--gold-primary); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Spotless Connect Direct Hotlines</strong>
                         <span style="color: rgba(255, 255, 255, 0.85); font-size: 0.95rem;">For partnership, media sponsorship, or project inquiries:</span>
@@ -146,6 +517,33 @@
         </section>
     </main>
 
+    <!-- Project Lightbox Modal -->
+    <div class="lightbox-modal" id="projectModal" aria-hidden="true" role="dialog">
+        <div class="lightbox-dialog">
+            <button class="lightbox-close-btn" onclick="closeLightboxModal()" aria-label="Close dialog">&times;</button>
+            
+            <div class="carousel-view">
+                <img id="carouselImg" src="" alt="Project Photo" class="carousel-main-img">
+                <button class="carousel-btn carousel-btn-prev" onclick="carouselPrev()">‹</button>
+                <button class="carousel-btn carousel-btn-next" onclick="carouselNext()">›</button>
+                <div class="carousel-counter" id="carouselCounter">1 / 1</div>
+            </div>
+
+            <div class="carousel-thumbs" id="carouselThumbs"></div>
+
+            <div class="lightbox-info">
+                <div class="lightbox-meta-row">
+                    <span class="lightbox-pill" id="modalCategory">Workshop</span>
+                    <span style="color: rgba(255,255,255,0.4);">•</span>
+                    <span id="modalDate" style="color: var(--gold-light); font-weight: 700; font-size: 0.9rem;">2025</span>
+                </div>
+                <h2 class="lightbox-title" id="modalTitle">Project Title</h2>
+                <div class="lightbox-company" id="modalCompany">Company Name</div>
+                <p class="lightbox-desc" id="modalDesc">Project description goes here...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="site-footer" role="contentinfo">
         <div class="footer-bottom-bar">
@@ -154,7 +552,8 @@
                     <p class="footer-copyright">
                         © <span id="current-year">2026</span> The Bridge Business Academy. Packaged by Spotless Connect. All rights reserved.
                     </p>
-                    <div class="footer-bottom-links">
+                    <div class="footer-bottom-links" style="display: flex; gap: 16px; align-items: center;">
+                        <a href="admin.html" style="color: var(--gold-light); font-weight: 700;">Admin CMS 🔒</a>
                         <a href="index.html">Back to Workshop Homepage ↑</a>
                     </div>
                 </div>
@@ -163,6 +562,220 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        let allProjects = [];
+        let activeCategory = "All";
+        let currentModalProject = null;
+        let currentImageIndex = 0;
+
+        async function loadPublicProjects() {
+            // First check live API
+            try {
+                const res = await fetch('/api/projects');
+                if (res.ok) {
+                    allProjects = await res.json();
+                    renderCategoryFilters();
+                    renderProjectsGrid();
+                    return;
+                }
+            } catch (err) {
+                console.log("Loading local fallback...");
+            }
+
+            // Fallback to localStorage
+            const stored = localStorage.getItem("tbba_past_projects");
+            if (stored) {
+                try {
+                    allProjects = JSON.parse(stored);
+                } catch (e) {
+                    allProjects = [];
+                }
+            }
+
+            // Fallback to static sample if empty
+            if (!allProjects || allProjects.length === 0) {
+                allProjects = [
+                    {
+                        id: "proj-1",
+                        title: "Business & Skill Up Acquisition 1.0",
+                        company: "The Bridge Business Academy × Spotless Connect",
+                        category: "Youth Empowerment & Workshops",
+                        date: "2025",
+                        summary: "Flagship inaugural edition empowering over 500 students with practical tech competencies, seed capital pitch grants, laptops, and career pathways.",
+                        images: ["assets/workshop-flyer.jpg"],
+                        companyLogo: "LOGOS/spotless-connect-logo.png"
+                    }
+                ];
+            }
+
+            renderCategoryFilters();
+            renderProjectsGrid();
+        }
+
+        function renderCategoryFilters() {
+            const filterBar = document.getElementById("categoryFilterBar");
+            const categories = new Set();
+            allProjects.forEach(p => {
+                if (p.category) categories.add(p.category.trim());
+            });
+
+            let html = `<button class="filter-pill ${activeCategory === 'All' ? 'is-active' : ''}" onclick="filterCategory('All')">All Projects (${allProjects.length})</button>`;
+            categories.forEach(cat => {
+                const count = allProjects.filter(p => p.category === cat).length;
+                html += `<button class="filter-pill ${activeCategory === cat ? 'is-active' : ''}" onclick="filterCategory('${cat}')">${cat} (${count})</button>`;
+            });
+
+            filterBar.innerHTML = html;
+        }
+
+        function filterCategory(cat) {
+            activeCategory = cat;
+            renderCategoryFilters();
+            renderProjectsGrid();
+        }
+
+        function renderProjectsGrid() {
+            const grid = document.getElementById("projectsGrid");
+            const filtered = activeCategory === "All" 
+                ? allProjects 
+                : allProjects.filter(p => p.category === activeCategory);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="gallery-empty-box">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">📂</div>
+                        <h3 style="color: #fff; font-size: 1.4rem; margin-bottom: 8px;">No projects found in this category</h3>
+                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">Use the Admin Portal to upload photographs and add new partner projects.</p>
+                        <a href="admin.html" class="button button-gold"><span>Go to Admin Portal</span> <span>→</span></a>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(proj => {
+                const images = proj.images || [];
+                const cover = images.length > 0 ? images[0] : 'assets/workshop-flyer.jpg';
+                const photoCount = images.length;
+                const companyLogo = proj.companyLogo || 'LOGOS/spotless-connect-logo.png';
+
+                return `
+                    <article class="project-card" onclick="openProjectLightbox('${proj.id}')">
+                        <div class="project-card-media">
+                            <img class="project-card-img" src="${cover}" alt="${proj.title}" loading="lazy" onerror="this.src='assets/workshop-flyer.jpg'">
+                            <span class="card-photo-count-badge">📷 ${photoCount} ${photoCount === 1 ? 'Photo' : 'Photos'}</span>
+                            <span class="card-timeline-badge">🗓️ ${proj.date || '2025'}</span>
+                        </div>
+                        <div class="project-card-body">
+                            <div class="project-card-category">${proj.category || 'Empowerment'}</div>
+                            <h3 class="project-card-title">${proj.title}</h3>
+                            <div class="project-card-partner">
+                                <img src="${companyLogo}" alt="Logo" onerror="this.style.display='none'">
+                                <span>${proj.company}</span>
+                            </div>
+                            <p class="project-card-summary">${proj.summary}</p>
+                            <div class="project-card-action">
+                                <span>View Photos &amp; Highlights</span>
+                                <span>→</span>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Lightbox Functions
+        function openProjectLightbox(id) {
+            const proj = allProjects.find(p => p.id === id);
+            if (!proj) return;
+            currentModalProject = proj;
+            currentImageIndex = 0;
+
+            document.getElementById("modalTitle").textContent = proj.title;
+            document.getElementById("modalCategory").textContent = proj.category || 'Project';
+            document.getElementById("modalDate").textContent = proj.date || '';
+            document.getElementById("modalCompany").textContent = 'Partner: ' + proj.company;
+            document.getElementById("modalDesc").textContent = proj.summary;
+
+            updateCarouselImage();
+            renderCarouselThumbs();
+
+            const modal = document.getElementById("projectModal");
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeLightboxModal() {
+            const modal = document.getElementById("projectModal");
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+        }
+
+        function updateCarouselImage() {
+            if (!currentModalProject) return;
+            const images = currentModalProject.images || [];
+            if (images.length === 0) images.push('assets/workshop-flyer.jpg');
+
+            const carouselImg = document.getElementById("carouselImg");
+            carouselImg.src = images[currentImageIndex];
+            document.getElementById("carouselCounter").textContent = `${currentImageIndex + 1} / ${images.length}`;
+
+            // Highlight thumbnail
+            const thumbs = document.querySelectorAll(".carousel-thumb-item");
+            thumbs.forEach((t, i) => {
+                t.classList.toggle("is-selected", i === currentImageIndex);
+            });
+        }
+
+        function renderCarouselThumbs() {
+            const thumbsContainer = document.getElementById("carouselThumbs");
+            const images = currentModalProject.images || [];
+            if (images.length <= 1) {
+                thumbsContainer.style.display = "none";
+                return;
+            }
+            thumbsContainer.style.display = "flex";
+            thumbsContainer.innerHTML = images.map((img, idx) => `
+                <img src="${img}" class="carousel-thumb-item ${idx === 0 ? 'is-selected' : ''}" 
+                    onclick="selectCarouselImage(${idx})" alt="Thumb ${idx + 1}">
+            `).join('');
+        }
+
+        function selectCarouselImage(idx) {
+            currentImageIndex = idx;
+            updateCarouselImage();
+        }
+
+        function carouselPrev() {
+            if (!currentModalProject) return;
+            const images = currentModalProject.images || [];
+            if (images.length === 0) return;
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            updateCarouselImage();
+        }
+
+        function carouselNext() {
+            if (!currentModalProject) return;
+            const images = currentModalProject.images || [];
+            if (images.length === 0) return;
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            updateCarouselImage();
+        }
+
+        // Keyboard navigation
+        document.addEventListener("keydown", (e) => {
+            const modal = document.getElementById("projectModal");
+            if (modal.classList.contains("is-open")) {
+                if (e.key === "Escape") closeLightboxModal();
+                if (e.key === "ArrowLeft") carouselPrev();
+                if (e.key === "ArrowRight") carouselNext();
+            }
+        });
+
+        // Initialize gallery
+        loadPublicProjects();
+    </script>
 </body>
 
 </html>

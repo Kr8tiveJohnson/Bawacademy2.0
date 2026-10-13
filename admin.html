@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d281e">
+    <title>Admin Portal | Manage Projects &amp; Gallery — Spotless Connect</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cabinet+Grotesk:wght@600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        :root {
+            --admin-bg: #03140b;
+            --admin-surface: #072416;
+            --admin-card: rgba(10, 36, 23, 0.85);
+            --admin-border: rgba(230, 183, 73, 0.22);
+            --admin-gold: #e6b749;
+            --admin-gold-light: #f6d27e;
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            color: #f1f5f9;
+            font-family: var(--font-body);
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: rgba(4, 20, 12, 0.96);
+            border-bottom: 1px solid var(--admin-border);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+        }
+
+        .admin-header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .admin-brand img {
+            height: 42px;
+            width: auto;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(230, 183, 73, 0.15);
+            border: 1px solid var(--admin-border);
+            color: var(--admin-gold);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .admin-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 20px 80px;
+        }
+
+        /* KPI Strip */
+        .admin-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .admin-kpi-card {
+            background: var(--admin-card);
+            border: 1px solid var(--admin-border);
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .admin-kpi-label {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.65);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .admin-kpi-val {
+            font-family: var(--font-heading);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--admin-gold-light);
+            line-height: 1;
+        }
+
+        /* Main Workspace Layout */
+        .admin-workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .admin-workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .admin-panel {
+            background: var(--admin-surface);
+            border: 1px solid var(--admin-border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+        }
+
+        .panel-heading {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-sub {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        /* Form elements */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-field label {
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 0.02em;
+        }
+
+        .form-field input[type="text"],
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            background: rgba(3, 20, 11, 0.8);
+            border: 1.5px solid rgba(230, 183, 73, 0.3);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-field input[type="text"]:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            border-color: var(--admin-gold);
+            box-shadow: 0 0 0 3px rgba(230, 183, 73, 0.2);
+        }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* Drop Zone */
+        .upload-dropzone {
+            border: 2px dashed rgba(230, 183, 73, 0.4);
+            border-radius: 14px;
+            padding: 24px 16px;
+            text-align: center;
+            background: rgba(230, 183, 73, 0.04);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .upload-dropzone:hover,
+        .upload-dropzone.dragover {
+            background: rgba(230, 183, 73, 0.1);
+            border-color: var(--admin-gold);
+        }
+
+        .upload-dropzone input[type="file"] {
+            display: none;
+        }
+
+        .dropzone-icon {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+
+        /* Photo Preview Grid */
+        .photo-previews {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .photo-thumb {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            border: 1px solid var(--admin-border);
+            background: #000;
+        }
+
+        .photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-thumb .btn-del-photo {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(239, 68, 68, 0.9);
+            color: #fff;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Projects List */
+        .project-item-card {
+            background: rgba(4, 20, 12, 0.9);
+            border: 1px solid var(--admin-border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .project-item-card:hover {
+            border-color: var(--admin-gold);
+            transform: translateY(-2px);
+        }
+
+        .project-item-cover {
+            width: 76px;
+            height: 76px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .project-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .project-item-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #ffffff;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .project-item-meta {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.65);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .project-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-action-sm {
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: rgba(230, 183, 73, 0.15);
+            color: var(--admin-gold);
+            border-color: var(--admin-border);
+        }
+
+        .btn-edit:hover {
+            background: var(--admin-gold);
+            color: #03140b;
+        }
+
+        .btn-del {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-del:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        /* Passcode Gate */
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 10, 6, 0.96);
+            backdrop-filter: blur(24px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--admin-surface);
+            border: 1.5px solid var(--admin-border);
+            border-radius: 20px;
+            padding: 40px 32px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .auth-lock-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--admin-gold);
+            color: #03140b;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 800;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 99999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .toast-notify.is-show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Passcode Auth Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-card">
+            <div class="auth-lock-icon">🔒</div>
+            <h2 style="color: #fff; font-family: var(--font-heading); margin-bottom: 8px; font-size: 1.6rem;">Admin Authorization</h2>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 24px;">
+                Enter admin passcode to manage Spotless Connect projects and media.
+            </p>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-field" style="margin-bottom: 16px;">
+                    <input type="password" id="passcodeInput" placeholder="Enter Passcode..." autocomplete="current-password" autofocus required
+                        style="text-align: center; font-size: 1.1rem; letter-spacing: 0.1em;">
+                </div>
+                <button type="submit" class="button button-gold button-block" style="width: 100%; justify-content: center;">
+                    <span>Unlock Admin Panel</span> <span>→</span>
+                </button>
+                <p id="authError" style="color: #f87171; font-size: 0.82rem; margin-top: 10px; display: none;">
+                    Invalid passcode. Default is: spotless2026
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div class="admin-brand">
+                <a href="index.html">
+                    <img src="LOGOS/Header%20logo.png" alt="The Bridge Business Academy">
+                </a>
+                <span class="admin-badge">Spotless Connect CMS</span>
+            </div>
+            <div class="admin-nav-actions">
+                <a href="pastproject.html" target="_blank" class="button button-outline" style="font-size: 0.85rem; padding: 8px 14px;">
+                    <span>View Public Page ↗</span>
+                </a>
+                <button class="button button-gold" style="font-size: 0.85rem; padding: 8px 14px;" onclick="exportJSONBackup()">
+                    <span>💾 Backup JSON</span>
+                </button>
+                <button class="btn-action-sm btn-del" onclick="handleLogout()" style="padding: 9px 14px;">
+                    <span>Lock Portal</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <!-- KPI Strip -->
+        <div class="admin-kpi-grid">
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label"><span>📁</span> Total Projects</div>
+                <div class="admin-kpi-val" id="kpiProjectCount">0</div>
+            </div>
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label"><span>🖼️</span> Total Photos</div>
+                <div class="admin-kpi-val" id="kpiPhotoCount">0</div>
+            </div>
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label"><span>🏢</span> Partner Companies</div>
+                <div class="admin-kpi-val" id="kpiCompanyCount">0</div>
+            </div>
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label"><span>⚡</span> Storage Mode</div>
+                <div class="admin-kpi-val" style="font-size: 1.25rem; margin-top: 6px;" id="kpiStorageMode">Live API + Local</div>
+            </div>
+        </div>
+
+        <div class="admin-workspace">
+            <!-- Left: Add / Edit Form -->
+            <section class="admin-panel">
+                <div class="panel-heading">
+                    <span id="formTitle">Add New Project</span>
+                    <button id="btnCancelEdit" class="btn-action-sm btn-del" style="display: none;" onclick="cancelEditing()">Cancel Edit</button>
+                </div>
+                <p class="panel-sub">Fill out the details below. Media images will be displayed in high-resolution on the portfolio gallery.</p>
+
+                <form id="projectForm" onsubmit="handleSaveProject(event)">
+                    <input type="hidden" id="editProjectId" value="">
+
+                    <div class="form-field">
+                        <label for="projectTitle">Project Title *</label>
+                        <input type="text" id="projectTitle" placeholder="e.g. Skill Up Acquisition 1.0 Bootcamp" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="projectCompany">Partner / Client Organization *</label>
+                            <input type="text" id="projectCompany" placeholder="e.g. Spotless Connect Media" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="projectCategory">Category / Domain *</label>
+                            <select id="projectCategory" required>
+                                <option value="Youth Empowerment & Workshops">Youth Empowerment &amp; Workshops</option>
+                                <option value="Corporate Brand Activation">Corporate Brand Activation</option>
+                                <option value="Technology & Skills Training">Technology &amp; Skills Training</option>
+                                <option value="Media & Creative Production">Media &amp; Creative Production</option>
+                                <option value="CSR & Community Impact">CSR &amp; Community Impact</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="projectDate">Timeline / Date *</label>
+                            <input type="text" id="projectDate" placeholder="e.g. October 2025" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="projectLogo">Company Logo URL / File (Optional)</label>
+                            <input type="text" id="projectLogo" placeholder="LOGOS/spotless-connect-logo.png or URL">
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="projectSummary">Project Summary / Achievements *</label>
+                        <textarea id="projectSummary" rows="3" placeholder="Describe the outcome, participants, sponsors, or achievements..." required></textarea>
+                    </div>
+
+                    <!-- Images Upload Zone -->
+                    <div class="form-field">
+                        <label>Project Photos (Upload Multi-Images or Drop Files)</label>
+                        <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                            <div class="dropzone-icon">📷</div>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">Click to Select Images or Drag &amp; Drop here</strong>
+                            <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">PNG, JPG, JPEG, WEBP accepted (Multiple files allowed)</span>
+                            <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFilesSelected(this.files)">
+                        </div>
+
+                        <!-- Manual Image URL Field -->
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <input type="text" id="manualImageUrl" placeholder="Or paste image URL (e.g. assets/workshop-flyer.jpg)" style="flex: 1; padding: 10px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--admin-border); background: #03140b; color: #fff;">
+                            <button type="button" class="btn-action-sm btn-edit" onclick="addManualImageUrl()">+ Add URL</button>
+                        </div>
+
+                        <!-- Photos Preview Strip -->
+                        <div class="photo-previews" id="photoPreviewContainer"></div>
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <button type="submit" class="button button-gold button-block" id="btnSubmitProject" style="width: 100%; justify-content: center; padding: 14px;">
+                            <span>💾 Save Project &amp; Publish to Gallery</span> <span>→</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right: Existing Projects Manager -->
+            <section class="admin-panel">
+                <div class="panel-heading">
+                    <span>Published Projects</span>
+                    <button class="btn-action-sm btn-edit" onclick="renderProjectsList()">🔄 Refresh</button>
+                </div>
+                <p class="panel-sub">Manage and reorder projects displayed on [pastproject.html].</p>
+
+                <div id="projectsListContainer">
+                    <!-- Project items rendered dynamically -->
+                </div>
+
+                <!-- Utilities Drawer -->
+                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--admin-border);">
+                    <strong style="display: block; color: var(--admin-gold); font-size: 0.9rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Backup &amp; Sync Options</strong>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="button button-outline" style="font-size: 0.8rem; padding: 8px 12px;" onclick="exportJSONBackup()">Download projects.json</button>
+                        <button class="button button-outline" style="font-size: 0.8rem; padding: 8px 12px;" onclick="document.getElementById('importFileInput').click()">Import JSON Backup</button>
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImportJSON(this.files)">
+                        <button class="btn-action-sm btn-del" onclick="resetToSampleData()">Reset Sample</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="toast-notify" id="toastNotify">Project saved successfully!</div>
+
+    <script>
+        const AUTH_PASSCODE = "spotless2026";
+        let projects = [];
+        let currentPhotos = [];
+
+        // Auth handling
+        function checkAuth() {
+            if (sessionStorage.getItem("tbba_admin_auth") === "true") {
+                document.getElementById("authOverlay").style.display = "none";
+                loadProjects();
+            } else {
+                document.getElementById("authOverlay").style.display = "flex";
+            }
+        }
+
+        function handleAuth(e) {
+            e.preventDefault();
+            const val = document.getElementById("passcodeInput").value.trim();
+            if (val === AUTH_PASSCODE) {
+                sessionStorage.setItem("tbba_admin_auth", "true");
+                document.getElementById("authOverlay").style.display = "none";
+                document.getElementById("authError").style.display = "none";
+                loadProjects();
+            } else {
+                document.getElementById("authError").style.display = "block";
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem("tbba_admin_auth");
+            location.reload();
+        }
+
+        // Dropzone handlers
+        const dropzone = document.getElementById("dropzone");
+        dropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropzone.classList.add("dragover");
+        });
+        dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+        dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("dragover");
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleFilesSelected(e.dataTransfer.files);
+            }
+        });
+
+        // Convert files to Base64 and compress for web
+        function handleFilesSelected(files) {
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith("image/")) return;
+                const reader = new FileReader();
+                reader.onload = async function (evt) {
+                    const base64 = evt.target.result;
+                    
+                    // Attempt upload to server if online
+                    try {
+                        const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ filename: file.name, data: base64 })
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.url) {
+                                currentPhotos.push(data.url);
+                                renderPhotoPreviews();
+                                return;
+                            }
+                        }
+                    } catch (err) {
+                        // Fallback to storing compressed base64 directly
+                    }
+                    currentPhotos.push(base64);
+                    renderPhotoPreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function addManualImageUrl() {
+            const input = document.getElementById("manualImageUrl");
+            const url = input.value.trim();
+            if (url) {
+                currentPhotos.push(url);
+                input.value = "";
+                renderPhotoPreviews();
+            }
+        }
+
+        function removePhoto(idx) {
+            currentPhotos.splice(idx, 1);
+            renderPhotoPreviews();
+        }
+
+        function renderPhotoPreviews() {
+            const container = document.getElementById("photoPreviewContainer");
+            container.innerHTML = "";
+            currentPhotos.forEach((src, idx) => {
+                const thumb = document.createElement("div");
+                thumb.className = "photo-thumb";
+                thumb.innerHTML = `
+                    <img src="${src}" alt="Preview ${idx + 1}">
+                    <button type="button" class="btn-del-photo" onclick="removePhoto(${idx})" title="Remove">✕</button>
+                `;
+                container.appendChild(thumb);
+            });
+        }
+
+        // Load projects from API or LocalStorage
+        async function loadProjects() {
+            try {
+                const res = await fetch('/api/projects');
+                if (res.ok) {
+                    projects = await res.json();
+                    localStorage.setItem("tbba_past_projects", JSON.stringify(projects));
+                    updateUI();
+                    return;
+                }
+            } catch (err) {
+                console.log("Using LocalStorage fallback...");
+            }
+
+            const local = localStorage.getItem("tbba_past_projects");
+            if (local) {
+                try {
+                    projects = JSON.parse(local);
+                } catch (e) { projects = []; }
+            }
+            updateUI();
+        }
+
+        async function syncProjectsToServer() {
+            localStorage.setItem("tbba_past_projects", JSON.stringify(projects));
+            try {
+                await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(projects)
+                });
+            } catch (err) {
+                console.warn("Server sync skipped, saved to localStorage.");
+            }
+        }
+
+        function updateUI() {
+            updateKPIs();
+            renderProjectsList();
+        }
+
+        function updateKPIs() {
+            document.getElementById("kpiProjectCount").textContent = projects.length;
+            const photoCount = projects.reduce((acc, p) => acc + (p.images ? p.images.length : 0), 0);
+            document.getElementById("kpiPhotoCount").textContent = photoCount;
+            const companies = new Set(projects.map(p => (p.company || '').trim()).filter(Boolean));
+            document.getElementById("kpiCompanyCount").textContent = companies.size;
+        }
+
+        function renderProjectsList() {
+            const container = document.getElementById("projectsListContainer");
+            container.innerHTML = "";
+
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5);">
+                        <p style="font-size: 2rem; margin-bottom: 8px;">📂</p>
+                        <p>No projects published yet. Fill out the form on the left to add your first project!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            projects.forEach((proj, index) => {
+                const cover = (proj.images && proj.images.length > 0) ? proj.images[0] : 'LOGOS/Header%20logo.png';
+                const card = document.createElement("div");
+                card.className = "project-item-card";
+                card.innerHTML = `
+                    <img class="project-item-cover" src="${cover}" alt="${proj.title}" onerror="this.src='LOGOS/Header%20logo.png'">
+                    <div class="project-item-info">
+                        <div class="project-item-title">${proj.title}</div>
+                        <div class="project-item-meta">
+                            <span style="color: var(--admin-gold);">${proj.category}</span>
+                            <span>•</span>
+                            <span>${proj.company}</span>
+                            <span>•</span>
+                            <span>📸 ${proj.images ? proj.images.length : 0} photos</span>
+                        </div>
+                    </div>
+                    <div class="project-item-actions">
+                        <button class="btn-action-sm btn-edit" onclick="editProject('${proj.id}')">Edit</button>
+                        <button class="btn-action-sm btn-del" onclick="deleteProject('${proj.id}')">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function handleSaveProject(e) {
+            e.preventDefault();
+            const editId = document.getElementById("editProjectId").value;
+            const title = document.getElementById("projectTitle").value.trim();
+            const company = document.getElementById("projectCompany").value.trim();
+            const category = document.getElementById("projectCategory").value;
+            const date = document.getElementById("projectDate").value.trim();
+            const logo = document.getElementById("projectLogo").value.trim();
+            const summary = document.getElementById("projectSummary").value.trim();
+
+            const projectData = {
+                id: editId || ('proj-' + Date.now()),
+                title,
+                company,
+                category,
+                date,
+                companyLogo: logo || 'LOGOS/spotless-connect-logo.png',
+                summary,
+                images: [...currentPhotos]
+            };
+
+            if (editId) {
+                const idx = projects.findIndex(p => p.id === editId);
+                if (idx !== -1) projects[idx] = projectData;
+            } else {
+                projects.unshift(projectData);
+            }
+
+            await syncProjectsToServer();
+            showToast(editId ? "Project updated successfully!" : "Project added successfully!");
+            cancelEditing();
+            updateUI();
+        }
+
+        function editProject(id) {
+            const proj = projects.find(p => p.id === id);
+            if (!proj) return;
+
+            document.getElementById("editProjectId").value = proj.id;
+            document.getElementById("projectTitle").value = proj.title || "";
+            document.getElementById("projectCompany").value = proj.company || "";
+            document.getElementById("projectCategory").value = proj.category || "";
+            document.getElementById("projectDate").value = proj.date || "";
+            document.getElementById("projectLogo").value = proj.companyLogo || "";
+            document.getElementById("projectSummary").value = proj.summary || "";
+
+            currentPhotos = [...(proj.images || [])];
+            renderPhotoPreviews();
+
+            document.getElementById("formTitle").textContent = "Edit Project";
+            document.getElementById("btnCancelEdit").style.display = "inline-block";
+            document.getElementById("btnSubmitProject").innerHTML = `<span>💾 Update Project Changes</span> <span>→</span>`;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function cancelEditing() {
+            document.getElementById("editProjectId").value = "";
+            document.getElementById("projectForm").reset();
+            currentPhotos = [];
+            renderPhotoPreviews();
+            document.getElementById("formTitle").textContent = "Add New Project";
+            document.getElementById("btnCancelEdit").style.display = "none";
+            document.getElementById("btnSubmitProject").innerHTML = `<span>💾 Save Project &amp; Publish to Gallery</span> <span>→</span>`;
+        }
+
+        async function deleteProject(id) {
+            if (!confirm("Are you sure you want to delete this project?")) return;
+            projects = projects.filter(p => p.id !== id);
+            await syncProjectsToServer();
+            showToast("Project deleted.");
+            updateUI();
+        }
+
+        function exportJSONBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+            const dlAnchor = document.createElement("a");
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "projects.json");
+            dlAnchor.click();
+            showToast("Backup downloaded!");
+        }
+
+        function handleImportJSON(files) {
+            if (!files || files.length === 0) return;
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        projects = parsed;
+                        await syncProjectsToServer();
+                        updateUI();
+                        showToast(`Imported ${projects.length} projects!`);
+                    } else {
+                        alert("Invalid JSON format. Expected array.");
+                    }
+                } catch (err) {
+                    alert("Could not parse JSON file.");
+                }
+            };
+            reader.readAsText(files[0]);
+        }
+
+        async function resetToSampleData() {
+            if (!confirm("Reset projects to default sample data?")) return;
+            projects = [
+                {
+                    "id": "proj-1",
+                    "title": "Business & Skill Up Acquisition 1.0",
+                    "company": "The Bridge Business Academy × Spotless Connect",
+                    "category": "Youth Empowerment & Workshops",
+                    "date": "2025",
+                    "summary": "Flagship inaugural edition empowering over 500 students with practical tech competencies, seed capital pitch grants, laptops, and career pathways.",
+                    "images": ["assets/workshop-flyer.jpg"],
+                    "companyLogo": "LOGOS/spotless-connect-logo.png"
+                }
+            ];
+            await syncProjectsToServer();
+            updateUI();
+            showToast("Reset to sample data.");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toastNotify");
+            toast.textContent = msg;
+            toast.classList.add("is-show");
+            setTimeout(() => toast.classList.remove("is-show"), 3000);
+        }
+
+        // Initialize on page load
+        checkAuth();
+    </script>
+</body>
+
+</html>
