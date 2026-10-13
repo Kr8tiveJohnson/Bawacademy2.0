@@ -515,38 +515,7 @@
                         <input type="text" id="projectTitle" placeholder="e.g. Skill Up Acquisition 1.0 Bootcamp" required>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="projectCompany">Partner / Client Organization *</label>
-                            <input type="text" id="projectCompany" placeholder="e.g. Spotless Connect Media" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="projectCategory">Category / Domain *</label>
-                            <select id="projectCategory" required>
-                                <option value="Youth Empowerment & Workshops">Youth Empowerment &amp; Workshops</option>
-                                <option value="Corporate Brand Activation">Corporate Brand Activation</option>
-                                <option value="Technology & Skills Training">Technology &amp; Skills Training</option>
-                                <option value="Media & Creative Production">Media &amp; Creative Production</option>
-                                <option value="CSR & Community Impact">CSR &amp; Community Impact</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="projectDate">Timeline / Date *</label>
-                            <input type="text" id="projectDate" placeholder="e.g. October 2025" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="projectLogo">Company Logo URL / File (Optional)</label>
-                            <input type="text" id="projectLogo" placeholder="LOGOS/spotless-connect-logo.png or URL">
-                        </div>
-                    </div>
-
-                    <div class="form-field">
-                        <label for="projectSummary">Project Summary / Achievements *</label>
-                        <textarea id="projectSummary" rows="3" placeholder="Describe the outcome, participants, sponsors, or achievements..." required></textarea>
-                    </div>
 
                     <!-- Images Upload Zone -->
                     <div class="form-field">
@@ -806,20 +775,14 @@
             e.preventDefault();
             const editId = document.getElementById("editProjectId").value;
             const title = document.getElementById("projectTitle").value.trim();
-            const company = document.getElementById("projectCompany").value.trim();
-            const category = document.getElementById("projectCategory").value;
-            const date = document.getElementById("projectDate").value.trim();
-            const logo = document.getElementById("projectLogo").value.trim();
-            const summary = document.getElementById("projectSummary").value.trim();
-
             const projectData = {
                 id: editId || ('proj-' + Date.now()),
                 title,
-                company,
-                category,
-                date,
-                companyLogo: logo || 'LOGOS/spotless-connect-logo.png',
-                summary,
+                company: 'The Bridge Business Academy × Spotless Connect',
+                category: 'Youth Empowerment & Workshops',
+                date: new Date().getFullYear().toString(),
+                companyLogo: 'LOGOS/spotless-connect-logo.png',
+                summary: '',
                 images: [...currentPhotos]
             };
 
@@ -842,11 +805,7 @@
 
             document.getElementById("editProjectId").value = proj.id;
             document.getElementById("projectTitle").value = proj.title || "";
-            document.getElementById("projectCompany").value = proj.company || "";
-            document.getElementById("projectCategory").value = proj.category || "";
-            document.getElementById("projectDate").value = proj.date || "";
-            document.getElementById("projectLogo").value = proj.companyLogo || "";
-            document.getElementById("projectSummary").value = proj.summary || "";
+            // partner/category/date/logo/summary fields removed
 
             currentPhotos = [...(proj.images || [])];
             renderPhotoPreviews();
