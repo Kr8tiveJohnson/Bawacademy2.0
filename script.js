@@ -4,95 +4,110 @@
  * Interactive Application Script
  */
 
-// ── Mobile Nav Toggle (bulletproof, runs immediately on script load) ──
+// ── Mobile Navigation Drawer Controller ─────────────────────
 (function () {
-    function doToggle() {
+    var lastToggleTime = 0;
+    var isNavOpen = false;
+
+    function doToggle(e) {
+        if (e) {
+            if (e.preventDefault) e.preventDefault();
+            if (e.stopPropagation) e.stopPropagation();
+        }
+
+        var now = Date.now();
+        // Debounce touch/click within 300ms to prevent double toggling on mobile
+        if (now - lastToggleTime < 300) return;
+        lastToggleTime = now;
+
         var btn = document.getElementById("menu-toggle");
         var nav = document.getElementById("mobile-nav");
         if (!btn || !nav) return;
-        var isOpen = nav.classList.contains("is-open");
-        if (isOpen) {
-            nav.classList.remove("is-open");
-            nav.setAttribute("aria-hidden", "true");
-            btn.setAttribute("aria-expanded", "false");
-        } else {
+
+        isNavOpen = !isNavOpen;
+
+        if (isNavOpen) {
             nav.classList.add("is-open");
+            nav.style.display = "block";
             nav.setAttribute("aria-hidden", "false");
             btn.setAttribute("aria-expanded", "true");
+            btn.classList.add("is-active");
+            document.body.classList.add("mobile-menu-open");
+        } else {
+            nav.classList.remove("is-open");
+            nav.style.display = "none";
+            nav.setAttribute("aria-hidden", "true");
+            btn.setAttribute("aria-expanded", "false");
+            btn.classList.remove("is-active");
+            document.body.classList.remove("mobile-menu-open");
         }
     }
 
-    function closeMobileNav() {
+    function closeNav() {
         var btn = document.getElementById("menu-toggle");
         var nav = document.getElementById("mobile-nav");
         if (!btn || !nav) return;
+        isNavOpen = false;
         nav.classList.remove("is-open");
+        nav.style.display = "none";
         nav.setAttribute("aria-hidden", "true");
         btn.setAttribute("aria-expanded", "false");
+        btn.classList.remove("is-active");
+        document.body.classList.remove("mobile-menu-open");
     }
 
-    function attachMenuToggle() {
-        var btn = document.getElementById("menu-toggle");
-        if (!btn) return;
-        // Remove any inline onclick to avoid double-firing
-        btn.removeAttribute("onclick");
-        btn.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            doToggle();
-        });
-    }
-
-    function attachMobileLinkClose() {
-        var nav = document.getElementById("mobile-nav");
-        if (!nav) return;
-        var links = nav.querySelectorAll("a");
-        links.forEach(function (link) {
-            link.addEventListener("click", function () {
-                setTimeout(closeMobileNav, 180);
-            });
-        });
-    }
-
-    function attachOutsideClose() {
-        document.addEventListener("click", function (e) {
-            var nav = document.getElementById("mobile-nav");
-            var btn = document.getElementById("menu-toggle");
-            var header = document.getElementById("header");
-            if (nav && nav.classList.contains("is-open") && header && !header.contains(e.target)) {
-                closeMobileNav();
-            }
-        });
-        document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape") {
-                closeMobileNav();
-            }
-        });
-    }
-
-    // Also expose globally for any potential inline use
+    // Expose globally for HTML onclick handlers
     window.toggleMobileNav = doToggle;
-    window.closeMobileNav = closeMobileNav;
+    window.closeMobileNav = closeNav;
 
-    // Attach when DOM is ready
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", function () {
-            attachMenuToggle();
-            attachMobileLinkClose();
-            attachOutsideClose();
+    function initMobileNav() {
+        var btn = document.getElementById("menu-toggle");
+        var nav = document.getElementById("mobile-nav");
+        var header = document.getElementById("header");
+
+        if (btn) {
+            btn.onclick = function (e) {
+                doToggle(e);
+            };
+        }
+
+        if (nav) {
+            var links = nav.querySelectorAll("a");
+            links.forEach(function (link) {
+                link.addEventListener("click", function () {
+                    setTimeout(closeNav, 160);
+                });
+            });
+        }
+
+        // Close on clicking outside
+        document.addEventListener("click", function (e) {
+            if (!isNavOpen || Date.now() - lastToggleTime < 350) return;
+            if (btn && (btn === e.target || btn.contains(e.target))) return;
+            if (nav && (nav === e.target || nav.contains(e.target))) return;
+            if (header && header.contains(e.target) && !e.target.closest("a")) return;
+            closeNav();
         });
+
+        // Close on ESC
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && isNavOpen) {
+                closeNav();
+            }
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initMobileNav);
     } else {
-        // DOM already ready
-        attachMenuToggle();
-        attachMobileLinkClose();
-        attachOutsideClose();
+        initMobileNav();
     }
 }());
 
 // ── Global Helper: Poster Lightbox Modal ───────────────────
-window.openFlyerModal = function(e) {
+window.openFlyerModal = function (e) {
     if (e && e.preventDefault) e.preventDefault();
-    const modal = document.querySelector("#flyerModal");
+    var modal = document.querySelector("#flyerModal");
     if (modal) {
         modal.classList.add("is-open");
         modal.setAttribute("aria-hidden", "false");
@@ -100,9 +115,9 @@ window.openFlyerModal = function(e) {
     }
 };
 
-window.closeFlyerModal = function(e) {
+window.closeFlyerModal = function (e) {
     if (e && e.preventDefault) e.preventDefault();
-    const modal = document.querySelector("#flyerModal");
+    var modal = document.querySelector("#flyerModal");
     if (modal) {
         modal.classList.remove("is-open");
         modal.setAttribute("aria-hidden", "true");
@@ -110,13 +125,13 @@ window.closeFlyerModal = function(e) {
     }
 };
 
-// ── Universal Smooth Scroll for all Anchor Links ──────────
+// ── Universal Smooth Scroll for in-page anchors ────────────
 function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function(e) {
-            const targetId = this.getAttribute("href");
+    document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
+        anchor.addEventListener("click", function (e) {
+            var targetId = this.getAttribute("href");
             if (targetId && targetId !== "#" && targetId !== "#top") {
-                const targetEl = document.querySelector(targetId);
+                var targetEl = document.querySelector(targetId);
                 if (targetEl) {
                     e.preventDefault();
                     targetEl.scrollIntoView({ behavior: "smooth" });
@@ -129,203 +144,48 @@ function initSmoothScroll() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
     initSmoothScroll();
 
     // 1. Scrolled header state
-    const siteHeader = document.querySelector("#header");
+    var siteHeader = document.querySelector("#header");
     if (siteHeader) {
-        const onScroll = () => {
+        var onScroll = function () {
             siteHeader.classList.toggle("scrolled", window.scrollY > 20);
         };
         window.addEventListener("scroll", onScroll, { passive: true });
         onScroll();
     }
 
-    // 2. Mobile nav handlers are set up in the IIFE above (before DOMContentLoaded)
-
-    // 3. Dynamic Year Update
-    const currentYearSpan = document.querySelector("#current-year");
+    // 2. Dynamic Year Update
+    var currentYearSpan = document.querySelector("#current-year");
     if (currentYearSpan) {
         currentYearSpan.textContent = String(new Date().getFullYear());
     }
 
-    // 3. Interactive Form Handling (Inspired by Badagry Summit)
-    const form = document.querySelector("#workshop-registration-form");
-    const formStatus = document.querySelector("#formStatus");
-    const submitBtn = document.querySelector("#submitBtn");
-
-    if (form) {
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-
-            // Clear previous errors
-            document.querySelectorAll(".form-group").forEach(fg => fg.classList.remove("has-error"));
-            formStatus.className = "form-status";
-            formStatus.style.display = "none";
-
-            let isValid = true;
-
-            const fullName = document.querySelector("#fullName");
-            const phone = document.querySelector("#phone");
-            const email = document.querySelector("#email");
-            const institution = document.querySelector("#institution");
-            const location = document.querySelector("#location");
-            const consent = document.querySelector("#consent");
-            const interestCheckboxes = document.querySelectorAll('input[name="interests"]:checked');
-
-            // Validate Full Name
-            if (!fullName.value.trim()) {
-                fullName.closest(".form-group").classList.add("has-error");
-                isValid = false;
-            }
-
-            // Validate Phone
-            if (!phone.value.trim() || phone.value.trim().length < 8) {
-                phone.closest(".form-group").classList.add("has-error");
-                isValid = false;
-            }
-
-            // Validate Email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email.value.trim() || !emailRegex.test(email.value.trim())) {
-                email.closest(".form-group").classList.add("has-error");
-                isValid = false;
-            }
-
-            // Validate Institution
-            if (!institution.value.trim()) {
-                institution.closest(".form-group").classList.add("has-error");
-                isValid = false;
-            }
-
-            // Validate Location
-            if (!location.value.trim()) {
-                location.closest(".form-group").classList.add("has-error");
-                isValid = false;
-            }
-
-            // Validate Interests
-            if (interestCheckboxes.length === 0) {
-                const interestGroup = document.querySelector(".skills-checkbox-grid").closest(".form-group");
-                interestGroup.classList.add("has-error");
-                isValid = false;
-            }
-
-            // Validate Consent
-            if (!consent.checked) {
-                consent.closest(".form-consent").classList.add("has-error");
-                isValid = false;
-            }
-
-            if (!isValid) {
-                formStatus.textContent = "Please fill in all required fields marked with an asterisk (*).";
-                formStatus.classList.add("is-error");
-                formStatus.style.display = "block";
-                return;
-            }
-
-            // Simulated Submission & WhatsApp Handoff
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<span>Processing Seat Reservation...</span>`;
-
-            setTimeout(() => {
-                const selectedInterests = Array.from(interestCheckboxes).map(cb => cb.value).join(", ");
-                const candidateName = fullName.value.trim();
-
-                // Store in localStorage for persistence
-                const submissionData = {
-                    name: candidateName,
-                    phone: phone.value.trim(),
-                    email: email.value.trim(),
-                    institution: institution.value.trim(),
-                    location: location.value.trim(),
-                    interests: selectedInterests,
-                    timestamp: new Date().toISOString()
-                };
-                try {
-                    localStorage.setItem("tbba_workshop_registration", JSON.stringify(submissionData));
-                } catch (err) {
-                    // Ignore storage errors if private browsing
-                }
-
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<span>✓ Place Reserved!</span>`;
-
-                const encodedWaText = encodeURIComponent(
-                    `Hello The Bridge Business Academy, I have pre-registered for the Skill Up 2.0 Workshop!\n\n` +
-                    `*Name:* ${candidateName}\n` +
-                    `*Phone:* ${phone.value.trim()}\n` +
-                    `*Institution/Job:* ${institution.value.trim()}\n` +
-                    `*Location:* ${location.value.trim()}\n` +
-                    `*Interests:* ${selectedInterests}`
-                );
-
-                formStatus.innerHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <strong>🎉 Congratulations, ${candidateName}! Your priority place has been recorded.</strong>
-                        <p style="margin: 0; font-size: 0.9em;">We have saved your details for the November 2026 workshop announcements, scholarship screenings, and brand job notifications.</p>
-                        <a href="https://wa.me/2347081755387?text=${encodedWaText}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; color: #072e17; font-weight: 800; padding: 10px 16px; border-radius: 6px; margin-top: 6px; text-decoration: none;">
-                            💬 Click Here to Confirm Instantly on WhatsApp (+234 708 175 5387)
-                        </a>
-                    </div>
-                `;
-                formStatus.classList.add("is-success");
-                formStatus.style.display = "block";
-
-                form.reset();
-            }, 800);
-        });
-    }
-
-    // 4. Header Shadow On Scroll
-    const header = document.querySelector(".site-header");
-    if (header) {
-        window.addEventListener("scroll", () => {
-            if (window.scrollY > 20) {
-                header.style.boxShadow = "0 8px 30px rgba(0, 0, 0, 0.4)";
-            } else {
-                header.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.2)";
-            }
-        }, { passive: true });
-    }
-
-    // 5. Official Poster Lightbox Modal
-    const posterTrigger = document.querySelector("#heroPosterTrigger");
-    const flyerModal = document.querySelector("#flyerModal");
-    const flyerModalClose = document.querySelector("#flyerModalClose");
-    const flyerModalBackdrop = document.querySelector("#flyerModalBackdrop");
-    const modalRegisterBtn = document.querySelector("#modalRegisterBtn");
+    // 3. Official Poster Lightbox Modal
+    var posterTrigger = document.querySelector("#heroPosterTrigger");
+    var flyerModal = document.querySelector("#flyerModal");
+    var flyerModalClose = document.querySelector("#flyerModalClose");
+    var flyerModalBackdrop = document.querySelector("#flyerModalBackdrop");
+    var modalRegisterBtn = document.querySelector("#modalRegisterBtn");
 
     if (posterTrigger && flyerModal) {
-        const openModal = () => {
-            flyerModal.classList.add("is-open");
-            flyerModal.setAttribute("aria-hidden", "false");
-            document.body.style.overflow = "hidden";
-        };
-
-        const closeModal = () => {
-            flyerModal.classList.remove("is-open");
-            flyerModal.setAttribute("aria-hidden", "true");
-            document.body.style.overflow = "";
-        };
-
-        posterTrigger.addEventListener("click", openModal);
-        posterTrigger.addEventListener("keydown", (e) => {
+        posterTrigger.addEventListener("click", window.openFlyerModal);
+        posterTrigger.addEventListener("keydown", function (e) {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                openModal();
+                window.openFlyerModal();
             }
         });
 
-        if (flyerModalClose) flyerModalClose.addEventListener("click", closeModal);
-        if (flyerModalBackdrop) flyerModalBackdrop.addEventListener("click", closeModal);
-        if (modalRegisterBtn) modalRegisterBtn.addEventListener("click", closeModal);
+        if (flyerModalClose) flyerModalClose.addEventListener("click", window.closeFlyerModal);
+        if (flyerModalBackdrop) flyerModalBackdrop.addEventListener("click", window.closeFlyerModal);
+        if (modalRegisterBtn) modalRegisterBtn.addEventListener("click", window.closeFlyerModal);
 
-        document.addEventListener("keydown", (e) => {
+        document.addEventListener("keydown", function (e) {
             if (e.key === "Escape" && flyerModal.classList.contains("is-open")) {
-                closeModal();
+                window.closeFlyerModal();
             }
         });
     }

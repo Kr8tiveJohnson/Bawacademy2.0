@@ -32,9 +32,6 @@
 <body id="top">
     <!-- Accessibility Skip Link -->
     <a class="skip-link" href="#main">Skip to main content</a>
-
-
-
     <!-- Header Navigation -->
     <header class="site-header" id="header">
         <div class="header-container">
@@ -49,13 +46,15 @@
                 <a href="#why" class="nav-link">Why It Matters</a>
                 <a href="#benefits" class="nav-link">What Students Gain</a>
                 <a href="#vision" class="nav-link">The Vision</a>
-                <a href="#anticipate" class="nav-link">Anticipate</a>
+                <a href="#past-projects" class="nav-link">Past Projects</a>
+                <a href="#anticipate" class="nav-link">Community</a>
                 <a href="#contact" class="nav-link">Contact</a>
             </nav>
 
             <!-- Right Actions -->
             <div class="header-actions">
-                <a class="header-cta" href="#anticipate">
+                <a class="header-cta" href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF"
+                    target="_blank" rel="noopener noreferrer">
                     <span>Pre&#8209;Register</span>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                         <path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
@@ -65,7 +64,8 @@
 
                 <!-- Mobile Hamburger Toggle -->
                 <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false"
-                    aria-controls="mobile-nav" aria-label="Toggle navigation">
+                    aria-controls="mobile-nav" aria-label="Toggle navigation"
+                    onclick="window.toggleMobileNav(event)">
                     <span class="ham-line"></span>
                     <span class="ham-line"></span>
                     <span class="ham-line"></span>
@@ -80,11 +80,14 @@
                     <a href="#why" class="mobile-nav-link">Why It Matters</a>
                     <a href="#benefits" class="mobile-nav-link">What Students Gain</a>
                     <a href="#vision" class="mobile-nav-link">The Vision</a>
-                    <a href="#anticipate" class="mobile-nav-link">Anticipate / Pre-Register</a>
+                    <a href="#past-projects" class="mobile-nav-link">Past Projects &amp; Companies</a>
+                    <a href="#anticipate" class="mobile-nav-link">Join Our Community / Pre-Register</a>
                     <a href="#contact" class="mobile-nav-link">Contact Us</a>
                 </nav>
                 <div class="mobile-nav-action">
-                    <a class="button button-gold button-block" href="#anticipate">Pre-Register Now <span>↗</span></a>
+                    <a class="button button-gold button-block"
+                        href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank"
+                        rel="noopener noreferrer">Pre-Register Now <span>↗</span></a>
                     <div class="mobile-contact-group">
                         <span class="mobile-contact-label">Direct Hotlines:</span>
                         <a href="tel:+2349036900011" class="mobile-contact-item">📞 +234 903 690 0011</a>
@@ -165,7 +168,9 @@
 
                     <!-- Interactive Hero Actions -->
                     <div class="hero-actions flyer-hero-actions">
-                        <a class="button button-gold hero-btn" href="#anticipate">
+                        <a class="button button-gold hero-btn"
+                            href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank"
+                            rel="noopener noreferrer">
                             <span>Pre-Register / Anticipate</span>
                             <span class="btn-arrow" aria-hidden="true">↘</span>
                         </a>
@@ -267,16 +272,10 @@
 
                 <div class="why-grid">
                     <div class="why-left">
-                        <p class="section-eyebrow">Education Meets Real-World Opportunity</p>
                         <h2 id="why-title" class="section-title">
                             Bridging the Gap Between <span class="title-emphasis">Education</span> and <span
                                 class="title-emphasis">Opportunity</span>.
                         </h2>
-                        <div class="why-badge-list">
-                            <span class="feature-tag">Commercial Relevance</span>
-                            <span class="feature-tag">Hands-on Execution</span>
-                            <span class="feature-tag">Direct Industry Access</span>
-                        </div>
                     </div>
 
                     <div class="why-right">
@@ -333,7 +332,7 @@
         </section>
 
         <!-- Section 2: What Students Will Gain (First Section & Second Section) -->
-        <section class="section benefits-section" id="benefits" aria-labelledby="benefits-title">
+        <section class="section benefits-section" id="benefits" aria-label="What Students Can Gain">
             <div class="benefits-watermark" aria-hidden="true">WHAT STUDENTS WILL GAIN</div>
 
             <div class="section-container">
@@ -348,17 +347,13 @@
                     <div class="benefits-hero-row">
                         <div>
                             <p class="section-eyebrow section-eyebrow-gold">A Launchpad For Real Transformation</p>
-                            <h2 id="benefits-title" class="section-title section-title-light">
-                                More Skills. <span class="title-gold">More Doors.</span>
-                            </h2>
                             <p class="benefits-subtitle">
                                 Every participant receives tangible support, modern tools, and direct economic pathways.
                                 Here is everything designed specifically for you:
                             </p>
                         </div>
                         <div class="benefits-cta-box">
-                            <span class="benefits-counter-badge">14 Transformative Benefits</span>
-                            <a href="#anticipate" class="button button-gold">Pre-Register Interest ↗</a>
+                            <span class="benefits-counter-badge">12 Transformative Benefits</span>
                         </div>
                     </div>
                 </div>
@@ -418,41 +413,28 @@
                                         competitions with immediate, empowering cash prizes.</p>
                                 </article>
 
-                                <!-- 4. Smartphones & Other Gadgets -->
+                                <!-- 4. Computers, Connectivity, Smartphones & Other Gadgets -->
                                 <article class="benefit-card">
                                     <div class="benefit-card-top">
                                         <span class="benefit-number">04</span>
-                                        <span class="benefit-icon" aria-hidden="true">📱</span>
-                                    </div>
-                                    <h4>Smartphones &amp; Other Gadgets</h4>
-                                    <p class="benefit-subtitle">Power Banks, Headphones, AirPods &amp; More</p>
-                                    <p class="benefit-detail">High-performance smartphones and essential tech gadgets
-                                        (power banks, premium headphones, AirPods, smartwatches) to keep you fully
-                                        productive.</p>
-                                </article>
-
-                                <!-- 5. Laptops & Tablets -->
-                                <article class="benefit-card">
-                                    <div class="benefit-card-top">
-                                        <span class="benefit-number">05</span>
                                         <span class="benefit-icon" aria-hidden="true">💻</span>
                                     </div>
-                                    <h4>Laptops &amp; Tablets</h4>
-                                    <p class="benefit-subtitle">Workstation Hardware</p>
-                                    <p class="benefit-detail">Modern portable computing machines to practice coding,
-                                        digital design, multimedia creation, and remote freelancing directly.</p>
-                                </article>
-
-                                <!-- 6. WiFi Devices -->
-                                <article class="benefit-card">
-                                    <div class="benefit-card-top">
-                                        <span class="benefit-number">06</span>
-                                        <span class="benefit-icon" aria-hidden="true">📶</span>
-                                    </div>
-                                    <h4>Wi-Fi Devices</h4>
-                                    <p class="benefit-subtitle">High-Speed Reliable Access</p>
-                                    <p class="benefit-detail">Dedicated MiFi and mobile broadband devices to ensure you
-                                        never drop out of webinars, client calls, research, and remote tasks.</p>
+                                    <h4>Laptops, Tablets, Wi-Fi Devices, Smartphones &amp; Other Gadgets</h4>
+                                    <p class="benefit-subtitle">Technology and accessories for learning, work &amp; everyday use</p>
+                                    <p class="benefit-detail">Students may also receive accessories such as:</p>
+                                    <ul class="benefit-gadget-list">
+                                        <li>Earpiece</li>
+                                        <li>Phone stands</li>
+                                        <li>Hand-rechargeable fans</li>
+                                        <li>Neck Bluetooth / neckbands</li>
+                                        <li>Branded face caps</li>
+                                        <li>Branded T-shirts</li>
+                                        <li>Tripod stands</li>
+                                        <li>Branded tote bags</li>
+                                        <li>Mini hair straighteners</li>
+                                        <li>Foldable laptop chairs</li>
+                                        <li>Selfie sticks</li>
+                                    </ul>
                                 </article>
                             </div>
                         </div>
@@ -467,10 +449,10 @@
                             </div>
 
                             <div class="benefit-cards-grid">
-                                <!-- 7. Amazing Gift Prizes -->
+                                <!-- 5. Amazing Gift Prizes -->
                                 <article class="benefit-card">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">07</span>
+                                        <span class="benefit-number">05</span>
                                         <span class="benefit-icon" aria-hidden="true">🎁</span>
                                     </div>
                                     <h4>Amazing Gift Prizes</h4>
@@ -479,10 +461,10 @@
                                         rewards handed out across active workshop sessions.</p>
                                 </article>
 
-                                <!-- 8. School Fees Relief -->
+                                <!-- 6. School Fees Relief -->
                                 <article class="benefit-card benefit-highlight">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">08</span>
+                                        <span class="benefit-number">06</span>
                                         <span class="benefit-icon" aria-hidden="true">💳</span>
                                     </div>
                                     <h4>School Fees Relief</h4>
@@ -492,10 +474,10 @@
                                     </p>
                                 </article>
 
-                                <!-- 9. Direct Connection with Top Brands -->
+                                <!-- 7. Direct Connection with Top Brands -->
                                 <article class="benefit-card benefit-highlight">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">09</span>
+                                        <span class="benefit-number">07</span>
                                         <span class="benefit-icon" aria-hidden="true">🤝</span>
                                     </div>
                                     <h4>Direct Connection with Top Brands</h4>
@@ -505,10 +487,10 @@
                                         internships.</p>
                                 </article>
 
-                                <!-- 10. Mentorship with Top Industry Leaders -->
+                                <!-- 8. Mentorship with Top Industry Leaders -->
                                 <article class="benefit-card">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">10</span>
+                                        <span class="benefit-number">08</span>
                                         <span class="benefit-icon" aria-hidden="true">🧑🏽‍💼</span>
                                     </div>
                                     <h4>Mentorship with Top Leaders</h4>
@@ -517,10 +499,10 @@
                                         executives sharing real-world playbooks and strategic advisory.</p>
                                 </article>
 
-                                <!-- 11. Practical, Profitable Digital Skills -->
+                                <!-- 9. Practical, Profitable Digital Skills -->
                                 <article class="benefit-card">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">11</span>
+                                        <span class="benefit-number">09</span>
                                         <span class="benefit-icon" aria-hidden="true">💻</span>
                                     </div>
                                     <h4>Practical, Profitable Digital Skills</h4>
@@ -529,10 +511,10 @@
                                         digital marketing, UI/UX, product sales, to media production.</p>
                                 </article>
 
-                                <!-- 12. Skills on Monetization & Business Growth -->
+                                <!-- 10. Skills on Monetization & Business Growth -->
                                 <article class="benefit-card">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">12</span>
+                                        <span class="benefit-number">10</span>
                                         <span class="benefit-icon" aria-hidden="true">📈</span>
                                     </div>
                                     <h4>Monetization &amp; Business Growth</h4>
@@ -541,10 +523,10 @@
                                         funnels, and scaling frameworks to generate sustainable income.</p>
                                 </article>
 
-                                <!-- 13. Business Registration Support -->
+                                <!-- 11. Business Registration Support -->
                                 <article class="benefit-card">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">13</span>
+                                        <span class="benefit-number">11</span>
                                         <span class="benefit-icon" aria-hidden="true">🏢</span>
                                     </div>
                                     <h4>Business Registration Support</h4>
@@ -553,10 +535,10 @@
                                         open corporate accounts, and access institutional contracts.</p>
                                 </article>
 
-                                <!-- 14. And So Much More -->
+                                <!-- 12. And So Much More -->
                                 <article class="benefit-card benefit-gold-card">
                                     <div class="benefit-card-top">
-                                        <span class="benefit-number">14</span>
+                                        <span class="benefit-number">12</span>
                                         <span class="benefit-icon" aria-hidden="true">✨</span>
                                     </div>
                                     <h4>And So Much More</h4>
@@ -628,187 +610,33 @@
             </div>
         </section>
 
-        <!-- Section 4: Anticipate & Pre-Registration Form (Inspired by Badagry Summit Reference) -->
+        <!-- Section 4: Join Our Community / Anticipate & Pre-Register -->
         <section class="section anticipate-section" id="anticipate" aria-labelledby="anticipate-title">
             <div class="section-container">
                 <div class="anticipate-layout">
-                    <!-- Left Column: Context & Direct Contact -->
                     <div class="anticipate-info">
                         <div class="section-index-pill section-index-pill-light">
                             <span class="index-num">04</span>
                             <span class="index-divider"></span>
-                            <span class="index-title">ANTICIPATE &amp; PRE-REGISTER</span>
+                            <span class="index-title">ANTICIPATE &amp; PRE-REGISTER · JOIN OUR COMMUNITY</span>
                         </div>
                         <p class="section-eyebrow section-eyebrow-gold">November 2026 · Coming Soon</p>
                         <h2 id="anticipate-title" class="section-title section-title-light">
-                            Be the First to Claim <br><span class="title-gold">Your Opportunity.</span>
+                            Be the First to Claim <span class="title-gold">Your Opportunity.</span>
                         </h2>
-                        <p class="anticipate-description">
-                            The <strong>Business &amp; Skill Up Acquisition 2.0 Workshop</strong> is coming November
-                            2026. Pre-registration is free and ensures you receive priority notification for
-                            scholarships, business grants, laptops, and job placement screenings.
+                        <p class="anticipate-subtitle-text" style="color: var(--gold-light); font-weight: 700; font-size: 1.15rem; margin-top: 10px;">
+                            Join Our Community of Hundreds of Students &amp; Connect directly with the organizers.
                         </p>
-
-                        <!-- Quick Checklist -->
-                        <ul class="anticipate-checklist">
-                            <li><span class="check-icon">✓</span> 100+ Scholarships available for selected applicants
-                            </li>
-                            <li><span class="check-icon">✓</span> Direct brand hiring pipelines and corporate mentorship
-                            </li>
-                            <li><span class="check-icon">✓</span> Grants, smartphones, laptops, and school fees relief
-                            </li>
-                            <li><span class="check-icon">✓</span> Free priority confirmation &amp; official updates</li>
-                        </ul>
-
-                        <!-- Direct Help Line -->
-                        <div class="anticipate-support-box">
-                            <span class="support-title">Have Questions or Want to Partner?</span>
-                            <p>Speak directly with our organizing team today:</p>
-                            <div class="support-phones">
-                                <a href="tel:+2349036900011" class="support-link">
-                                    <span class="support-icon">📞</span> +234 903 690 0011
-                                </a>
-                                <a href="tel:+2347081755387" class="support-link">
-                                    <span class="support-icon">📞</span> +234 708 175 5387
-                                </a>
-                            </div>
+                        <p class="anticipate-description" style="margin-top: 14px;">
+                            The <strong>Business &amp; Skill Up Acquisition 2.0 Workshop</strong> is coming November 2026. Pre-registration is free and ensures you receive priority notification for scholarships, business grants, laptops, smartphones, Wi-Fi gadgets, and job placement screenings.
+                        </p>
+                        <div style="margin-top: 24px;">
+                            <a class="button button-gold button-lg" href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF"
+                                target="_blank" rel="noopener noreferrer">
+                                <span>Join Our WhatsApp Community (Pre-Register Free)</span>
+                                <span class="btn-arrow" aria-hidden="true">↗</span>
+                            </a>
                         </div>
-                    </div>
-
-                    <!-- Right Column: Interactive Pre-Registration Form -->
-                    <div class="anticipate-form-container">
-                        <div class="form-header">
-                            <h3>Pre-Register Your Interest</h3>
-                            <p>Complete your details below to join the priority anticipation waitlist.</p>
-                        </div>
-
-                        <form id="workshop-registration-form" class="workshop-form" novalidate>
-                            <div class="form-grid">
-                                <!-- Full Name -->
-                                <div class="form-group">
-                                    <label for="fullName">Full Name <span class="required">*</span></label>
-                                    <input type="text" id="fullName" name="fullName" required
-                                        placeholder="e.g. John Doe" autocomplete="name">
-                                    <span class="field-error" id="fullNameError">Please enter your full name.</span>
-                                </div>
-
-                                <!-- Phone Number -->
-                                <div class="form-group">
-                                    <label for="phone">Phone / WhatsApp Number <span class="required">*</span></label>
-                                    <input type="tel" id="phone" name="phone" required
-                                        placeholder="e.g. +234 801 234 5678" autocomplete="tel">
-                                    <span class="field-error" id="phoneError">Please enter a valid phone number.</span>
-                                </div>
-
-                                <!-- Email Address -->
-                                <div class="form-group form-group-full">
-                                    <label for="email">Email Address <span class="required">*</span></label>
-                                    <input type="email" id="email" name="email" required
-                                        placeholder="e.g. johndoe@gmail.com" autocomplete="email">
-                                    <span class="field-error" id="emailError">Please enter a valid email address.</span>
-                                </div>
-
-                                <!-- Institution / Profession -->
-                                <div class="form-group">
-                                    <label for="institution">School / Institution or Occupation <span
-                                            class="required">*</span></label>
-                                    <input type="text" id="institution" name="institution" required
-                                        placeholder="e.g. UNILAG, Student, or Entrepreneur">
-                                    <span class="field-error" id="institutionError">Please provide your institution or
-                                        profession.</span>
-                                </div>
-
-                                <!-- State / Area of Residence -->
-                                <div class="form-group">
-                                    <label for="location">State / Area of Residence <span
-                                            class="required">*</span></label>
-                                    <input type="text" id="location" name="location" required
-                                        placeholder="e.g. Lagos, Badagry, Abuja">
-                                    <span class="field-error" id="locationError">Please provide your location.</span>
-                                </div>
-
-                                <!-- Preferred Opportunities & Skills -->
-                                <div class="form-group form-group-full">
-                                    <label class="checkbox-legend">Opportunities &amp; Skills You Wish to Access <span
-                                            class="required">*</span></label>
-                                    <p class="checkbox-hint">Select all that apply to tailor your workshop pathway:</p>
-
-                                    <div class="skills-checkbox-grid">
-                                        <label class="custom-checkbox">
-                                            <input type="checkbox" name="interests" value="100+ Scholarships" checked>
-                                            <span class="checkbox-box"></span>
-                                            <span class="checkbox-text">Scholarship Opportunities (100+ Slots)</span>
-                                        </label>
-
-                                        <label class="custom-checkbox">
-                                            <input type="checkbox" name="interests"
-                                                value="Business Grants & Cash Prizes" checked>
-                                            <span class="checkbox-box"></span>
-                                            <span class="checkbox-text">Business Grants &amp; Cash Prizes</span>
-                                        </label>
-
-                                        <label class="custom-checkbox">
-                                            <input type="checkbox" name="interests" value="Laptops & Smartphones">
-                                            <span class="checkbox-box"></span>
-                                            <span class="checkbox-text">Smartphones, Laptops &amp; WiFi Gadgets</span>
-                                        </label>
-
-                                        <label class="custom-checkbox">
-                                            <input type="checkbox" name="interests" value="Direct Job Connections">
-                                            <span class="checkbox-box"></span>
-                                            <span class="checkbox-text">Direct Connection with Top Brand Jobs</span>
-                                        </label>
-
-                                        <label class="custom-checkbox">
-                                            <input type="checkbox" name="interests"
-                                                value="Digital Skills & Monetization">
-                                            <span class="checkbox-box"></span>
-                                            <span class="checkbox-text">Practical Digital Skills &amp;
-                                                Monetization</span>
-                                        </label>
-
-                                        <label class="custom-checkbox">
-                                            <input type="checkbox" name="interests" value="School Fees Relief">
-                                            <span class="checkbox-box"></span>
-                                            <span class="checkbox-text">School Fees Relief &amp; Business
-                                                Registration</span>
-                                        </label>
-                                    </div>
-                                    <span class="field-error" id="interestsError">Please select at least one
-                                        interest.</span>
-                                </div>
-
-                                <!-- Optional Note -->
-                                <div class="form-group form-group-full">
-                                    <label for="notes">Additional Comments or Questions (Optional)</label>
-                                    <textarea id="notes" name="notes" rows="2"
-                                        placeholder="Tell us about your expectations or business idea..."></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Consent Checkbox -->
-                            <div class="form-consent">
-                                <label class="custom-checkbox">
-                                    <input type="checkbox" id="consent" name="consent" required checked>
-                                    <span class="checkbox-box"></span>
-                                    <span class="checkbox-text">I confirm that the details provided are accurate and
-                                        consent to being contacted by The Bridge Business Academy organizing team
-                                        regarding the Skill Up 2.0 Workshop.</span>
-                                </label>
-                                <span class="field-error" id="consentError">Please agree to continue.</span>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <div class="form-submit-row">
-                                <button type="submit" class="button button-gold button-block form-submit-btn"
-                                    id="submitBtn">
-                                    <span>Reserve My Priority Seat</span>
-                                    <span class="btn-arrow" aria-hidden="true">↗</span>
-                                </button>
-                            </div>
-
-                            <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -864,6 +692,19 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section past-projects-section" id="past-projects" aria-labelledby="past-projects-title">
+            <div class="section-container">
+                <div class="section-index-pill">
+                    <span class="index-title">SPOTLESS CONNECT</span>
+                </div>
+                <h2 id="past-projects-title" class="section-title">Past Projects &amp; Companies</h2>
+                <div class="past-projects-placeholder">
+                    <p>A showcase of projects delivered and organizations Spotless Connect has worked with will be added here.</p>
+                    <a class="button button-gold" href="pastproject.html">View Past Projects ↗</a>
                 </div>
             </div>
         </section>
@@ -927,7 +768,8 @@
                             <li><a href="#why">Why It Matters</a></li>
                             <li><a href="#benefits">What Students Gain</a></li>
                             <li><a href="#vision">The Vision</a></li>
-                            <li><a href="#anticipate">Pre-Register / Anticipate</a></li>
+                            <li><a href="pastproject.html">Past Projects &amp; Companies</a></li>
+                            <li><a href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank" rel="noopener noreferrer">Join Community / Pre-Register ↗</a></li>
                             <li><a href="#contact">Contact Hotlines</a></li>
                         </ul>
                     </div>
@@ -952,8 +794,9 @@
                             <strong>November 2026</strong>
                             <p>Coming Soon · Available For All Participants</p>
                         </div>
-                        <a href="#anticipate" class="button button-gold button-sm footer-anticipate-btn">Anticipate With
-                            Us ↗</a>
+                        <a href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF"
+                            class="button button-gold button-sm footer-anticipate-btn" target="_blank"
+                            rel="noopener noreferrer">Anticipate With Us ↗</a>
 
                     </div>
                 </div>
@@ -986,13 +829,13 @@
                     <strong>Business / Skill Up Acquisition 2.0 Workshop</strong>
                     <span>November 2026 · The Bridge Business Academy × Spotless Connect</span>
                 </div>
-                <a class="button button-gold button-sm" href="#anticipate" id="modalRegisterBtn">Pre-Register Now ↗</a>
+                <a class="button button-gold button-sm"
+                    href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank"
+                    rel="noopener noreferrer" id="modalRegisterBtn">Pre-Register Now ↗</a>
             </div>
         </div>
     </div>
 
-    <!-- Main JavaScript -->
-    <script src="script.js" defer></script>
 </body>
 
 </html>

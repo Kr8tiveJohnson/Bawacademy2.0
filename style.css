@@ -117,7 +117,7 @@ button, input, textarea, select {
 .site-header {
     position: sticky;
     top: 0;
-    z-index: 900;
+    z-index: 9999;
     background: rgba(5, 22, 14, 0.72);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
@@ -289,15 +289,18 @@ button, input, textarea, select {
     pointer-events: none;
 }
 
-/* Active (X) state driven by aria-expanded on button */
-.menu-toggle[aria-expanded="true"] .ham-line:nth-child(1) {
+/* Active (X) state driven by aria-expanded and is-active on button */
+.menu-toggle[aria-expanded="true"] .ham-line:nth-child(1),
+.menu-toggle.is-active .ham-line:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
 }
-.menu-toggle[aria-expanded="true"] .ham-line:nth-child(2) {
+.menu-toggle[aria-expanded="true"] .ham-line:nth-child(2),
+.menu-toggle.is-active .ham-line:nth-child(2) {
     opacity: 0;
     transform: scaleX(0);
 }
-.menu-toggle[aria-expanded="true"] .ham-line:nth-child(3) {
+.menu-toggle[aria-expanded="true"] .ham-line:nth-child(3),
+.menu-toggle.is-active .ham-line:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
 }
 
@@ -1615,6 +1618,16 @@ button, input, textarea, select {
     margin-top: auto;
 }
 
+.benefit-gadget-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 18px;
+    margin: 10px 0 0 18px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
 /* --------------------------------------------------------------------------
    Section 3: The Vision
    -------------------------------------------------------------------------- */
@@ -1706,9 +1719,26 @@ button, input, textarea, select {
 
 .anticipate-layout {
     display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
-    gap: clamp(40px, 6vw, 80px);
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.anticipate-info {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.anticipate-info .section-index-pill {
+    margin-inline: auto;
+}
+
+.anticipate-info .anticipate-description {
+    max-width: 720px;
+    margin-inline: auto;
+}
+
+.anticipate-info > .button {
+    margin-top: 4px;
 }
 
 .anticipate-description {
@@ -2381,6 +2411,39 @@ button, input, textarea, select {
     text-decoration: underline;
 }
 
+.past-projects-section {
+    background: var(--cream-surface);
+}
+
+.past-projects-section .section-title {
+    margin-top: 18px;
+}
+
+.past-projects-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    padding: clamp(28px, 6vw, 64px) 24px;
+    background: var(--paper-white);
+    border: 1px solid var(--border-light);
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.past-projects-placeholder p {
+    max-width: 640px;
+    color: var(--ink-secondary);
+}
+
+.past-projects-back-link {
+    display: inline-block;
+    margin-bottom: 36px;
+    color: var(--forest-deep);
+    font-weight: 700;
+}
+
 /* --------------------------------------------------------------------------
    Responsive Breakpoints
    -------------------------------------------------------------------------- */
@@ -2437,6 +2500,33 @@ button, input, textarea, select {
     
     .menu-toggle {
         display: flex !important;
+        pointer-events: auto !important;
+        z-index: 10001;
+    }
+
+    .mobile-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: rgba(3, 20, 11, 0.98);
+        border-top: 1px solid rgba(216, 255, 0, 0.2);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        max-height: calc(100vh - 64px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 10000;
+    }
+
+    .mobile-nav.is-open {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        animation: slideDown 0.25s ease;
     }
     
     .brand-logo-bridge {
@@ -2510,6 +2600,10 @@ button, input, textarea, select {
     
     .flyer-hero-actions .hero-btn {
         width: 100%;
+    }
+
+    .benefit-gadget-list {
+        grid-template-columns: 1fr;
     }
     
     .hero-flyer-showcase {
@@ -2613,4 +2707,3 @@ button, input, textarea, select {
     opacity: 0.9;
     letter-spacing: 0.02em;
 }
-
