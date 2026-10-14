@@ -189,4 +189,68 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // ── Cybersecurity Client-Side Protection & Anti-Inspect Deterrents ──
+    (function () {
+        var toastTimer = null;
+        function showSecurityNotice() {
+            var existing = document.getElementById("cyberSecurityToast");
+            if (!existing) {
+                existing = document.createElement("div");
+                existing.id = "cyberSecurityToast";
+                existing.innerHTML = "🛡️ <strong>Security Protected:</strong> Source viewing & inspect tools are disabled.";
+                existing.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);" +
+                    "background:rgba(4,20,12,0.96);color:#f1f5f9;border:1px solid #e6b749;padding:12px 22px;border-radius:999px;" +
+                    "font-size:0.85rem;font-family:sans-serif;box-shadow:0 10px 30px rgba(0,0,0,0.7);z-index:999999;opacity:0;" +
+                    "pointer-events:none;transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;";
+                document.body.appendChild(existing);
+            }
+            clearTimeout(toastTimer);
+            requestAnimationFrame(function () {
+                existing.style.transform = "translateX(-50%) translateY(0)";
+                existing.style.opacity = "1";
+            });
+            toastTimer = setTimeout(function () {
+                existing.style.transform = "translateX(-50%) translateY(100px)";
+                existing.style.opacity = "0";
+            }, 2600);
+        }
+
+        // Disable Context Menu (Right Click)
+        document.addEventListener("contextmenu", function (e) {
+            // Allow right click inside form inputs if user is typing
+            if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+            e.preventDefault();
+            showSecurityNotice();
+            return false;
+        }, { capture: true });
+
+        // Disable Developer Tools & View-Source Keyboard Shortcuts
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "F12") {
+                e.preventDefault();
+                showSecurityNotice();
+                return false;
+            }
+            if ((e.ctrlKey || e.metaKey) && (
+                e.key === "u" || e.key === "U" ||
+                e.key === "s" || e.key === "S" ||
+                ((e.shiftKey || e.altKey) && (e.key === "i" || e.key === "I" || e.key === "j" || e.key === "J" || e.key === "c" || e.key === "C"))
+            )) {
+                e.preventDefault();
+                showSecurityNotice();
+                return false;
+            }
+        }, { capture: true });
+
+        // Self-XSS & Probing Warning Banner in Console
+        try {
+            console.log(
+                "%c🛡️ SECURITY ADVISORY%c\nThis is a protected academy application. Tampering, unauthorized scripting, or injection attempts are actively monitored and logged.",
+                "color: #e6b749; font-size: 18px; font-weight: bold; background: #03140b; padding: 4px 8px; border-radius: 4px; border: 1px solid #e6b749;",
+                "color: #94a3b8; font-size: 13px; line-height: 1.5;"
+            );
+        } catch (err) {}
+    })();
 });
+
