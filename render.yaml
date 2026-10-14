@@ -11,8 +11,10 @@ services:
     name: the-bridge-business-academy-server
     env: node
     plan: free
-    buildCommand: ""
+    buildCommand: npm install
     startCommand: node server.js
     envVars:
       - key: NODE_VERSION
         value: 20
+      - key: MONGODB_URI
+        sync: false

@@ -572,9 +572,14 @@
                 const res = await fetch('/api/projects');
                 if (res.ok) {
                     allProjects = await res.json();
-                    renderCategoryFilters();
-                    renderProjectsGrid();
-                    return;
+                    if (Array.isArray(allProjects) && allProjects.length > 0) {
+                        try {
+                            localStorage.setItem("tbba_past_projects", JSON.stringify(allProjects));
+                        } catch (e) {}
+                        renderCategoryFilters();
+                        renderProjectsGrid();
+                        return;
+                    }
                 }
             } catch (err) {
                 console.log("Loading local fallback...");
@@ -654,22 +659,23 @@
                 const cover = images.length > 0 ? images[0] : 'assets/workshop-flyer.jpg';
                 const photoCount = images.length;
                 const companyLogo = proj.companyLogo || 'LOGOS/spotless-connect-logo.png';
+                const summary = proj.summary || 'Skill up empowerment workshop and corporate brand activation packaged by Spotless Connect.';
 
                 return `
                     <article class="project-card" onclick="openProjectLightbox('${proj.id}')">
                         <div class="project-card-media">
-                            <img class="project-card-img" src="${cover}" alt="${proj.title}" loading="lazy" onerror="this.src='assets/workshop-flyer.jpg'">
+                            <img class="project-card-img" src="${cover}" alt="${proj.title}" loading="lazy" onerror="this.onerror=null; this.src='assets/workshop-flyer.jpg';">
                             <span class="card-photo-count-badge">📷 ${photoCount} ${photoCount === 1 ? 'Photo' : 'Photos'}</span>
                             <span class="card-timeline-badge">🗓️ ${proj.date || '2025'}</span>
                         </div>
                         <div class="project-card-body">
-                            <div class="project-card-category">${proj.category || 'Empowerment'}</div>
+                            <div class="project-card-category">${proj.category || 'Youth Empowerment & Workshops'}</div>
                             <h3 class="project-card-title">${proj.title}</h3>
                             <div class="project-card-partner">
                                 <img src="${companyLogo}" alt="Logo" onerror="this.style.display='none'">
-                                <span>${proj.company}</span>
+                                <span>${proj.company || 'The Bridge Business Academy × Spotless Connect'}</span>
                             </div>
-                            <p class="project-card-summary">${proj.summary}</p>
+                            <p class="project-card-summary">${summary}</p>
                             <div class="project-card-action">
                                 <span>View Photos &amp; Highlights</span>
                                 <span>→</span>
@@ -687,11 +693,11 @@
             currentModalProject = proj;
             currentImageIndex = 0;
 
-            document.getElementById("modalTitle").textContent = proj.title;
-            document.getElementById("modalCategory").textContent = proj.category || 'Project';
-            document.getElementById("modalDate").textContent = proj.date || '';
-            document.getElementById("modalCompany").textContent = 'Partner: ' + proj.company;
-            document.getElementById("modalDesc").textContent = proj.summary;
+            document.getElementById("modalTitle").textContent = proj.title || 'Project Showcase';
+            document.getElementById("modalCategory").textContent = proj.category || 'Youth Empowerment & Workshops';
+            document.getElementById("modalDate").textContent = proj.date || '2025';
+            document.getElementById("modalCompany").textContent = 'Partner: ' + (proj.company || 'The Bridge Business Academy × Spotless Connect');
+            document.getElementById("modalDesc").textContent = proj.summary || 'Project gallery highlights and media coverage packaged by Spotless Connect.';
 
             updateCarouselImage();
             renderCarouselThumbs();
@@ -715,6 +721,10 @@
             if (images.length === 0) images.push('assets/workshop-flyer.jpg');
 
             const carouselImg = document.getElementById("carouselImg");
+            carouselImg.onerror = function() {
+                this.onerror = null;
+                this.src = 'assets/workshop-flyer.jpg';
+            };
             carouselImg.src = images[currentImageIndex];
             document.getElementById("carouselCounter").textContent = `${currentImageIndex + 1} / ${images.length}`;
 
@@ -734,8 +744,8 @@
             }
             thumbsContainer.style.display = "flex";
             thumbsContainer.innerHTML = images.map((img, idx) => `
-                <img src="${img}" class="carousel-thumb-item ${idx === 0 ? 'is-selected' : ''}" 
-                    onclick="selectCarouselImage(${idx})" alt="Thumb ${idx + 1}">
+                <img src="${img}" class="carousel-thumb-item ${idx === currentImageIndex ? 'is-selected' : ''}" 
+                    onclick="selectCarouselImage(${idx})" alt="Thumb ${idx + 1}" onerror="this.onerror=null; this.src='assets/workshop-flyer.jpg';">
             `).join('');
         }
 

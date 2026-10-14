@@ -16,5 +16,9 @@
     "spotless-connect"
   ],
   "author": "The Bridge Business Academy",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "mongodb": "^7.7.0"
+  }
 }
