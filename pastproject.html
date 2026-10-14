@@ -772,7 +772,6 @@
                     <span id="modalDate" style="color: var(--gold-light); font-weight: 700; font-size: 0.9rem;">2025</span>
                 </div>
                 <h2 class="lightbox-title" id="modalTitle">Project Title</h2>
-                <div class="lightbox-company" id="modalCompany">Company Name</div>
                 <p class="lightbox-desc" id="modalDesc">Project description goes here...</p>
             </div>
         </div>
@@ -906,10 +905,6 @@
                         <div class="project-card-body">
                             <div class="project-card-category">${proj.category || 'Youth Empowerment & Workshops'}</div>
                             <h3 class="project-card-title">${proj.title}</h3>
-                            <div class="project-card-partner">
-                                <img src="${companyLogo}" alt="Logo" onerror="this.style.display='none'">
-                                <span>${proj.company || 'The Bridge Business Academy × Spotless Connect'}</span>
-                            </div>
                             <p class="project-card-summary">${summary}</p>
                             <div class="project-card-action">
                                 <span>View Photos &amp; Highlights</span>
@@ -931,7 +926,6 @@
             document.getElementById("modalTitle").textContent = proj.title || 'Project Showcase';
             document.getElementById("modalCategory").textContent = proj.category || 'Youth Empowerment & Workshops';
             document.getElementById("modalDate").textContent = proj.date || '2025';
-            document.getElementById("modalCompany").textContent = 'Partner: ' + (proj.company || 'The Bridge Business Academy × Spotless Connect');
             document.getElementById("modalDesc").textContent = proj.summary || 'Project gallery highlights and media coverage packaged by Spotless Connect.';
 
             updateCarouselImage();
