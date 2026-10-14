@@ -58,11 +58,14 @@ let projectsCollection = null;
 let isMongoConnected = false;
 
 async function initMongoDB() {
-  const uri = process.env.MONGODB_URI;
+  let uri = process.env.MONGODB_URI;
   if (!uri || !uri.trim()) {
     console.log('[Database] ℹ️  No MONGODB_URI found in environment. Using local projects.json file.');
     return;
   }
+
+  // Automatically remove accidental < > brackets around passwords
+  uri = uri.trim().replace(/<([^>]+)>/g, '$1');
 
   try {
     console.log('[Database] ⏳ Connecting to MongoDB Atlas...');
