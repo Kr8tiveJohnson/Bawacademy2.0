@@ -20,53 +20,165 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* Dark body override – pastproject is a dark-themed standalone page */
-        body {
+        /* ── Core Dark Theme & Anti-Overflow ── */
+        html, body {
             background-color: #03140b !important;
             color: #f1f5f9;
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        /* Gallery & Lightbox Custom Styling */
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+
+        #main, 
+        .section, 
+        .past-projects-hero, 
+        .past-projects-section,
+        .site-footer {
+            background-color: #03140b !important;
+            color: #f1f5f9;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+
+        /* ── Header Mobile Tweaks ── */
+        .site-header {
+            background: rgba(3, 20, 11, 0.95) !important;
+            border-bottom: 1px solid rgba(230, 183, 73, 0.2) !important;
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                height: 60px !important;
+                padding: 0 14px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .brand-logo-bridge {
+                height: 38px !important;
+                max-width: 130px !important;
+            }
+
+            .header-actions {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+            }
+
+            /* Hide the long back link from the cramped top bar on mobile */
+            .past-projects-back-link {
+                display: none !important;
+            }
+
+            .header-cta {
+                padding: 7px 14px !important;
+                font-size: 0.78rem !important;
+            }
+
+            .menu-toggle {
+                width: 40px !important;
+                height: 40px !important;
+                flex-shrink: 0;
+            }
+        }
+
+        /* ── Hero Title Section ── */
+        .past-projects-hero {
+            background: radial-gradient(circle at 50% 0%, rgba(230, 183, 73, 0.16) 0%, #03140b 70%) !important;
+            border-bottom: 1px solid rgba(230, 183, 73, 0.15) !important;
+            text-align: center;
+            padding: 50px 16px 36px;
+        }
+
+        @media (max-width: 768px) {
+            .past-projects-hero {
+                padding: 28px 14px 20px !important;
+            }
+            .section-index-pill {
+                font-size: 0.65rem !important;
+                gap: 8px !important;
+                margin-bottom: 12px !important;
+            }
+            .section-title {
+                font-size: 1.65rem !important;
+                line-height: 1.25 !important;
+                margin-bottom: 10px !important;
+            }
+            .section-sub {
+                font-size: 0.88rem !important;
+                line-height: 1.5 !important;
+                max-width: 100% !important;
+                padding: 0 4px !important;
+            }
+        }
+
+        /* ── Filter Pills ── */
         .filter-bar {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 40px;
+            margin-bottom: 36px;
+            padding: 0 12px;
         }
 
         .filter-pill {
             padding: 9px 18px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(230, 183, 73, 0.22);
-            color: rgba(255, 255, 255, 0.82);
-            font-size: 0.86rem;
+            background: rgba(10, 42, 26, 0.95);
+            border: 1.5px solid rgba(230, 183, 73, 0.4);
+            color: #ffffff !important;
+            font-size: 0.85rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.25s ease;
-            white-space: nowrap;
+            transition: all 0.2s ease;
+            white-space: normal;
+            text-align: center;
         }
 
         .filter-pill:hover,
         .filter-pill.is-active {
-            background: var(--gold-primary);
-            color: var(--forest-darkest);
-            border-color: var(--gold-primary);
+            background: var(--gold-primary) !important;
+            color: #03140b !important;
+            border-color: var(--gold-primary) !important;
             box-shadow: 0 4px 16px rgba(230, 183, 73, 0.35);
             transform: translateY(-2px);
         }
 
+        @media (max-width: 768px) {
+            .filter-bar {
+                gap: 8px !important;
+                margin-bottom: 20px !important;
+            }
+            .filter-pill {
+                padding: 7px 14px !important;
+                font-size: 0.76rem !important;
+            }
+        }
+
+        /* ── Gallery Grid & Project Cards ── */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 28px;
+            width: 100%;
         }
 
         .project-card {
-            background: rgba(5, 24, 15, 0.85);
-            border: 1px solid rgba(230, 183, 73, 0.22);
+            background: rgba(5, 24, 15, 0.95);
+            border: 1px solid rgba(230, 183, 73, 0.25);
             border-radius: 20px;
             overflow: hidden;
             display: flex;
@@ -104,9 +216,9 @@
             position: absolute;
             top: 12px;
             right: 12px;
-            background: rgba(3, 20, 11, 0.85);
+            background: rgba(3, 20, 11, 0.88);
             color: var(--gold-light);
-            border: 1px solid rgba(230, 183, 73, 0.4);
+            border: 1px solid rgba(230, 183, 73, 0.45);
             backdrop-filter: blur(8px);
             font-size: 0.74rem;
             font-weight: 700;
@@ -121,9 +233,9 @@
             position: absolute;
             bottom: 12px;
             left: 12px;
-            background: rgba(3, 20, 11, 0.85);
+            background: rgba(3, 20, 11, 0.88);
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(8px);
             font-size: 0.72rem;
             font-weight: 700;
@@ -149,7 +261,7 @@
 
         .project-card-title {
             font-family: var(--font-heading);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 800;
             color: #ffffff;
             line-height: 1.3;
@@ -196,7 +308,109 @@
             border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Fullscreen Lightbox Modal */
+        /* ── 2-by-2 Grid Layout on Mobile Devices ── */
+        @media (max-width: 768px) {
+            .past-projects-section {
+                padding: 16px 0 50px !important;
+            }
+
+            .section-container {
+                padding: 0 10px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .gallery-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 10px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .project-card {
+                border-radius: 12px !important;
+                background: rgba(7, 30, 18, 0.98) !important;
+                border: 1px solid rgba(230, 183, 73, 0.3) !important;
+                overflow: hidden !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+            }
+
+            .project-card-media {
+                aspect-ratio: 16 / 11 !important;
+                width: 100% !important;
+            }
+
+            .project-card-body {
+                padding: 8px 8px 10px !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .project-card-category {
+                font-size: 0.58rem !important;
+                margin-bottom: 2px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .project-card-title {
+                font-size: 0.82rem !important;
+                line-height: 1.22 !important;
+                margin-bottom: 4px !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                word-break: break-word !important;
+            }
+
+            .project-card-partner {
+                font-size: 0.64rem !important;
+                margin-bottom: 4px !important;
+                gap: 4px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .project-card-partner img {
+                width: 12px !important;
+                height: 12px !important;
+            }
+
+            .project-card-summary {
+                display: none !important;
+            }
+
+            .project-card-action {
+                font-size: 0.65rem !important;
+                padding-top: 6px !important;
+                margin-top: auto !important;
+            }
+
+            .card-photo-count-badge {
+                top: 5px !important;
+                right: 5px !important;
+                font-size: 0.58rem !important;
+                padding: 2px 5px !important;
+            }
+
+            .card-timeline-badge {
+                bottom: 5px !important;
+                left: 5px !important;
+                font-size: 0.56rem !important;
+                padding: 2px 5px !important;
+            }
+        }
+
+        /* ── Fullscreen Lightbox Modal ── */
         .lightbox-modal {
             position: fixed;
             inset: 0;
@@ -206,7 +420,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
         }
 
         .lightbox-modal.is-open {
@@ -215,9 +429,9 @@
         }
 
         .lightbox-dialog {
-            background: var(--admin-surface, #051a10);
+            background: #051a10;
             border: 1.5px solid rgba(230, 183, 73, 0.35);
-            border-radius: 24px;
+            border-radius: 20px;
             max-width: 960px;
             width: 100%;
             max-height: 92vh;
@@ -230,12 +444,12 @@
 
         .lightbox-close-btn {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 40px;
-            height: 40px;
+            top: 14px;
+            right: 14px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(0, 0, 0, 0.7);
             border: 1.5px solid rgba(230, 183, 73, 0.4);
             color: #fff;
             font-size: 1.4rem;
@@ -252,7 +466,6 @@
             color: #03140b;
         }
 
-        /* Carousel Component */
         .carousel-view {
             position: relative;
             background: #000;
@@ -262,8 +475,8 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border-top-left-radius: 22px;
-            border-top-right-radius: 22px;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
         }
 
         .carousel-main-img {
@@ -277,10 +490,10 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: rgba(3, 20, 11, 0.75);
+            background: rgba(3, 20, 11, 0.8);
             border: 1.5px solid rgba(230, 183, 73, 0.4);
             color: #ffffff;
             font-size: 1.2rem;
@@ -297,34 +510,34 @@
             color: #03140b;
         }
 
-        .carousel-btn-prev { left: 16px; }
-        .carousel-btn-next { right: 16px; }
+        .carousel-btn-prev { left: 14px; }
+        .carousel-btn-next { right: 14px; }
 
         .carousel-counter {
             position: absolute;
-            bottom: 14px;
-            right: 16px;
-            background: rgba(0, 0, 0, 0.7);
+            bottom: 12px;
+            right: 14px;
+            background: rgba(0, 0, 0, 0.75);
             color: var(--gold-light);
             border: 1px solid rgba(230, 183, 73, 0.3);
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 999px;
-            font-size: 0.8rem;
+            font-size: 0.76rem;
             font-weight: 700;
         }
 
         .carousel-thumbs {
             display: flex;
-            gap: 10px;
-            padding: 12px 24px;
+            gap: 8px;
+            padding: 10px 16px;
             background: rgba(3, 20, 11, 0.95);
             overflow-x: auto;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .carousel-thumb-item {
-            width: 60px;
-            height: 44px;
+            width: 54px;
+            height: 40px;
             border-radius: 6px;
             object-fit: cover;
             cursor: pointer;
@@ -340,14 +553,14 @@
         }
 
         .lightbox-info {
-            padding: 28px 32px 36px;
+            padding: 24px 24px 30px;
         }
 
         .lightbox-meta-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
@@ -355,140 +568,68 @@
             background: rgba(230, 183, 73, 0.15);
             border: 1px solid rgba(230, 183, 73, 0.3);
             color: var(--gold-light);
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             font-weight: 800;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 999px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         .lightbox-title {
             font-family: var(--font-heading);
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: #ffffff;
-            line-height: 1.25;
-            margin-bottom: 10px;
+            line-height: 1.3;
+            margin-bottom: 8px;
         }
 
         .lightbox-company {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 14px;
         }
 
         .lightbox-desc {
             color: rgba(255, 255, 255, 0.85);
-            font-size: 1.02rem;
-            line-height: 1.65;
+            font-size: 0.98rem;
+            line-height: 1.6;
         }
 
-        /* Empty state */
+        /* ── Empty State ── */
         .gallery-empty-box {
             grid-column: 1 / -1;
-            padding: 60px 24px;
+            padding: 40px 16px;
             text-align: center;
             background: rgba(5, 22, 14, 0.6);
             border: 2px dashed rgba(230, 183, 73, 0.3);
-            border-radius: 20px;
+            border-radius: 16px;
         }
 
-        /* 2-by-2 Grid Layout on Mobile Devices */
+        /* ── Responsive Hotlines Capsule ── */
         @media (max-width: 768px) {
-            .gallery-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px !important;
+            .spotless-hotline-capsule {
+                margin-top: 36px !important;
+                padding: 18px 14px !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                text-align: center !important;
+                gap: 14px !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
             }
 
-            .project-card {
-                border-radius: 14px;
-            }
-
-            .project-card-media {
-                aspect-ratio: 16 / 11;
-            }
-
-            .card-photo-count-badge {
-                top: 6px;
-                right: 6px;
-                font-size: 0.62rem;
-                padding: 2px 6px;
-            }
-
-            .card-timeline-badge {
-                bottom: 6px;
-                left: 6px;
-                font-size: 0.6rem;
-                padding: 2px 6px;
-            }
-
-            .project-card-body {
-                padding: 10px 10px 12px;
-            }
-
-            .project-card-category {
-                font-size: 0.62rem;
-                margin-bottom: 2px;
-            }
-
-            .project-card-title {
-                font-size: 0.88rem;
-                line-height: 1.24;
-                margin-bottom: 4px;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
-
-            .project-card-partner {
-                font-size: 0.68rem;
-                margin-bottom: 6px;
-                gap: 5px;
-            }
-
-            .project-card-partner img {
-                width: 14px;
-                height: 14px;
-            }
-
-            .project-card-summary {
-                font-size: 0.72rem;
-                line-height: 1.35;
-                margin-bottom: 8px;
-                -webkit-line-clamp: 2;
-            }
-
-            .project-card-action {
-                font-size: 0.68rem;
-                padding-top: 6px;
-            }
-        }
-
-        @media (max-width: 440px) {
-            .gallery-grid {
+            .spotless-hotline-actions {
+                flex-direction: column !important;
+                width: 100% !important;
                 gap: 8px !important;
             }
 
-            .project-card-body {
-                padding: 8px 8px 10px;
-            }
-
-            .project-card-title {
-                font-size: 0.82rem;
-            }
-
-            .project-card-summary {
-                display: none;
-            }
-
-            .project-card-action {
-                display: none;
+            .spotless-hotline-btn {
+                width: 100% !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
             }
         }
     </style>
@@ -560,24 +701,24 @@
 
     <main id="main">
         <!-- Hero Title Section -->
-        <section class="section past-projects-hero" style="background: radial-gradient(circle at 50% 0%, rgba(230, 183, 73, 0.12) 0%, rgba(3, 20, 11, 0.98) 70%); padding: 60px 0 40px; text-align: center; border-bottom: 1px solid rgba(230, 183, 73, 0.15);">
+        <section class="section past-projects-hero">
             <div class="section-container">
                 <div class="section-index-pill section-index-pill-light" style="margin: 0 auto 16px;">
                     <span class="index-num">PORTFOLIO</span>
                     <span class="index-divider"></span>
                     <span class="index-title">SPOTLESS CONNECT MEDIA PARTNER</span>
                 </div>
-                <h1 class="section-title section-title-light" style="font-size: clamp(2.2rem, 5vw, 3.5rem); margin-bottom: 16px;">
+                <h1 class="section-title section-title-light">
                     Past Projects &amp; <span class="title-gold">Partner Companies</span>
                 </h1>
-                <p class="section-sub" style="max-width: 760px; margin: 0 auto; color: rgba(255, 255, 255, 0.78); font-size: 1.1rem; line-height: 1.6;">
+                <p class="section-sub">
                     Explore our track record of youth empowerment workshops, corporate brand activations, media productions, and corporate alliances packaged by Spotless Connect.
                 </p>
             </div>
         </section>
 
         <!-- Dynamic Gallery Section -->
-        <section class="section past-projects-section" style="padding: 50px 0 80px;">
+        <section class="section past-projects-section">
             <div class="section-container">
                 <!-- Filter Pills -->
                 <div class="filter-bar" id="categoryFilterBar">
@@ -590,17 +731,17 @@
                 </div>
 
                 <!-- Spotless Connect Contact Capsule -->
-                <div style="margin-top: 60px; padding: 28px 32px; background: rgba(10, 40, 25, 0.95); border: 1.5px solid rgba(230, 183, 73, 0.45); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div class="spotless-hotline-capsule" style="margin-top: 60px; padding: 28px 32px; background: rgba(10, 40, 25, 0.95); border: 1.5px solid rgba(230, 183, 73, 0.45); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                     <div>
                         <strong style="display: block; color: #e6b749; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Spotless Connect Direct Hotlines</strong>
                         <span style="color: rgba(255, 255, 255, 0.85); font-size: 0.95rem;">For partnership, media sponsorship, or project inquiries:</span>
                     </div>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <a href="tel:09036900011" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:rgba(230,183,73,0.15); border:1.5px solid rgba(230,183,73,0.5); border-radius:10px; color:#f5d57a; font-size:0.95rem; font-weight:700; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='rgba(230,183,73,0.3)'" onmouseout="this.style.background='rgba(230,183,73,0.15)'">
+                    <div class="spotless-hotline-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <a href="tel:09036900011" class="spotless-hotline-btn" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:rgba(230,183,73,0.15); border:1.5px solid rgba(230,183,73,0.5); border-radius:10px; color:#f5d57a; font-size:0.95rem; font-weight:700; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='rgba(230,183,73,0.3)'" onmouseout="this.style.background='rgba(230,183,73,0.15)'">
                             <span>📞</span>
                             <span>09036900011</span>
                         </a>
-                        <a href="tel:07012518888" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:rgba(230,183,73,0.15); border:1.5px solid rgba(230,183,73,0.5); border-radius:10px; color:#f5d57a; font-size:0.95rem; font-weight:700; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='rgba(230,183,73,0.3)'" onmouseout="this.style.background='rgba(230,183,73,0.15)'">
+                        <a href="tel:07012518888" class="spotless-hotline-btn" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:rgba(230,183,73,0.15); border:1.5px solid rgba(230,183,73,0.5); border-radius:10px; color:#f5d57a; font-size:0.95rem; font-weight:700; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='rgba(230,183,73,0.3)'" onmouseout="this.style.background='rgba(230,183,73,0.15)'">
                             <span>📞</span>
                             <span>07012518888</span>
                         </a>
