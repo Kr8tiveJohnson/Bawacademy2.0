@@ -292,20 +292,36 @@ async function saveProjects(projectsList) {
   return true;
 }
 
-// ── Registrations Data Handlers ──
 async function getRegistrations() {
+  let docs = [];
   if (isMongoConnected && registrationsCollection) {
     try {
-      const docs = await registrationsCollection.find({}).sort({ registeredAt: -1 }).toArray();
-      return docs.map(d => {
+      const mongoDocs = await registrationsCollection.find({}).sort({ registeredAt: -1 }).toArray();
+      docs = mongoDocs.map(d => {
         const { _id, ...rest } = d;
         return { id: rest.id || (_id ? _id.toString() : 'reg-' + Date.now()), ...rest };
       });
     } catch (err) {
       console.error('[Database] Failed to read registrations from MongoDB:', err.message);
+      docs = readRegistrationsFromFile();
     }
+  } else {
+    docs = readRegistrationsFromFile();
   }
-  return readRegistrationsFromFile();
+
+  // Calculate dynamic referral counts for each unique code
+  const refCountMap = {};
+  docs.forEach(d => {
+    if (d.referredBy && typeof d.referredBy === 'string') {
+      const code = d.referredBy.trim().toUpperCase();
+      refCountMap[code] = (refCountMap[code] || 0) + 1;
+    }
+  });
+
+  return docs.map(d => ({
+    ...d,
+    referralCount: refCountMap[(d.uniqueCode || '').trim().toUpperCase()] || 0
+  }));
 }
 
 async function findRegistrationByReference(ref) {
@@ -503,7 +519,7 @@ const server = http.createServer(async (req, res) => {
   // ── Paystack Initialize Endpoint ──
   if (reqPath === '/api/paystack/initialize' && req.method === 'POST') {
     try {
-      const { email, name, phone } = await parseJsonBody(req, 1024 * 64);
+      const { email, name, phone, referredBy } = await parseJsonBody(req, 1024 * 64);
       if (!email || !email.includes('@')) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'A valid email address is required for payment.' }));
@@ -536,7 +552,8 @@ const server = http.createServer(async (req, res) => {
           custom_fields: [
             { display_name: 'Student Name', variable_name: 'student_name', value: name || 'Student' },
             { display_name: 'Workshop', variable_name: 'workshop', value: 'Business / Skill Up Acquisition 2.0' },
-            { display_name: 'Phone', variable_name: 'phone', value: phone || '' }
+            { display_name: 'Phone', variable_name: 'phone', value: phone || '' },
+            { display_name: 'Referred By', variable_name: 'referred_by', value: (referredBy || '').trim().toUpperCase() }
           ]
         }
       };
@@ -608,9 +625,12 @@ const server = http.createServer(async (req, res) => {
         const uniqueCode = `BAW-5K-${randPart}`;
 
         let customerName = '';
+        let referredBy = '';
         if (txData.metadata && txData.metadata.custom_fields) {
           const nameField = txData.metadata.custom_fields.find(f => f.variable_name === 'student_name');
           if (nameField) customerName = nameField.value;
+          const refField = txData.metadata.custom_fields.find(f => f.variable_name === 'referred_by');
+          if (refField) referredBy = refField.value;
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -621,6 +641,7 @@ const server = http.createServer(async (req, res) => {
           email: txData.customer ? txData.customer.email : '',
           amount: txData.amount / 100,
           customerName: customerName,
+          referredBy: referredBy,
           paidAt: txData.paid_at,
           uniqueCode: uniqueCode
         }));
@@ -665,7 +686,8 @@ const server = http.createServer(async (req, res) => {
           email,
           currentStatus,
           primaryGoal,
-          qaQuestion
+          qaQuestion,
+          referredBy
         } = body;
 
         if (!reference || !uniqueCode || !name || !email) {
@@ -691,6 +713,9 @@ const server = http.createServer(async (req, res) => {
         }
 
         const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 5000;
+        const cleanRef = String(referredBy || '').trim().toUpperCase();
+        const finalReferredBy = (cleanRef && cleanRef !== uniqueCode.trim().toUpperCase()) ? cleanRef : '';
+
         const regDoc = {
           id: `reg-${Date.now()}`,
           reference: reference.trim(),
@@ -703,6 +728,7 @@ const server = http.createServer(async (req, res) => {
           currentStatus: String(currentStatus || '').trim(),
           primaryGoal: String(primaryGoal || '').trim(),
           qaQuestion: String(qaQuestion || '').trim(),
+          referredBy: finalReferredBy,
           amountPaid: feeNGN,
           paystackData: {
             channel: paystackRes.data.data.channel,

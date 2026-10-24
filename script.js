@@ -137,6 +137,13 @@ window.openPaystackModal = function (e) {
         modal.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
         var nameInput = document.getElementById("payModalName");
+        var referralInput = document.getElementById("payModalReferral");
+        if (referralInput && !referralInput.value) {
+            try {
+                var savedRef = localStorage.getItem("tbba_referral_code");
+                if (savedRef) referralInput.value = savedRef;
+            } catch (e) {}
+        }
         if (nameInput) setTimeout(function () { nameInput.focus(); }, 120);
     }
 };
@@ -159,6 +166,8 @@ window.handlePayInitSubmit = async function (e) {
     var btn = document.getElementById("payInitSubmitBtn");
     var nameInput = document.getElementById("payModalName");
     var emailInput = document.getElementById("payModalEmail");
+    var refInput = document.getElementById("payModalReferral");
+    var referredBy = refInput ? refInput.value.trim().toUpperCase() : "";
 
     if (!emailInput || !emailInput.value.trim() || !emailInput.value.includes("@")) {
         alert("Please enter a valid email address to receive your ticket confirmation.");
@@ -177,7 +186,8 @@ window.handlePayInitSubmit = async function (e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 name: nameInput ? nameInput.value.trim() : '',
-                email: emailInput.value.trim()
+                email: emailInput.value.trim(),
+                referredBy: referredBy
             })
         });
 
@@ -196,6 +206,17 @@ window.handlePayInitSubmit = async function (e) {
         }
     }
 };
+
+// Auto-detect referral code in URL query (?ref=BAW-5K-...)
+(function () {
+    try {
+        var params = new URLSearchParams(window.location.search);
+        var ref = params.get("ref");
+        if (ref) {
+            localStorage.setItem("tbba_referral_code", ref.trim().toUpperCase());
+        }
+    } catch (e) {}
+})();
 
 // ── Universal Smooth Scroll for in-page anchors ────────────
 function initSmoothScroll() {

@@ -754,6 +754,15 @@
                             </div>
                         </div>
 
+                        <!-- REFERRAL / AMBASSADOR CODE -->
+                        <div class="form-group form-full">
+                            <label class="form-label" for="referredByInput">
+                                REFERRAL / AMBASSADOR CODE: <span style="color:#94a3b8; font-weight:400; font-size:0.75rem;">(Optional - enter your friend's pass code)</span>
+                            </label>
+                            <input type="text" id="referredByInput" name="referredBy" class="form-input"
+                                placeholder="e.g. BAW-5K-XXXXXX" style="text-transform: uppercase; font-family: monospace; letter-spacing: 1px;">
+                        </div>
+
                         <!-- Q&A QUESTION -->
                         <div class="form-group form-full">
                             <label class="form-label" for="qaQuestion">
@@ -832,9 +841,15 @@
                                     <div class="ticket-field-val" id="ticketPhone">—</div>
                                 </div>
                             </div>
-                            <div class="ticket-field">
-                                <div class="ticket-field-label">Current Status</div>
-                                <div class="ticket-field-val" id="ticketStatus" style="font-size: 0.95rem; color: var(--reg-gold-light);">—</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Current Status</div>
+                                    <div class="ticket-field-val" id="ticketStatus" style="font-size: 0.95rem; color: var(--reg-gold-light);">—</div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Referred By</div>
+                                    <div class="ticket-field-val" id="ticketReferredBy" style="font-size: 0.95rem; font-family: monospace; color: #94a3b8;">None</div>
+                                </div>
                             </div>
                         </div>
 
@@ -862,6 +877,37 @@
                         <button type="button" class="print-btn" onclick="window.print()">
                             <span>🖨️ Print / Save Ticket (PDF)</span>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Personal Referral & Ambassador Hub -->
+                <div style="margin-top: 24px; background: rgba(10, 36, 23, 0.95); border: 1.5px solid var(--reg-gold); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 1.6rem;">🎁</span>
+                        <h3 style="font-family: var(--font-heading); color: var(--reg-gold-light); font-size: 1.25rem;">
+                            Your Personal Referral Link &amp; Code
+                        </h3>
+                    </div>
+                    <p style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.5;">
+                        Invite friends to the <strong>Business &amp; Skill Up Acquisition 2.0 Workshop</strong>! When your peers register with your code, you earn credit towards laptops, tech gadgets, scholarships, and ambassador awards.
+                    </p>
+                    
+                    <div style="margin-top: 16px; background: rgba(3, 20, 11, 0.85); border: 1px dashed var(--reg-gold); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 240px;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">Your Shareable Referral Link:</div>
+                            <div id="referralShareLink" style="color: #fff; font-family: monospace; font-size: 0.95rem; font-weight: 700; word-break: break-all; margin-top: 4px;">
+                                https://.../?ref=BAW-5K-XXXXXX
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" class="copy-code-btn" onclick="copyReferralLink()" style="padding: 10px 16px; font-size: 0.85rem;">
+                                📋 Copy Link
+                            </button>
+                            <a id="shareWhatsappReferralBtn" href="#" target="_blank" rel="noopener noreferrer"
+                               style="display: inline-flex; align-items: center; gap: 6px; background: #25d366; color: #03140b; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
+                                <span>💬 Share on WhatsApp</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -906,6 +952,13 @@
             });
         }
 
+        function copyReferralLink() {
+            const link = document.getElementById('referralShareLink').textContent.trim();
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Your personal referral link is copied:\n' + link);
+            });
+        }
+
         function renderTicket(reg) {
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('error-state').style.display = 'none';
@@ -924,7 +977,20 @@
             document.getElementById('ticketEmail').textContent = reg.email || '—';
             document.getElementById('ticketPhone').textContent = reg.phone || '—';
             document.getElementById('ticketStatus').textContent = reg.currentStatus || '—';
+            document.getElementById('ticketReferredBy').textContent = reg.referredBy || 'None';
             document.getElementById('ticketUniqueCode').textContent = reg.uniqueCode || '—';
+
+            // Setup Shareable Referral Link & WhatsApp Button
+            const myCode = reg.uniqueCode || '';
+            const refUrl = window.location.origin + '/?ref=' + encodeURIComponent(myCode);
+            const linkEl = document.getElementById('referralShareLink');
+            if (linkEl) linkEl.textContent = refUrl;
+
+            const waBtn = document.getElementById('shareWhatsappReferralBtn');
+            if (waBtn) {
+                const msg = `Hey! I just secured my admission ticket for the Business & Skill Up Acquisition 2.0 Workshop (Coming November 2026)! Join me and stand a chance to win laptops, scholarships, gadgets and business grants.\n\nUse my referral code: ${myCode}\nRegister here: ${refUrl}`;
+                waBtn.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
+            }
         }
 
         // Initialize Verification on Page Load
@@ -968,6 +1034,18 @@
                     document.getElementById('studentName').value = data.customerName;
                 }
 
+                // Auto-detect referral code from payment or local storage
+                let autoRef = data.referredBy;
+                if (!autoRef) {
+                    try {
+                        autoRef = localStorage.getItem('tbba_referral_code') || '';
+                    } catch (e) {}
+                }
+                const refInput = document.getElementById('referredByInput');
+                if (refInput && autoRef) {
+                    refInput.value = autoRef;
+                }
+
                 document.getElementById('loading-state').style.display = 'none';
                 document.getElementById('registration-state').style.display = 'block';
 
@@ -998,6 +1076,7 @@
                     goalVal = customGoal ? `Other: ${customGoal}` : 'Other';
                 }
 
+                const refInput = document.getElementById('referredByInput');
                 const payload = {
                     reference: verifiedPayment.reference,
                     uniqueCode: document.getElementById('uniqueCodeInput').value,
@@ -1008,7 +1087,8 @@
                     email: document.getElementById('studentEmail').value,
                     currentStatus: statusVal,
                     primaryGoal: goalVal,
-                    qaQuestion: document.getElementById('qaQuestion').value
+                    qaQuestion: document.getElementById('qaQuestion').value,
+                    referredBy: refInput ? refInput.value.trim().toUpperCase() : ''
                 };
 
                 const res = await fetch('/api/registrations', {
