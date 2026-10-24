@@ -430,6 +430,86 @@
             transform: translateY(0);
             opacity: 1;
         }
+
+        /* Registrations Tab Styles */
+        .admin-tab-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--admin-border);
+            padding-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .admin-tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #94a3b8;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .admin-tab-btn:hover {
+            border-color: var(--admin-gold);
+            color: #fff;
+        }
+
+        .admin-tab-btn.is-active {
+            background: var(--admin-gold);
+            color: #03140b;
+            border-color: var(--admin-gold);
+        }
+
+        .reg-table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid var(--admin-border);
+            background: rgba(4, 20, 12, 0.95);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .reg-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.88rem;
+        }
+
+        .reg-table th {
+            background: rgba(10, 36, 23, 0.98);
+            color: var(--admin-gold);
+            padding: 14px 16px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--admin-border);
+            white-space: nowrap;
+        }
+
+        .reg-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            color: #e2e8f0;
+            vertical-align: top;
+        }
+
+        .reg-table tr:hover td {
+            background: rgba(230, 183, 73, 0.04);
+        }
+
+        .reg-code-badge {
+            display: inline-block;
+            font-family: monospace;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(230, 183, 73, 0.15);
+            color: var(--admin-gold-light);
+            border: 1px solid rgba(230, 183, 73, 0.3);
+            white-space: nowrap;
+        }
     </style>
 </head>
 
@@ -496,8 +576,12 @@
                 <div class="admin-kpi-val" id="kpiPhotoCount">0</div>
             </div>
             <div class="admin-kpi-card">
-                <div class="admin-kpi-label"><span>🏢</span> Partner Companies</div>
-                <div class="admin-kpi-val" id="kpiCompanyCount">0</div>
+                <div class="admin-kpi-label"><span>🎟️</span> Paid Registrations</div>
+                <div class="admin-kpi-val" id="kpiRegCount" style="color: #4ade80;">0</div>
+            </div>
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label"><span>💰</span> Revenue Collected</div>
+                <div class="admin-kpi-val" id="kpiRegRevenue" style="color: #f6d27e;">₦0</div>
             </div>
             <div class="admin-kpi-card">
                 <div class="admin-kpi-label"><span>⚡</span> Storage Mode</div>
@@ -505,7 +589,19 @@
             </div>
         </div>
 
-        <div class="admin-workspace">
+        <!-- Section Navigation Tabs -->
+        <div class="admin-tab-bar">
+            <button class="admin-tab-btn is-active" id="tabBtnProjects" onclick="switchAdminTab('projects')">
+                📁 Projects &amp; Portfolio Gallery
+            </button>
+            <button class="admin-tab-btn" id="tabBtnRegistrations" onclick="switchAdminTab('registrations')">
+                🎟️ Workshop 2.0 Registrations (<span id="tabBadgeRegs">0</span>)
+            </button>
+        </div>
+
+        <!-- Projects Workspace Section -->
+        <div id="projectsSection">
+            <div class="admin-workspace">
             <!-- Left: Add / Edit Form -->
             <section class="admin-panel">
                 <div class="panel-heading">
@@ -573,8 +669,59 @@
                         <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImportJSON(this.files)">
                         <button class="btn-action-sm btn-del" onclick="resetToSampleData()">Reset Sample</button>
                     </div>
-                </div>
             </section>
+        </div>
+        </div>
+
+        <!-- Registrations Workspace Section -->
+        <div id="registrationsSection" style="display: none;">
+            <div style="background: var(--admin-card); border: 1px solid var(--admin-border); border-radius: 20px; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <div>
+                        <h2 style="font-family: var(--font-heading); color: #fff; font-size: 1.5rem;">
+                            Workshop 2.0 Paid Attendees
+                        </h2>
+                        <p style="color: #94a3b8; font-size: 0.88rem; margin-top: 4px;">
+                            Verified Paystack admission payments (₦5,000) &amp; participant registration responses.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <input type="text" id="regSearchInput" placeholder="🔍 Search name, code, dept..." oninput="filterRegistrations()"
+                            style="background: rgba(3,20,11,0.8); border: 1px solid var(--admin-border); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 0.9rem; min-width: 240px;">
+                        <button class="button button-gold" onclick="exportRegistrationsCSV()" style="font-size: 0.88rem; padding: 10px 16px;">
+                            <span>📥 Export CSV</span>
+                        </button>
+                        <button class="button button-outline" onclick="loadRegistrations()" style="font-size: 0.88rem; padding: 10px 14px;">
+                            <span>🔄 Refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="reg-table-container">
+                    <table class="reg-table">
+                        <thead>
+                            <tr>
+                                <th>Pass Code</th>
+                                <th>Student Name</th>
+                                <th>Contact (Email &amp; Phone)</th>
+                                <th>Dept / Level</th>
+                                <th>Current Status</th>
+                                <th>Primary Goal</th>
+                                <th>Q&amp;A Question</th>
+                                <th>Ref &amp; Fee</th>
+                                <th>Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrationsTableBody">
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                    Loading registered students...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -584,12 +731,174 @@
         const AUTH_PASSCODE = "spotless2026";
         let projects = [];
         let currentPhotos = [];
+        let registrations = [];
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function switchAdminTab(tab) {
+            const tabBtnProjects = document.getElementById("tabBtnProjects");
+            const tabBtnRegistrations = document.getElementById("tabBtnRegistrations");
+            const projectsSection = document.getElementById("projectsSection");
+            const registrationsSection = document.getElementById("registrationsSection");
+
+            if (tab === "registrations") {
+                tabBtnProjects.classList.remove("is-active");
+                tabBtnRegistrations.classList.add("is-active");
+                projectsSection.style.display = "none";
+                registrationsSection.style.display = "block";
+                loadRegistrations();
+            } else {
+                tabBtnProjects.classList.add("is-active");
+                tabBtnRegistrations.classList.remove("is-active");
+                projectsSection.style.display = "block";
+                registrationsSection.style.display = "none";
+            }
+        }
+
+        async function loadRegistrations() {
+            try {
+                const res = await fetch("/api/registrations");
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    registrations = data;
+                    renderRegistrationsTable(registrations);
+                    updateRegKPIs();
+                }
+            } catch (err) {
+                console.error("Error loading registrations:", err);
+            }
+        }
+
+        function updateRegKPIs() {
+            const count = registrations.length;
+            const revenue = count * 5000;
+            const regCountEl = document.getElementById("kpiRegCount");
+            const regRevenueEl = document.getElementById("kpiRegRevenue");
+            const tabBadge = document.getElementById("tabBadgeRegs");
+            if (regCountEl) regCountEl.textContent = count;
+            if (regRevenueEl) regRevenueEl.textContent = "₦" + revenue.toLocaleString();
+            if (tabBadge) tabBadge.textContent = count;
+        }
+
+        function renderRegistrationsTable(list) {
+            const tbody = document.getElementById("registrationsTableBody");
+            if (!tbody) return;
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            No registered students yet. Once payments are completed via Paystack, they appear here instantly.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = list.map((r, i) => {
+                const dateStr = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+                return `
+                    <tr>
+                        <td>
+                            <span class="reg-code-badge">${escapeHtml(r.uniqueCode || '—')}</span>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; font-size: 0.95rem;">${escapeHtml(r.name || '—')}</strong>
+                        </td>
+                        <td>
+                            <div><a href="mailto:${escapeHtml(r.email || '')}" style="color: var(--admin-gold); text-decoration: none;">${escapeHtml(r.email || '—')}</a></div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 2px;"><a href="tel:${escapeHtml(r.phone || '')}" style="color: #cbd5e1; text-decoration: none;">📞 ${escapeHtml(r.phone || '—')}</a></div>
+                        </td>
+                        <td>
+                            <div>${escapeHtml(r.department || '—')}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">${escapeHtml(r.level || '—')}</div>
+                        </td>
+                        <td>
+                            <span style="font-size: 0.82rem; color: var(--admin-gold-light);">${escapeHtml(r.currentStatus || '—')}</span>
+                        </td>
+                        <td>
+                            <span style="font-size: 0.82rem;">${escapeHtml(r.primaryGoal || '—')}</span>
+                        </td>
+                        <td>
+                            <span style="font-size: 0.82rem; color: #cbd5e1; font-style: italic;">${escapeHtml(r.qaQuestion || 'None provided')}</span>
+                        </td>
+                        <td>
+                            <div style="color: #4ade80; font-weight: 700;">₦${(r.amountPaid || 5000).toLocaleString()}</div>
+                            <div style="font-size: 0.75rem; color: #94a3b8; font-family: monospace;">${escapeHtml(r.reference || '—')}</div>
+                        </td>
+                        <td style="font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">
+                            ${dateStr}
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function filterRegistrations() {
+            const query = (document.getElementById("regSearchInput")?.value || "").toLowerCase().trim();
+            if (!query) {
+                renderRegistrationsTable(registrations);
+                return;
+            }
+            const filtered = registrations.filter(r => {
+                return (r.name && r.name.toLowerCase().includes(query)) ||
+                    (r.uniqueCode && r.uniqueCode.toLowerCase().includes(query)) ||
+                    (r.email && r.email.toLowerCase().includes(query)) ||
+                    (r.phone && r.phone.toLowerCase().includes(query)) ||
+                    (r.department && r.department.toLowerCase().includes(query)) ||
+                    (r.level && r.level.toLowerCase().includes(query)) ||
+                    (r.reference && r.reference.toLowerCase().includes(query));
+            });
+            renderRegistrationsTable(filtered);
+        }
+
+        function exportRegistrationsCSV() {
+            if (!registrations || registrations.length === 0) {
+                alert("No registration records to export.");
+                return;
+            }
+
+            const headers = ["Unique Code", "Name", "Email", "Phone", "Department", "Level", "Current Status", "Primary Goal", "QA Question", "Fee Paid", "Reference", "Registration Date"];
+            const rows = registrations.map(r => [
+                `"${(r.uniqueCode || '').replace(/"/g, '""')}"`,
+                `"${(r.name || '').replace(/"/g, '""')}"`,
+                `"${(r.email || '').replace(/"/g, '""')}"`,
+                `"${(r.phone || '').replace(/"/g, '""')}"`,
+                `"${(r.department || '').replace(/"/g, '""')}"`,
+                `"${(r.level || '').replace(/"/g, '""')}"`,
+                `"${(r.currentStatus || '').replace(/"/g, '""')}"`,
+                `"${(r.primaryGoal || '').replace(/"/g, '""')}"`,
+                `"${(r.qaQuestion || '').replace(/"/g, '""')}"`,
+                `"${r.amountPaid || 5000}"`,
+                `"${(r.reference || '').replace(/"/g, '""')}"`,
+                `"${r.registeredAt || ''}"`
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `bawacademy2.0_registrations_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("CSV exported successfully!");
+        }
 
         // Auth handling
         function checkAuth() {
             if (sessionStorage.getItem("tbba_admin_auth") === "true") {
                 document.getElementById("authOverlay").style.display = "none";
                 loadProjects();
+                loadRegistrations();
             } else {
                 document.getElementById("authOverlay").style.display = "flex";
             }

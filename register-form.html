@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d281e">
+    <title>Registration &amp; Workshop Pass | Business / Skill Up 2.0</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cabinet+Grotesk:wght@600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        :root {
+            --reg-bg: #03140b;
+            --reg-surface: #072416;
+            --reg-card: rgba(10, 36, 23, 0.92);
+            --reg-border: rgba(230, 183, 73, 0.28);
+            --reg-gold: #e6b749;
+            --reg-gold-light: #f6d27e;
+        }
+
+        body {
+            background-color: var(--reg-bg);
+            color: #f1f5f9;
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(ellipse 70% 45% at 50% 0%, rgba(230, 183, 73, 0.12) 0%, transparent 70%),
+                radial-gradient(circle 350px at 90% 85%, rgba(15, 51, 39, 0.45) 0%, transparent 70%);
+        }
+
+        .reg-header {
+            background: rgba(4, 20, 12, 0.96);
+            border-bottom: 1px solid var(--reg-border);
+            padding: 18px 24px;
+            backdrop-filter: blur(14px);
+        }
+
+        .reg-header-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .reg-brand-img {
+            height: 42px;
+            width: auto;
+        }
+
+        .reg-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--reg-gold);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(230, 183, 73, 0.1);
+            border: 1px solid var(--reg-border);
+            transition: all 0.2s ease;
+        }
+
+        .reg-back-link:hover {
+            background: var(--reg-gold);
+            color: #03140b;
+        }
+
+        .reg-main-wrap {
+            flex: 1;
+            max-width: 860px;
+            width: 100%;
+            margin: 36px auto;
+            padding: 0 20px;
+        }
+
+        /* Stepper header */
+        .reg-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .step-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.82rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .step-pill.is-active {
+            background: rgba(230, 183, 73, 0.18);
+            border-color: var(--reg-gold);
+            color: var(--reg-gold-light);
+        }
+
+        .step-pill.is-done {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #4ade80;
+        }
+
+        .step-sep {
+            color: #475569;
+            font-size: 0.8rem;
+        }
+
+        /* Card Container */
+        .reg-card {
+            background: var(--reg-card);
+            border: 1px solid var(--reg-border);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(16px);
+        }
+
+        @media (max-width: 640px) {
+            .reg-card {
+                padding: 24px 18px;
+            }
+        }
+
+        /* Verification Status Banner */
+        .verify-banner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #86efac;
+            margin-bottom: 28px;
+        }
+
+        .verify-icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .verify-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #f0fdf4;
+        }
+
+        .verify-subtitle {
+            font-size: 0.84rem;
+            color: #bbf7d0;
+            margin-top: 2px;
+        }
+
+        /* Form elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 680px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--reg-gold-light);
+            letter-spacing: 0.02em;
+        }
+
+        .form-label .req {
+            color: #f87171;
+            margin-left: 2px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            background: rgba(3, 20, 11, 0.85);
+            border: 1px solid rgba(230, 183, 73, 0.3);
+            border-radius: 10px;
+            padding: 13px 16px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--reg-gold);
+            box-shadow: 0 0 0 3px rgba(230, 183, 73, 0.22);
+            background: rgba(3, 20, 11, 0.95);
+        }
+
+        .form-input[readonly] {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .unique-code-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(230, 183, 73, 0.12);
+            border: 1px dashed var(--reg-gold);
+            padding: 12px 18px;
+            border-radius: 12px;
+        }
+
+        .unique-code-val {
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--reg-gold);
+            letter-spacing: 2px;
+            flex: 1;
+        }
+
+        .copy-code-btn {
+            background: rgba(230, 183, 73, 0.2);
+            border: 1px solid var(--reg-gold);
+            color: var(--reg-gold-light);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-code-btn:hover {
+            background: var(--reg-gold);
+            color: #03140b;
+        }
+
+        /* Choice options cards */
+        .choice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .choice-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: rgba(3, 20, 11, 0.6);
+            border: 1px solid rgba(230, 183, 73, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .choice-item:hover {
+            border-color: var(--reg-gold);
+            background: rgba(230, 183, 73, 0.08);
+        }
+
+        .choice-item input[type="radio"] {
+            accent-color: var(--reg-gold);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .choice-label {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .other-input-wrap {
+            margin-top: 8px;
+            padding-left: 30px;
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #e6b749 0%, #f6d27e 50%, #b88a22 100%);
+            color: #03140b;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 800;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(230, 183, 73, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(230, 183, 73, 0.45);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loader & error screens */
+        .state-box {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner-ring {
+            width: 54px;
+            height: 54px;
+            border: 4px solid rgba(230, 183, 73, 0.2);
+            border-top-color: var(--reg-gold);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-card {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        /* ── Official Pass / Ticket Card ── */
+        .ticket-pass {
+            background: linear-gradient(145deg, #09281a 0%, #03150c 100%);
+            border: 2px solid var(--reg-gold);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+
+        .ticket-header {
+            background: linear-gradient(90deg, rgba(230, 183, 73, 0.2) 0%, rgba(10, 36, 23, 0.9) 100%);
+            border-bottom: 1px dashed var(--reg-gold);
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .ticket-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--reg-gold);
+            color: #03140b;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .ticket-body {
+            padding: 32px 28px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 28px;
+        }
+
+        @media (max-width: 680px) {
+            .ticket-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .ticket-field {
+            margin-bottom: 16px;
+        }
+
+        .ticket-field-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .ticket-field-val {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 2px;
+        }
+
+        .ticket-code-display {
+            background: rgba(3, 20, 11, 0.95);
+            border: 2px dashed var(--reg-gold);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ticket-barcode-mock {
+            font-family: monospace;
+            letter-spacing: 4px;
+            font-size: 0.85rem;
+            color: var(--reg-gold-light);
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        .ticket-footer {
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(230, 183, 73, 0.2);
+            padding: 20px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .whatsapp-vip-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #25d366;
+            color: #03140b;
+            text-decoration: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .whatsapp-vip-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(37, 211, 102, 0.5);
+            color: #000;
+        }
+
+        .print-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f1f5f9;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .print-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #fff;
+        }
+
+        @media print {
+            body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+            .reg-header, .reg-stepper, .whatsapp-vip-btn, .print-btn, .reg-back-link {
+                display: none !important;
+            }
+            .ticket-pass {
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+                background: #fff !important;
+                color: #000 !important;
+            }
+            .ticket-field-val, .ticket-header h2 {
+                color: #000 !important;
+            }
+            .ticket-code-display {
+                border-color: #000 !important;
+                background: #f8fafc !important;
+            }
+            .unique-code-val {
+                color: #000 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header -->
+    <header class="reg-header">
+        <div class="reg-header-inner">
+            <a href="index.html" aria-label="Return to Academy Home">
+                <img class="reg-brand-img" src="LOGOS/Header%20logo.png" alt="The Bridge Business Academy">
+            </a>
+            <a href="index.html" class="reg-back-link">
+                <span>← Back to Website</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="reg-main-wrap" id="main-content">
+
+        <!-- Stepper -->
+        <div class="reg-stepper">
+            <span class="step-pill is-done" id="step1-pill">
+                <span>✓</span> 1. Payment Verified
+            </span>
+            <span class="step-sep">›</span>
+            <span class="step-pill is-active" id="step2-pill">
+                2. Complete Details
+            </span>
+            <span class="step-sep">›</span>
+            <span class="step-pill" id="step3-pill">
+                3. Workshop Pass
+            </span>
+        </div>
+
+        <!-- Dynamic Content Card -->
+        <div class="reg-card" id="form-container">
+            <!-- Loading State -->
+            <div class="state-box" id="loading-state">
+                <div class="spinner-ring"></div>
+                <h2 style="font-family: var(--font-heading); color: var(--reg-gold);">Verifying Your Payment...</h2>
+                <p style="color: #94a3b8; margin-top: 8px;">Please wait while we confirm your transaction with Paystack.</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" style="display: none;">
+                <div class="error-card">
+                    <div style="font-size: 2.4rem; margin-bottom: 12px;">⚠️</div>
+                    <h2 id="error-title" style="color: #f87171; font-family: var(--font-heading);">Payment Not Verified</h2>
+                    <p id="error-desc" style="margin: 12px 0 24px; color: #fca5a5;">
+                        We could not verify a successful ₦5,000 admission payment for this session.
+                    </p>
+                    <a href="index.html" class="submit-btn" style="text-decoration: none; max-width: 320px; margin: 0 auto;">
+                        Return Home &amp; Pre-Register
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form State (When Verified) -->
+            <div id="registration-state" style="display: none;">
+                <!-- Payment Success Banner -->
+                <div class="verify-banner">
+                    <div class="verify-icon">✅</div>
+                    <div>
+                        <div class="verify-title">Payment Confirmed · ₦5,000 Verified</div>
+                        <div class="verify-subtitle" id="verify-meta-text">
+                            Reference: <span id="display-ref" style="font-family: monospace;"></span> · Your slot is securely reserved.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h1 style="font-family: var(--font-heading); font-size: 1.7rem; color: #ffffff;">
+                        Complete Workshop Participant Form
+                    </h1>
+                    <p style="color: #94a3b8; font-size: 0.92rem; margin-top: 4px;">
+                        Fill in your accurate details below to issue your Official 2.0 Workshop Ticket Pass and VIP group access.
+                    </p>
+                </div>
+
+                <form id="studentRegistrationForm" onsubmit="handleRegistrationSubmit(event)">
+                    <div class="form-grid">
+                        
+                        <!-- UNIQUE CODE (Locked / Generated) -->
+                        <div class="form-group form-full">
+                            <label class="form-label">UNIQUE CODE (Your Workshop Pass ID):</label>
+                            <div class="unique-code-box">
+                                <span class="unique-code-val" id="uniqueCodeDisplay">BAW-5K-XXXXXX</span>
+                                <button type="button" class="copy-code-btn" onclick="copyUniqueCode()">📋 Copy Code</button>
+                            </div>
+                            <input type="hidden" id="uniqueCodeInput" name="uniqueCode">
+                        </div>
+
+                        <!-- NAME -->
+                        <div class="form-group">
+                            <label class="form-label" for="studentName">
+                                NAME: <span class="req">*</span>
+                            </label>
+                            <input type="text" id="studentName" name="name" class="form-input" required
+                                placeholder="Enter your full name (First &amp; Last)">
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="form-group">
+                            <label class="form-label" for="studentEmail">
+                                EMAIL: <span class="req">*</span>
+                            </label>
+                            <input type="email" id="studentEmail" name="email" class="form-input" required readonly>
+                        </div>
+
+                        <!-- PHONE NUMBER -->
+                        <div class="form-group">
+                            <label class="form-label" for="studentPhone">
+                                PHONE NUMBER: <span class="req">*</span>
+                            </label>
+                            <input type="tel" id="studentPhone" name="phone" class="form-input" required
+                                placeholder="e.g. 09036900011 or +234..." pattern="[0-9+ ]{10,16}">
+                        </div>
+
+                        <!-- DEPARTMENT -->
+                        <div class="form-group">
+                            <label class="form-label" for="studentDept">
+                                DEPARTMENT: <span class="req">*</span>
+                            </label>
+                            <input type="text" id="studentDept" name="department" class="form-input" required
+                                placeholder="e.g. Computer Science, Accounting, Engineering...">
+                        </div>
+
+                        <!-- LEVEL -->
+                        <div class="form-group form-full">
+                            <label class="form-label" for="studentLevel">
+                                LEVEL: <span class="req">*</span>
+                            </label>
+                            <select id="studentLevel" name="level" class="form-select" required>
+                                <option value="" disabled selected>Select your current level</option>
+                                <option value="100 Level">100 Level</option>
+                                <option value="200 Level">200 Level</option>
+                                <option value="300 Level">300 Level</option>
+                                <option value="400 Level">400 Level</option>
+                                <option value="500 Level">500 Level</option>
+                                <option value="Graduate / Alumnus">Graduate / Alumnus</option>
+                                <option value="Non-Student / Professional">Non-Student / Professional</option>
+                            </select>
+                        </div>
+
+                        <!-- CURRENT STATUS -->
+                        <div class="form-group form-full">
+                            <label class="form-label">
+                                CURRENT STATUS: <span class="req">*</span>
+                            </label>
+                            <div class="choice-list">
+                                <label class="choice-item">
+                                    <input type="radio" name="currentStatus" value="STUDENT" required onchange="toggleStatusOther(false)">
+                                    <span class="choice-label">STUDENT</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="currentStatus" value="Aspiring Entrepreneur / Freelancer" onchange="toggleStatusOther(false)">
+                                    <span class="choice-label">Aspiring Entrepreneur / Freelancer</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="currentStatus" value="Working Professional / Career Transitioner" onchange="toggleStatusOther(false)">
+                                    <span class="choice-label">Working Professional / Career Transitioner</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="currentStatus" value="Existing Small Business Owner" onchange="toggleStatusOther(false)">
+                                    <span class="choice-label">Existing Small Business Owner</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="currentStatus" value="Other" onchange="toggleStatusOther(true)">
+                                    <span class="choice-label">Other:</span>
+                                </label>
+                            </div>
+                            <div class="other-input-wrap" id="statusOtherWrap">
+                                <input type="text" id="statusOtherInput" class="form-input" placeholder="Specify your current status...">
+                            </div>
+                        </div>
+
+                        <!-- PRIMARY GOAL -->
+                        <div class="form-group form-full">
+                            <label class="form-label">
+                                What is your primary goal for attending this workshop?: <span class="req">*</span>
+                            </label>
+                            <div class="choice-list">
+                                <label class="choice-item">
+                                    <input type="radio" name="primaryGoal" value="Start a new business / monetize a skill" required onchange="toggleGoalOther(false)">
+                                    <span class="choice-label">Start a new business / monetize a skill</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="primaryGoal" value="Scale / automate an existing business" onchange="toggleGoalOther(false)">
+                                    <span class="choice-label">Scale / automate an existing business</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="primaryGoal" value="Improve productivity / technical workflow" onchange="toggleGoalOther(false)">
+                                    <span class="choice-label">Improve productivity / technical workflow</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="primaryGoal" value="Network and collaborate with peers" onchange="toggleGoalOther(false)">
+                                    <span class="choice-label">Network and collaborate with peers</span>
+                                </label>
+                                <label class="choice-item">
+                                    <input type="radio" name="primaryGoal" value="Other" onchange="toggleGoalOther(true)">
+                                    <span class="choice-label">Other:</span>
+                                </label>
+                            </div>
+                            <div class="other-input-wrap" id="goalOtherWrap">
+                                <input type="text" id="goalOtherInput" class="form-input" placeholder="Specify your primary goal...">
+                            </div>
+                        </div>
+
+                        <!-- Q&A QUESTION -->
+                        <div class="form-group form-full">
+                            <label class="form-label" for="qaQuestion">
+                                What specific question do you want answered during the Q&amp;A session?:
+                            </label>
+                            <textarea id="qaQuestion" name="qaQuestion" class="form-textarea" rows="3"
+                                placeholder="Type your burning questions regarding skills, grants, scholarships or mentorship..."></textarea>
+                        </div>
+
+                        <div class="form-full" style="margin-top: 10px;">
+                            <button type="submit" class="submit-btn" id="submitFormBtn">
+                                <span>Complete Registration &amp; Claim Ticket Pass</span>
+                                <span>🎟️</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Ticket / Pass State (After submission or if already registered) -->
+            <div id="ticket-state" style="display: none;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; font-size: 0.85rem; font-weight: 700; margin-bottom: 12px;">
+                        ✓ REGISTRATION CONFIRMED
+                    </div>
+                    <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.8rem;">
+                        Official Admission Ticket Pass
+                    </h2>
+                    <p style="color: #94a3b8; font-size: 0.95rem;">
+                        Please save or screenshot your pass. You will need your Unique Code for event entry.
+                    </p>
+                </div>
+
+                <div class="ticket-pass" id="printableTicket">
+                    <!-- Ticket Header -->
+                    <div class="ticket-header">
+                        <div>
+                            <span class="ticket-tag">★ OFFICIAL ADMISSION PASS</span>
+                            <h2 style="font-family: var(--font-heading); font-size: 1.35rem; color: #fff; margin-top: 6px;">
+                                Business / Skill Up Acquisition 2.0
+                            </h2>
+                            <p style="color: var(--reg-gold-light); font-size: 0.85rem; font-weight: 600;">
+                                The Bridge Business Academy × Spotless Connect · November 2026
+                            </p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Fee Paid</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: #4ade80;">₦5,000 · VERIFIED</div>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Body -->
+                    <div class="ticket-body">
+                        <div>
+                            <div class="ticket-field">
+                                <div class="ticket-field-label">Participant Full Name</div>
+                                <div class="ticket-field-val" id="ticketName">—</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Department</div>
+                                    <div class="ticket-field-val" id="ticketDept">—</div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Level</div>
+                                    <div class="ticket-field-val" id="ticketLevel">—</div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Email</div>
+                                    <div class="ticket-field-val" id="ticketEmail" style="font-size: 0.95rem;">—</div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Phone</div>
+                                    <div class="ticket-field-val" id="ticketPhone">—</div>
+                                </div>
+                            </div>
+                            <div class="ticket-field">
+                                <div class="ticket-field-label">Current Status</div>
+                                <div class="ticket-field-val" id="ticketStatus" style="font-size: 0.95rem; color: var(--reg-gold-light);">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Code box -->
+                        <div class="ticket-code-display">
+                            <div style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px;">
+                                UNIQUE ADMISSION CODE
+                            </div>
+                            <div class="unique-code-val" id="ticketUniqueCode" style="font-size: 1.5rem; margin: 12px 0;">
+                                BAW-5K-XXXXXX
+                            </div>
+                            <div class="ticket-barcode-mock">||| | ||||| || |||| ||</div>
+                            <button type="button" class="copy-code-btn" style="margin-top: 14px;" onclick="copyTicketCode()">
+                                📋 Copy Pass Code
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Footer with Action -->
+                    <div class="ticket-footer">
+                        <a href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank" rel="noopener noreferrer" class="whatsapp-vip-btn">
+                            <span>💬 Join WhatsApp VIP Community</span>
+                            <span>↗</span>
+                        </a>
+                        <button type="button" class="print-btn" onclick="window.print()">
+                            <span>🖨️ Print / Save Ticket (PDF)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // State Holder
+        let verifiedPayment = null;
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function toggleStatusOther(show) {
+            const wrap = document.getElementById('statusOtherWrap');
+            if (wrap) wrap.style.display = show ? 'block' : 'none';
+            const input = document.getElementById('statusOtherInput');
+            if (input) input.required = show;
+        }
+
+        function toggleGoalOther(show) {
+            const wrap = document.getElementById('goalOtherWrap');
+            if (wrap) wrap.style.display = show ? 'block' : 'none';
+            const input = document.getElementById('goalOtherInput');
+            if (input) input.required = show;
+        }
+
+        function copyUniqueCode() {
+            const code = document.getElementById('uniqueCodeDisplay').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Unique Code copied: ' + code);
+            });
+        }
+
+        function copyTicketCode() {
+            const code = document.getElementById('ticketUniqueCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Admission Pass Code copied: ' + code);
+            });
+        }
+
+        function renderTicket(reg) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('registration-state').style.display = 'none';
+            document.getElementById('ticket-state').style.display = 'block';
+
+            // Update Stepper
+            document.getElementById('step1-pill').className = 'step-pill is-done';
+            document.getElementById('step2-pill').className = 'step-pill is-done';
+            document.getElementById('step3-pill').className = 'step-pill is-active';
+
+            // Populate fields
+            document.getElementById('ticketName').textContent = reg.name || 'Participant';
+            document.getElementById('ticketDept').textContent = reg.department || '—';
+            document.getElementById('ticketLevel').textContent = reg.level || '—';
+            document.getElementById('ticketEmail').textContent = reg.email || '—';
+            document.getElementById('ticketPhone').textContent = reg.phone || '—';
+            document.getElementById('ticketStatus').textContent = reg.currentStatus || '—';
+            document.getElementById('ticketUniqueCode').textContent = reg.uniqueCode || '—';
+        }
+
+        // Initialize Verification on Page Load
+        async function initPage() {
+            const ref = getQueryParam('reference') || getQueryParam('trxref');
+            if (!ref) {
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('error-state').style.display = 'block';
+                document.getElementById('error-title').textContent = 'No Payment Session Found';
+                document.getElementById('error-desc').textContent = 'Please start from the homepage to complete your ₦5,000 admission payment.';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/paystack/verify?reference=${encodeURIComponent(ref)}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.verified) {
+                    document.getElementById('loading-state').style.display = 'none';
+                    document.getElementById('error-state').style.display = 'block';
+                    document.getElementById('error-title').textContent = 'Payment Verification Failed';
+                    document.getElementById('error-desc').textContent = data.error || 'We could not confirm your payment. Please try again or contact support.';
+                    return;
+                }
+
+                // If already completed registration, display ticket immediately
+                if (data.alreadyRegistered && data.registration) {
+                    renderTicket(data.registration);
+                    return;
+                }
+
+                // Store verified payment context
+                verifiedPayment = data;
+
+                // Populate form fields
+                document.getElementById('display-ref').textContent = data.reference;
+                document.getElementById('uniqueCodeDisplay').textContent = data.uniqueCode;
+                document.getElementById('uniqueCodeInput').value = data.uniqueCode;
+                document.getElementById('studentEmail').value = data.email || '';
+                if (data.customerName) {
+                    document.getElementById('studentName').value = data.customerName;
+                }
+
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('registration-state').style.display = 'block';
+
+            } catch (err) {
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('error-state').style.display = 'block';
+                document.getElementById('error-desc').textContent = err.message || 'Network connection issue while verifying payment.';
+            }
+        }
+
+        async function handleRegistrationSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitFormBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Registering...</span> <span>⏳</span>';
+
+            try {
+                // Collect radio values
+                let statusVal = document.querySelector('input[name="currentStatus"]:checked')?.value || '';
+                if (statusVal === 'Other') {
+                    const customStatus = document.getElementById('statusOtherInput').value.trim();
+                    statusVal = customStatus ? `Other: ${customStatus}` : 'Other';
+                }
+
+                let goalVal = document.querySelector('input[name="primaryGoal"]:checked')?.value || '';
+                if (goalVal === 'Other') {
+                    const customGoal = document.getElementById('goalOtherInput').value.trim();
+                    goalVal = customGoal ? `Other: ${customGoal}` : 'Other';
+                }
+
+                const payload = {
+                    reference: verifiedPayment.reference,
+                    uniqueCode: document.getElementById('uniqueCodeInput').value,
+                    name: document.getElementById('studentName').value,
+                    department: document.getElementById('studentDept').value,
+                    level: document.getElementById('studentLevel').value,
+                    phone: document.getElementById('studentPhone').value,
+                    email: document.getElementById('studentEmail').value,
+                    currentStatus: statusVal,
+                    primaryGoal: goalVal,
+                    qaQuestion: document.getElementById('qaQuestion').value
+                };
+
+                const res = await fetch('/api/registrations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to submit registration form.');
+                }
+
+                // Render official ticket
+                renderTicket(data.registration);
+
+            } catch (err) {
+                alert('Error: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = '<span>Complete Registration &amp; Claim Ticket Pass</span> <span>🎟️</span>';
+            }
+        }
+
+        // Run verification on start
+        window.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+
+</html>

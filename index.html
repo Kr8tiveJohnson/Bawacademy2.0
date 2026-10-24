@@ -53,8 +53,7 @@
 
             <!-- Right Actions -->
             <div class="header-actions">
-                <a class="header-cta" href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF"
-                    target="_blank" rel="noopener noreferrer">
+                <a class="header-cta" href="#pre-register" onclick="window.openPaystackModal(event)">
                     <span>Pre&#8209;Register</span>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                         <path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
@@ -86,8 +85,7 @@
                 </nav>
                 <div class="mobile-nav-action">
                     <a class="button button-gold button-block"
-                        href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank"
-                        rel="noopener noreferrer">Pre-Register Now <span>↗</span></a>
+                        href="#pre-register" onclick="window.openPaystackModal(event)">Pre-Register Now (₦5,000) <span>💳</span></a>
                     <div class="mobile-contact-group">
                         <span class="mobile-contact-label">Direct Hotlines:</span>
                         <a href="tel:+2349036900011" class="mobile-contact-item">📞 +234 903 690 0011</a>
@@ -169,10 +167,9 @@
                     <!-- Interactive Hero Actions -->
                     <div class="hero-actions flyer-hero-actions">
                         <a class="button button-gold hero-btn"
-                            href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank"
-                            rel="noopener noreferrer">
+                            href="#pre-register" onclick="window.openPaystackModal(event)">
                             <span>Pre-Register / Anticipate</span>
-                            <span class="btn-arrow" aria-hidden="true">↘</span>
+                            <span class="btn-arrow" aria-hidden="true">💳</span>
                         </a>
                         <a class="button button-outline hero-btn" href="#benefits">
                             <span>What Students Will Gain</span>
@@ -642,10 +639,15 @@
                         <p class="anticipate-description" style="margin-top: 14px;">
                             The <strong>Business &amp; Skill Up Acquisition 2.0 Workshop</strong> is coming November 2026. Pre-registration is free and ensures you receive priority notification for scholarships, business grants, laptops, smartphones, Wi-Fi gadgets, and job placement screenings.
                         </p>
-                        <div style="margin-top: 24px;">
-                            <a class="button button-gold button-lg" href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF"
+                        <div style="margin-top: 24px; display: flex; gap: 14px; flex-wrap: wrap;">
+                            <a class="button button-gold button-lg" href="#pre-register"
+                                onclick="window.openPaystackModal(event)">
+                                <span>Pre-Register Now (₦5,000 Admission)</span>
+                                <span class="btn-arrow" aria-hidden="true">💳</span>
+                            </a>
+                            <a class="button button-whatsapp button-lg" href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF"
                                 target="_blank" rel="noopener noreferrer">
-                                <span>Join Our WhatsApp Community (Pre-Register Free)</span>
+                                <span>Join WhatsApp Community</span>
                                 <span class="btn-arrow" aria-hidden="true">↗</span>
                             </a>
                         </div>
@@ -842,9 +844,54 @@
                     <span>November 2026 · The Bridge Business Academy × Spotless Connect</span>
                 </div>
                 <a class="button button-gold button-sm"
-                    href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank"
-                    rel="noopener noreferrer" id="modalRegisterBtn">Pre-Register Now ↗</a>
+                    href="#pre-register" onclick="window.closeFlyerModal(); window.openPaystackModal(event);"
+                    id="modalRegisterBtn">Pre-Register Now (₦5,000) 💳</a>
             </div>
+        </div>
+    </div>
+
+    <!-- Paystack Pre-Register Checkout Modal -->
+    <div class="pay-modal-backdrop" id="payModalBackdrop" aria-hidden="true" style="display:none;">
+        <div class="pay-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="payModalTitle">
+            <div class="pay-modal-header">
+                <div>
+                    <span class="pay-modal-badge">ADMISSION TICKET · ₦5,000</span>
+                    <h3 id="payModalTitle" class="pay-modal-title">Business &amp; Skill Up Acquisition 2.0</h3>
+                    <p class="pay-modal-sub">Secure your workshop slot &amp; proceed to official Paystack checkout</p>
+                </div>
+                <button type="button" class="pay-modal-close" id="payModalClose" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="payInitForm" onsubmit="handlePayInitSubmit(event)">
+                <div class="pay-modal-body">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label" for="payModalName" style="color: var(--gold-light); font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 6px;">
+                            Your Full Name <span style="color:#f87171;">*</span>
+                        </label>
+                        <input type="text" id="payModalName" class="form-input" required placeholder="e.g. John Doe">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label" for="payModalEmail" style="color: var(--gold-light); font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 6px;">
+                            Email Address <span style="color:#f87171;">*</span>
+                        </label>
+                        <input type="email" id="payModalEmail" class="form-input" required placeholder="e.g. johndoe@gmail.com">
+                        <small style="color: #94a3b8; font-size: 0.78rem; margin-top: 4px; display: block;">Your receipt &amp; admission confirmation will be sent here.</small>
+                    </div>
+                    <div class="pay-modal-trust">
+                        <div>🔒 <strong>256-Bit SSL Encrypted:</strong> Secure payment via Paystack</div>
+                        <div>⚡ <strong>Accepted:</strong> Bank Transfer, USSD, OPay, Visa &amp; Mastercard</div>
+                    </div>
+                </div>
+                <div class="pay-modal-footer">
+                    <button type="submit" class="button button-gold button-block" id="payInitSubmitBtn" style="width: 100%; justify-content: center; font-size: 1.05rem; padding: 14px 20px;">
+                        <span>Pay ₦5,000 via Paystack</span>
+                        <span>💳</span>
+                    </button>
+                    <div class="paystack-powered-by">
+                        <span>Secured by</span>
+                        <strong style="color: #cbd5e1; letter-spacing: 1px;">PAYSTACK</strong>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 

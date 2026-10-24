@@ -125,6 +125,78 @@ window.closeFlyerModal = function (e) {
     }
 };
 
+// ── Global Helper: Paystack Pre-Register Modal ──────────────
+window.openPaystackModal = function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var modal = document.querySelector("#payModalBackdrop");
+    if (modal) {
+        modal.style.display = "flex";
+        // Force reflow for animation
+        modal.offsetHeight;
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        var nameInput = document.getElementById("payModalName");
+        if (nameInput) setTimeout(function () { nameInput.focus(); }, 120);
+    }
+};
+
+window.closePaystackModal = function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var modal = document.querySelector("#payModalBackdrop");
+    if (modal) {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        setTimeout(function () {
+            modal.style.display = "none";
+        }, 220);
+        document.body.style.overflow = "";
+    }
+};
+
+window.handlePayInitSubmit = async function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var btn = document.getElementById("payInitSubmitBtn");
+    var nameInput = document.getElementById("payModalName");
+    var emailInput = document.getElementById("payModalEmail");
+
+    if (!emailInput || !emailInput.value.trim() || !emailInput.value.includes("@")) {
+        alert("Please enter a valid email address to receive your ticket confirmation.");
+        return;
+    }
+
+    var originalHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Connecting to Paystack...</span> <span>⏳</span>';
+    }
+
+    try {
+        var res = await fetch('/api/paystack/initialize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: nameInput ? nameInput.value.trim() : '',
+                email: emailInput.value.trim()
+            })
+        });
+
+        var data = await res.json();
+        if (!res.ok || !data.success || !data.authorization_url) {
+            throw new Error(data.error || 'Failed to initialize payment.');
+        }
+
+        // Direct student to official Paystack checkout
+        window.location.href = data.authorization_url;
+    } catch (err) {
+        alert("Payment Gateway Error: " + err.message);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+};
+
 // ── Universal Smooth Scroll for in-page anchors ────────────
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
@@ -188,6 +260,34 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.closeFlyerModal();
             }
         });
+    }
+
+    // 4. Paystack Pre-Register Modal Listeners
+    var payModalClose = document.querySelector("#payModalClose");
+    var payModalBackdrop = document.querySelector("#payModalBackdrop");
+    if (payModalClose) {
+        payModalClose.addEventListener("click", window.closePaystackModal);
+    }
+    if (payModalBackdrop) {
+        payModalBackdrop.addEventListener("click", function (e) {
+            if (e.target === payModalBackdrop) {
+                window.closePaystackModal();
+            }
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && payModalBackdrop.classList.contains("is-open")) {
+                window.closePaystackModal();
+            }
+        });
+    }
+
+    // Auto-open modal if URL has #pre-register
+    if (window.location.hash === "#pre-register") {
+        setTimeout(function () {
+            if (typeof window.openPaystackModal === "function") {
+                window.openPaystackModal();
+            }
+        }, 350);
     }
 
     // ── Cybersecurity Client-Side Protection & Anti-Inspect Deterrents ──
