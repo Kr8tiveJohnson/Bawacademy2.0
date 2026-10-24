@@ -139,9 +139,14 @@ window.openPaystackModal = function (e) {
         var nameInput = document.getElementById("payModalName");
         var referralInput = document.getElementById("payModalReferral");
         if (referralInput && !referralInput.value) {
+            // Read referral code directly from URL query param (?ref=BAW-5K-...)
             try {
-                var savedRef = localStorage.getItem("tbba_referral_code");
-                if (savedRef) referralInput.value = savedRef;
+                var params = new URLSearchParams(window.location.search);
+                var urlRef = params.get("ref");
+                if (urlRef) {
+                    referralInput.value = urlRef.trim().toUpperCase();
+                    verifyReferralCode(referralInput.value);
+                }
             } catch (e) {}
         }
         if (nameInput) setTimeout(function () { nameInput.focus(); }, 120);
@@ -207,13 +212,55 @@ window.handlePayInitSubmit = async function (e) {
     }
 };
 
-// Auto-detect referral code in URL query (?ref=BAW-5K-...)
+// ── Database-Backed Referral Code Verification ──
+async function verifyReferralCode(code) {
+    var feedback = document.getElementById("payModalReferralFeedback");
+    if (!code || code.length < 6) {
+        if (feedback) { feedback.textContent = ""; feedback.style.display = "none"; }
+        return;
+    }
+    if (feedback) {
+        feedback.textContent = "Verifying...";
+        feedback.style.color = "#94a3b8";
+        feedback.style.display = "block";
+    }
+    try {
+        var res = await fetch("/api/referrals/verify?code=" + encodeURIComponent(code));
+        var data = await res.json();
+        if (feedback) {
+            if (data.valid) {
+                feedback.innerHTML = "✅ <strong>" + data.name + "</strong>'s referral code verified";
+                feedback.style.color = "#4ade80";
+            } else {
+                feedback.textContent = "❌ Code not found in our database";
+                feedback.style.color = "#f87171";
+            }
+            feedback.style.display = "block";
+        }
+    } catch (e) {
+        if (feedback) { feedback.textContent = ""; feedback.style.display = "none"; }
+    }
+}
+
+// Auto-verify referral code when the user leaves the input field
 (function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        var refInput = document.getElementById("payModalReferral");
+        if (refInput) {
+            refInput.addEventListener("blur", function () {
+                verifyReferralCode(refInput.value.trim().toUpperCase());
+            });
+        }
+    });
+
+    // If URL has ?ref=..., auto-open the modal after a short delay
     try {
         var params = new URLSearchParams(window.location.search);
         var ref = params.get("ref");
-        if (ref) {
-            localStorage.setItem("tbba_referral_code", ref.trim().toUpperCase());
+        if (ref && ref.trim()) {
+            window.addEventListener("DOMContentLoaded", function () {
+                setTimeout(function () { window.openPaystackModal(); }, 600);
+            });
         }
     } catch (e) {}
 })();

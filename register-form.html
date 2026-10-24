@@ -1034,13 +1034,8 @@
                     document.getElementById('studentName').value = data.customerName;
                 }
 
-                // Auto-detect referral code from payment or local storage
-                let autoRef = data.referredBy;
-                if (!autoRef) {
-                    try {
-                        autoRef = localStorage.getItem('tbba_referral_code') || '';
-                    } catch (e) {}
-                }
+                // Use referral code from the verified payment data (stored in database via Paystack metadata)
+                const autoRef = data.referredBy || '';
                 const refInput = document.getElementById('referredByInput');
                 if (refInput && autoRef) {
                     refInput.value = autoRef;

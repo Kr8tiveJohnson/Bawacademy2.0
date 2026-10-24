@@ -341,6 +341,51 @@ async function findRegistrationByReference(ref) {
   return all.find(r => r.reference === ref) || null;
 }
 
+async function findRegistrationByUniqueCode(code) {
+  if (!code) return null;
+  const clean = code.trim().toUpperCase();
+  if (isMongoConnected && registrationsCollection) {
+    try {
+      const doc = await registrationsCollection.findOne({ uniqueCode: clean });
+      if (doc) {
+        const { _id, ...rest } = doc;
+        return rest;
+      }
+    } catch (err) {
+      console.error('[Database] Error finding registration by uniqueCode in MongoDB:', err.message);
+    }
+  }
+  const all = readRegistrationsFromFile();
+  return all.find(r => (r.uniqueCode || '').trim().toUpperCase() === clean) || null;
+}
+
+async function getReferralsForCode(code) {
+  if (!code) return [];
+  const clean = code.trim().toUpperCase();
+  if (isMongoConnected && registrationsCollection) {
+    try {
+      const docs = await registrationsCollection.find({ referredBy: clean }).sort({ registeredAt: -1 }).toArray();
+      return docs.map(d => ({
+        name: d.name,
+        department: d.department,
+        level: d.level,
+        registeredAt: d.registeredAt
+      }));
+    } catch (err) {
+      console.error('[Database] Error finding referrals in MongoDB:', err.message);
+    }
+  }
+  const all = readRegistrationsFromFile();
+  return all
+    .filter(r => (r.referredBy || '').trim().toUpperCase() === clean)
+    .map(d => ({
+      name: d.name,
+      department: d.department,
+      level: d.level,
+      registeredAt: d.registeredAt
+    }));
+}
+
 async function saveRegistration(regDoc) {
   // Sync to local cache file
   const list = readRegistrationsFromFile();
@@ -714,7 +759,15 @@ const server = http.createServer(async (req, res) => {
 
         const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 5000;
         const cleanRef = String(referredBy || '').trim().toUpperCase();
-        const finalReferredBy = (cleanRef && cleanRef !== uniqueCode.trim().toUpperCase()) ? cleanRef : '';
+        let finalReferredBy = '';
+
+        // Validate referrer strictly against the database
+        if (cleanRef && cleanRef !== uniqueCode.trim().toUpperCase()) {
+          const referrerDoc = await findRegistrationByUniqueCode(cleanRef);
+          if (referrerDoc) {
+            finalReferredBy = referrerDoc.uniqueCode;
+          }
+        }
 
         const regDoc = {
           id: `reg-${Date.now()}`,
@@ -751,6 +804,78 @@ const server = http.createServer(async (req, res) => {
       }
       return;
     }
+  }
+
+  // ── Database Referral Verification Endpoint ──
+  if (reqPath === '/api/referrals/verify' && req.method === 'GET') {
+    try {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const code = (urlObj.searchParams.get('code') || '').trim().toUpperCase();
+
+      if (!code) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ valid: false, error: 'Referral code is required.' }));
+        return;
+      }
+
+      const student = await findRegistrationByUniqueCode(code);
+      if (!student) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ valid: false, error: 'Code not found in database.' }));
+        return;
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        valid: true,
+        uniqueCode: student.uniqueCode,
+        name: student.name,
+        department: student.department || ''
+      }));
+    } catch (err) {
+      console.error('[Referral Verify Error]:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ valid: false, error: 'Database query failed.' }));
+    }
+    return;
+  }
+
+  // ── Database Student Referral Stats Endpoint ──
+  if (reqPath === '/api/referrals/stats' && req.method === 'GET') {
+    try {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const code = (urlObj.searchParams.get('code') || '').trim().toUpperCase();
+
+      if (!code) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Unique code is required.' }));
+        return;
+      }
+
+      const student = await findRegistrationByUniqueCode(code);
+      if (!student) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Student registration not found in database.' }));
+        return;
+      }
+
+      const referrals = await getReferralsForCode(code);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        uniqueCode: student.uniqueCode,
+        studentName: student.name,
+        department: student.department || '',
+        referralCount: referrals.length,
+        referrals: referrals
+      }));
+    } catch (err) {
+      console.error('[Referral Stats Error]:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Database query failed.' }));
+    }
+    return;
   }
 
   // Upload API route for saving project image files directly to disk
