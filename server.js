@@ -49,7 +49,7 @@ const SENSITIVE_FILES = new Set([
 ]);
 
 // Allowed HTTP methods
-const ALLOWED_METHODS = new Set(['GET', 'POST', 'HEAD', 'OPTIONS']);
+const ALLOWED_METHODS = new Set(['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS']);
 
 // ── In-Memory Rate Limiter (Anti-DDoS / Anti-Brute-Force) ──
 const rateLimitMap = new Map();
@@ -414,6 +414,48 @@ async function saveRegistration(regDoc) {
   return true;
 }
 
+async function deleteRegistration(identifier) {
+  if (!identifier) return false;
+  const cleanId = String(identifier).trim();
+  const cleanCode = cleanId.toUpperCase();
+
+  // Local file removal
+  const list = readRegistrationsFromFile();
+  const filtered = list.filter(r => r.id !== cleanId && r.reference !== cleanId && (r.uniqueCode || '').toUpperCase() !== cleanCode);
+  writeRegistrationsToFile(filtered);
+
+  // MongoDB removal
+  if (isMongoConnected && registrationsCollection) {
+    try {
+      await registrationsCollection.deleteMany({
+        $or: [
+          { id: cleanId },
+          { reference: cleanId },
+          { uniqueCode: cleanCode }
+        ]
+      });
+      return true;
+    } catch (err) {
+      console.error('[Database] Failed to delete registration in MongoDB:', err.message);
+      return false;
+    }
+  }
+  return true;
+}
+
+async function clearAllRegistrations() {
+  writeRegistrationsToFile([]);
+  if (isMongoConnected && registrationsCollection) {
+    try {
+      await registrationsCollection.deleteMany({});
+      return true;
+    } catch (err) {
+      console.error('[Database] Failed to clear all registrations in MongoDB:', err.message);
+      return false;
+    }
+  }
+  return true;
+}
 
 // ── HTTP Request Handler ──
 const server = http.createServer(async (req, res) => {
@@ -427,7 +469,7 @@ const server = http.createServer(async (req, res) => {
 
   // Rate Limiting check
   const clientIP = getClientIP(req);
-  const isWriteMethod = req.method === 'POST';
+  const isWriteMethod = req.method === 'POST' || req.method === 'DELETE';
   if (checkRateLimit(clientIP, isWriteMethod)) {
     applySecurityHeaders(res);
     res.writeHead(429, {
@@ -443,7 +485,7 @@ const server = http.createServer(async (req, res) => {
 
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
 
   if (req.method === 'OPTIONS') {
@@ -652,6 +694,63 @@ const server = http.createServer(async (req, res) => {
       }
       return;
     }
+
+    if (req.method === 'DELETE') {
+      try {
+        const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+        const id = (urlObj.searchParams.get('id') || urlObj.searchParams.get('reference') || urlObj.searchParams.get('code') || '').trim();
+        const clearAll = urlObj.searchParams.get('clearAll') === 'true';
+
+        if (clearAll) {
+          await clearAllRegistrations();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'All registrations deleted successfully.' }));
+          return;
+        }
+
+        if (!id) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Registration ID or Reference required to delete.' }));
+          return;
+        }
+
+        await deleteRegistration(id);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Registration deleted successfully.' }));
+      } catch (err) {
+        console.error('[Delete Registration Error]:', err.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Failed to delete registration.' }));
+      }
+      return;
+    }
+  }
+
+  // DELETE /api/registrations/:id or /api/registrations/clear-all
+  if (reqPath.startsWith('/api/registrations/') && req.method === 'DELETE') {
+    try {
+      const rawId = reqPath.slice('/api/registrations/'.length);
+      const id = decodeURIComponent(rawId).trim();
+      if (id === 'clear-all') {
+        await clearAllRegistrations();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'All registrations cleared successfully.' }));
+        return;
+      }
+      if (!id) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'ID required to delete' }));
+        return;
+      }
+      await deleteRegistration(id);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, message: 'Registration deleted successfully.' }));
+    } catch (err) {
+      console.error('[Delete Registration Error]:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Failed to delete registration.' }));
+    }
+    return;
   }
 
   // ── Database Referral Verification Endpoint ──

@@ -545,18 +545,11 @@
                     <img src="LOGOS/Header%20logo.png" alt="The Bridge Business Academy">
                 </a>
                 <span class="admin-badge">Spotless Connect CMS</span>
-                <span id="dbStatusBadge" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; background: rgba(230, 183, 73, 0.15); border: 1px solid rgba(230, 183, 73, 0.4); color: var(--admin-gold); font-weight: 700;">
-                    <span id="dbDot" style="width: 7px; height: 7px; border-radius: 50%; background: #eab308;"></span>
-                    <span id="dbStatusText">Checking DB...</span>
-                </span>
             </div>
             <div class="admin-nav-actions">
                 <a href="pastproject.html" target="_blank" class="button button-outline" style="font-size: 0.85rem; padding: 8px 14px;">
                     <span>View Public Page ↗</span>
                 </a>
-                <button class="button button-gold" style="font-size: 0.85rem; padding: 8px 14px;" onclick="exportJSONBackup()">
-                    <span>💾 Backup JSON</span>
-                </button>
                 <button class="btn-action-sm btn-del" onclick="handleLogout()" style="padding: 9px 14px;">
                     <span>Lock Portal</span>
                 </button>
@@ -582,10 +575,6 @@
             <div class="admin-kpi-card">
                 <div class="admin-kpi-label"><span>💰</span> Revenue Collected</div>
                 <div class="admin-kpi-val" id="kpiRegRevenue" style="color: #f6d27e;">₦0</div>
-            </div>
-            <div class="admin-kpi-card">
-                <div class="admin-kpi-label"><span>⚡</span> Storage Mode</div>
-                <div class="admin-kpi-val" style="font-size: 1.25rem; margin-top: 6px;" id="kpiStorageMode">Live API + Local</div>
             </div>
         </div>
 
@@ -660,15 +649,6 @@
                     <!-- Project items rendered dynamically -->
                 </div>
 
-                <!-- Utilities Drawer -->
-                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--admin-border);">
-                    <strong style="display: block; color: var(--admin-gold); font-size: 0.9rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Backup &amp; Sync Options</strong>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="button button-outline" style="font-size: 0.8rem; padding: 8px 12px;" onclick="exportJSONBackup()">Download projects.json</button>
-                        <button class="button button-outline" style="font-size: 0.8rem; padding: 8px 12px;" onclick="document.getElementById('importFileInput').click()">Import JSON Backup</button>
-                        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImportJSON(this.files)">
-                        <button class="btn-action-sm btn-del" onclick="resetToSampleData()">Reset Sample</button>
-                    </div>
             </section>
         </div>
         </div>
@@ -694,6 +674,9 @@
                         <button class="button button-outline" onclick="loadRegistrations()" style="font-size: 0.88rem; padding: 10px 14px;">
                             <span>🔄 Refresh</span>
                         </button>
+                        <button class="btn-action-sm btn-del" onclick="clearAllRegistrations()" style="font-size: 0.88rem; padding: 10px 16px;">
+                            <span>🗑️ Clear All</span>
+                        </button>
                     </div>
                 </div>
 
@@ -715,11 +698,12 @@
                                 <th>Q&amp;A Question</th>
                                 <th>Fee &amp; Ref</th>
                                 <th>Registered</th>
+                                <th style="text-align: center;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="registrationsTableBody">
                             <tr>
-                                <td colspan="12" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                <td colspan="13" style="text-align: center; padding: 40px; color: #94a3b8;">
                                     Loading registered students...
                                 </td>
                             </tr>
@@ -894,6 +878,11 @@
                         <td style="font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">
                             ${dateStr}
                         </td>
+                        <td style="text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${r.id || r.reference || r.uniqueCode}', '${escapeHtml(r.name || 'Participant')}')" style="padding: 6px 12px; font-size: 0.78rem;">
+                                Delete
+                            </button>
+                        </td>
                     </tr>
                 `;
             }).join("");
@@ -952,6 +941,51 @@
             link.click();
             document.body.removeChild(link);
             showToast("CSV exported successfully!");
+        }
+
+        async function deleteSingleRegistration(id, name) {
+            if (!confirm(`Are you sure you want to delete registration for "${name || 'this participant'}"? This action cannot be undone.`)) {
+                return;
+            }
+            try {
+                const res = await fetch(`/api/registrations/${encodeURIComponent(id)}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to delete registration');
+                }
+                showToast(`Deleted registration for ${name || 'participant'}`);
+                loadRegistrations();
+            } catch (err) {
+                alert('Error deleting registration: ' + err.message);
+            }
+        }
+
+        async function clearAllRegistrations() {
+            if (!registrations || registrations.length === 0) {
+                alert("There are no registrations to delete.");
+                return;
+            }
+            const confirmMsg = prompt('⚠️ DANGER: You are about to permanently delete ALL workshop registrations.\n\nType DELETE to confirm:');
+            if (confirmMsg !== 'DELETE') {
+                if (confirmMsg !== null) alert('Deletion cancelled. You must type DELETE exactly.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/registrations/clear-all', {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to clear registrations');
+                }
+                showToast("All registrations have been permanently deleted.");
+                loadRegistrations();
+            } catch (err) {
+                alert('Error clearing registrations: ' + err.message);
+            }
         }
 
         // Auth handling
@@ -1084,41 +1118,8 @@
             });
         }
 
-        // Check MongoDB status
-        async function checkDbStatus() {
-            const dot = document.getElementById("dbDot");
-            const text = document.getElementById("dbStatusText");
-            const kpiMode = document.getElementById("kpiStorageMode");
-
-            try {
-                const res = await fetch('/api/db-status');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.connected) {
-                        dot.style.background = "#22c55e";
-                        text.textContent = "MongoDB Atlas Live";
-                        text.style.color = "#4ade80";
-                        if (kpiMode) kpiMode.innerHTML = `<span style="color: #4ade80;">🟢 MongoDB Atlas</span>`;
-                        return;
-                    } else if (data.hasUriConfigured) {
-                        dot.style.background = "#f59e0b";
-                        text.textContent = "Atlas Connecting...";
-                        text.style.color = "#fbbf24";
-                        if (kpiMode) kpiMode.innerHTML = `<span style="color: #fbbf24;">🟡 Connecting...</span>`;
-                        return;
-                    }
-                }
-            } catch (err) {}
-
-            dot.style.background = "#eab308";
-            text.textContent = "Local DB (Atlas ready)";
-            text.style.color = "#fef08a";
-            if (kpiMode) kpiMode.innerHTML = `<span style="color: #fef08a;">💾 Local File</span>`;
-        }
-
         // Load projects from API or LocalStorage
         async function loadProjects() {
-            checkDbStatus();
             try {
                 const res = await fetch('/api/projects');
                 if (res.ok) {
@@ -1176,7 +1177,8 @@
             const photoCount = projects.reduce((acc, p) => acc + (p.images ? p.images.length : 0), 0);
             document.getElementById("kpiPhotoCount").textContent = photoCount;
             const companies = new Set(projects.map(p => (p.company || '').trim()).filter(Boolean));
-            document.getElementById("kpiCompanyCount").textContent = companies.size;
+            const companyCountEl = document.getElementById("kpiCompanyCount");
+            if (companyCountEl) companyCountEl.textContent = companies.size;
         }
 
         function renderProjectsList() {
@@ -1251,7 +1253,6 @@
                 showToast((editId ? "Project updated successfully!" : "Project added successfully!") + storageNote);
                 cancelEditing();
                 updateUI();
-                checkDbStatus();
             } catch (err) {
                 alert("Error saving project: " + err.message);
             } finally {
@@ -1292,55 +1293,6 @@
             await syncProjectsToServer();
             showToast("Project deleted.");
             updateUI();
-        }
-
-        function exportJSONBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
-            const dlAnchor = document.createElement("a");
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "projects.json");
-            dlAnchor.click();
-            showToast("Backup downloaded!");
-        }
-
-        function handleImportJSON(files) {
-            if (!files || files.length === 0) return;
-            const reader = new FileReader();
-            reader.onload = async function (e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (Array.isArray(parsed)) {
-                        projects = parsed;
-                        await syncProjectsToServer();
-                        updateUI();
-                        showToast(`Imported ${projects.length} projects!`);
-                    } else {
-                        alert("Invalid JSON format. Expected array.");
-                    }
-                } catch (err) {
-                    alert("Could not parse JSON file.");
-                }
-            };
-            reader.readAsText(files[0]);
-        }
-
-        async function resetToSampleData() {
-            if (!confirm("Reset projects to default sample data?")) return;
-            projects = [
-                {
-                    "id": "proj-1",
-                    "title": "Business & Skill Up Acquisition 1.0",
-                    "company": "The Bridge Business Academy × Spotless Connect",
-                    "category": "Youth Empowerment & Workshops",
-                    "date": "2025",
-                    "summary": "Flagship inaugural edition empowering over 500 students with practical tech competencies, seed capital pitch grants, laptops, and career pathways.",
-                    "images": ["assets/workshop-flyer.jpg"],
-                    "companyLogo": "LOGOS/spotless-connect-logo.png"
-                }
-            ];
-            await syncProjectsToServer();
-            updateUI();
-            showToast("Reset to sample data.");
         }
 
         function showToast(msg) {
