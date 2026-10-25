@@ -1278,9 +1278,9 @@
                             Transfer <strong>₦1,500</strong> to the account above, then complete the participant form
                             below. Send your payment receipt via WhatsApp:
                         </p>
-                        <a href="https://wa.me/+2249036900011?text=Hello%20BAW%20Academy,%20I%20have%20transferred%20my%20workshop%20fee%20of%20%E2%82%A61,500.%20Here%20is%20my%20payment%20receipt:"
+                        <a href="https://wa.me/+2349036900011?text=Hello%20BAW%20Academy,%20I%20have%20transferred%20my%20workshop%20fee%20of%20%E2%82%A61,500.%20Here%20is%20my%20payment%20receipt:"
                             target="_blank" rel="noopener noreferrer" class="direct-pay-wa-link btn-pulse-attention" id="btnSendWaReceipt" onclick="onSendReceiptClicked()">
-                            <span>Send Receipt on WhatsApp (+2249036900011)</span>
+                            <span>Send Receipt on WhatsApp (+2349036900011)</span>
                             <span>↗</span>
                         </a>
 
@@ -1288,22 +1288,22 @@
                         <div class="payment-consent-box" style="margin-top: 14px; background: rgba(3, 20, 11, 0.95); border: 1.5px solid rgba(230, 183, 73, 0.45); border-radius: 12px; padding: 13px 16px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
                             <input type="checkbox" id="consentPaymentCheckbox" onchange="onConsentCheckboxChanged()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #22c55e; cursor: pointer; flex-shrink: 0;">
                             <label for="consentPaymentCheckbox" style="cursor: pointer; user-select: none; font-size: 0.88rem; color: #f1f5f9; line-height: 1.45;">
-                                <strong style="color: #4ade80; display: block; font-size: 0.92rem;">I have consented and sent my payment receipt.</strong>
+                                <strong style="color: #4ade80; display: block; font-size: 0.92rem;">I confirm that I have transferred ₦1,500 and submitted my genuine payment receipt.</strong>
                                 <span style="display: block; font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">
-                                    (Click the green button above to open WhatsApp DM and send your receipt screenshot, then tick this checkbox to unlock the registration form)
+                                    I understand that submissions without corresponding verified bank deposits will be revoked and denied access at the accreditation desk.
                                 </span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <!-- Form Lock / Unlock Notice Banner -->
+                <!-- Form Verification Notice Banner -->
                 <div id="formLockedNotice" style="background: rgba(245, 158, 11, 0.12); border: 1.5px dashed rgba(245, 158, 11, 0.6); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px; transition: all 0.3s ease;">
-                    <span id="formLockIcon" style="font-size: 1.8rem;">🔒</span>
+                    <span id="formLockIcon" style="font-size: 1.8rem;">🛡️</span>
                     <div style="flex: 1;">
-                        <strong id="formLockTitle" style="color: #fbbf24; font-size: 0.98rem; display: block;">Registration Form is Locked</strong>
+                        <strong id="formLockTitle" style="color: #fbbf24; font-size: 0.98rem; display: block;">Strict Payment Audit in Effect</strong>
                         <span id="formLockSub" style="color: #cbd5e1; font-size: 0.84rem; line-height: 1.45; display: block; margin-top: 2px;">
-                            To prevent unverified submissions, you must click <strong>"Send Receipt on WhatsApp (+2249036900011)"</strong> above and check the confirmation box to unlock the form.
+                            All transfers are strictly reconciled with official bank statements. Send your valid ₦1,500 receipt screenshot to WhatsApp (+2349036900011) and verify payment above to unlock registration. Fake or unverified proofs will be disqualified.
                         </span>
                     </div>
                 </div>
@@ -1756,7 +1756,7 @@
                         verifies your receipt, you will be added directly to the official workshop WhatsApp group!
                     </p>
                     <div style="margin-top: 18px;">
-                        <a id="joinGroupWaBtn" href="https://wa.me/+2249036900011" target="_blank"
+                        <a id="joinGroupWaBtn" href="https://wa.me/+2349036900011" target="_blank"
                             rel="noopener noreferrer"
                             style="display: inline-flex; align-items: center; gap: 8px; background: #25d366; color: #03140b; text-decoration: none; padding: 13px 22px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35); transition: all 0.2s ease;">
                             <span>Send Receipt to WhatsApp DM &amp; Join Group</span>
@@ -2138,7 +2138,7 @@
 
                 if (waReceiptBtn) {
                     const receiptMsg = `Hello BAW Academy, I have paid ₦1,500 and registered for the Business & Skill Up Acquisition 2.0 Workshop.\nName: ${reg.name || ''}\nSuper Mega Challenge Code: ${reg.uniqueCode || ''}\nHere is my payment receipt screenshot:`;
-                    waReceiptBtn.href = 'https://wa.me/+2249036900011?text=' + encodeURIComponent(receiptMsg);
+                    waReceiptBtn.href = 'https://wa.me/+2349036900011?text=' + encodeURIComponent(receiptMsg);
                     waReceiptBtn.innerHTML = '<span>Send Receipt via WhatsApp</span> <span>↗</span>';
                 }
             } else {
@@ -2149,10 +2149,10 @@
 
                 const joinGroupWaBtn = document.getElementById('joinGroupWaBtn');
                 if (joinGroupWaBtn) {
-                    joinGroupWaBtn.href = 'https://wa.me/+2249036900011?text=' + encodeURIComponent(groupMsg);
+                    joinGroupWaBtn.href = 'https://wa.me/+2349036900011?text=' + encodeURIComponent(groupMsg);
                 }
                 if (waReceiptBtn) {
-                    waReceiptBtn.href = 'https://wa.me/+2249036900011?text=' + encodeURIComponent(groupMsg);
+                    waReceiptBtn.href = 'https://wa.me/+2349036900011?text=' + encodeURIComponent(groupMsg);
                     waReceiptBtn.innerHTML = '<span>Send Receipt to DM &amp; Join Group</span> <span>↗</span>';
                 }
             }
@@ -2228,7 +2228,7 @@
             if (cb.checked) {
                 if (!hasClickedReceiptButton) {
                     cb.checked = false;
-                    alert("⚠️ Action Required:\n\nPlease click the green 'Send Receipt on WhatsApp (+2249036900011)' button first to open WhatsApp and send your transfer receipt screenshot, then check this box.");
+                    alert("⚠️ Verification Required:\n\nPlease submit your genuine ₦1,500 payment receipt screenshot to our official WhatsApp (+2349036900011) first before confirming.");
                     const btn = document.getElementById('btnSendWaReceipt');
                     if (btn) {
                         btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2259,14 +2259,14 @@
                 if (notice) {
                     notice.style.background = 'rgba(34, 197, 94, 0.14)';
                     notice.style.borderColor = 'rgba(34, 197, 94, 0.6)';
-                    if (icon) icon.textContent = '🔓';
+                    if (icon) icon.textContent = '✅';
                     if (title) {
                         title.style.color = '#4ade80';
-                        title.textContent = 'Form Unlocked — Receipt Sent & Confirmed';
+                        title.textContent = 'Payment Confirmation Acknowledged';
                     }
                     if (sub) {
                         sub.style.color = '#e2e8f0';
-                        sub.innerHTML = 'Thank you! You can now proceed to complete your workshop participant form below and claim your pass.';
+                        sub.innerHTML = 'Receipt submission confirmed. Fill out your accurate attendee details below. Note: Final pass admission remains subject to bank audit reconciliation.';
                     }
                 }
             } else {
@@ -2278,14 +2278,14 @@
                 if (notice) {
                     notice.style.background = 'rgba(245, 158, 11, 0.12)';
                     notice.style.borderColor = 'rgba(245, 158, 11, 0.6)';
-                    if (icon) icon.textContent = '🔒';
+                    if (icon) icon.textContent = '🛡️';
                     if (title) {
                         title.style.color = '#fbbf24';
-                        title.textContent = 'Registration Form is Locked';
+                        title.textContent = 'Strict Payment Audit in Effect';
                     }
                     if (sub) {
                         sub.style.color = '#cbd5e1';
-                        sub.innerHTML = 'To prevent unverified submissions, you must click <strong>"Send Receipt on WhatsApp (+2249036900011)"</strong> above and check the confirmation box to unlock the form.';
+                        sub.innerHTML = 'All transfers are strictly reconciled with official bank statements. Send your valid ₦1,500 receipt screenshot to WhatsApp (+2349036900011) and verify payment above to unlock registration. Fake or unverified proofs will be disqualified.';
                     }
                 }
             }
@@ -2294,7 +2294,7 @@
         async function handleRegistrationSubmit(e) {
             e.preventDefault();
             if (!hasClickedReceiptButton || !document.getElementById('consentPaymentCheckbox')?.checked) {
-                alert("Payment Verification Required:\n\nYou must click 'Send Receipt on WhatsApp (+2249036900011)' and check the receipt confirmation box before submitting your registration.");
+                alert("Payment Verification Required:\n\nPlease ensure you have transferred ₦1,500 and submitted your genuine payment receipt to official WhatsApp (+2349036900011) before registering.");
                 const btn = document.getElementById('btnSendWaReceipt');
                 if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
