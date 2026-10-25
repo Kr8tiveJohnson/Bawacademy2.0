@@ -214,11 +214,13 @@ let dbClient = null;
 let projectsCollection = null;
 let registrationsCollection = null;
 let isMongoConnected = false;
+let cachedProjects = null;
 
 async function initMongoDB() {
   let uri = process.env.MONGODB_URI;
   if (!uri || !uri.trim()) {
     console.log('[Database] ℹ️  No MONGODB_URI found in environment. Using local files.');
+    cachedProjects = readProjectsFromFile();
     return;
   }
 
@@ -238,39 +240,80 @@ async function initMongoDB() {
     isMongoConnected = true;
     console.log(`[Database] ✅ Connected to MongoDB Atlas! Database: "${db.databaseName}"`);
 
-    // Check if initial seeding of projects is needed
+    // Ensure projects exist: Check current DB, fallback to 'test' DB, fallback to projects.json
     const count = await projectsCollection.countDocuments();
-    if (count === 0) {
-      console.log('[Database] 📦 Seeding initial project data into MongoDB Atlas...');
-      const local = readProjectsFromFile();
-      if (local && local.length > 0) {
-        await projectsCollection.insertMany(local);
-        console.log(`[Database] ✅ Seeded ${local.length} projects into MongoDB Atlas.`);
+    if (count <= 1) {
+      try {
+        const testCol = dbClient.db('test').collection('projects');
+        const testCount = await testCol.countDocuments();
+        if (testCount > count) {
+          console.log(`[Database] 📦 Syncing ${testCount} projects from test database to ${db.databaseName}...`);
+          const testDocs = await testCol.find({}).toArray();
+          const cleanDocs = testDocs.map(p => {
+            const doc = { ...p };
+            delete doc._id;
+            return doc;
+          });
+          await projectsCollection.deleteMany({});
+          await projectsCollection.insertMany(cleanDocs);
+          writeProjectsToFile(cleanDocs);
+          cachedProjects = cleanDocs;
+          console.log(`[Database] ✅ Synced ${cleanDocs.length} projects to ${db.databaseName} and local cache.`);
+        }
+      } catch (err) {
+        console.warn('[Database] Could not inspect test database:', err.message);
       }
     }
+
+    // Populate in-memory project cache
+    if (!cachedProjects || cachedProjects.length === 0) {
+      try {
+        const docs = await projectsCollection.find({}).toArray();
+        if (docs.length > 0) {
+          cachedProjects = docs.map(d => {
+            const { _id, ...rest } = d;
+            return { id: rest.id || (_id ? _id.toString() : 'proj-' + Date.now()), ...rest };
+          });
+        }
+      } catch (e) {
+        console.error('[Database] Failed to preload projects cache:', e.message);
+      }
+    }
+
+    if (!cachedProjects || cachedProjects.length === 0) {
+      cachedProjects = readProjectsFromFile();
+    }
+    console.log(`[Database] 🚀 Project cache warmed with ${cachedProjects.length} projects.`);
   } catch (err) {
     console.error('[Database] ❌ MongoDB Atlas connection error:', err.message);
     console.log('[Database] ⚠️  Falling back to local file storage.');
     isMongoConnected = false;
+    cachedProjects = readProjectsFromFile();
   }
 }
 
 async function getProjects() {
+  if (cachedProjects && cachedProjects.length > 0) {
+    return cachedProjects;
+  }
   if (isMongoConnected && projectsCollection) {
     try {
       const docs = await projectsCollection.find({}).toArray();
-      return docs.map(d => {
+      cachedProjects = docs.map(d => {
         const { _id, ...rest } = d;
         return { id: rest.id || (_id ? _id.toString() : 'proj-' + Date.now()), ...rest };
       });
+      return cachedProjects;
     } catch (err) {
       console.error('[Database] Failed to read from MongoDB Atlas, falling back to local file:', err.message);
     }
   }
-  return readProjectsFromFile();
+  cachedProjects = readProjectsFromFile();
+  return cachedProjects;
 }
 
 async function saveProjects(projectsList) {
+  cachedProjects = projectsList;
   writeProjectsToFile(projectsList);
 
   if (isMongoConnected && projectsCollection) {
