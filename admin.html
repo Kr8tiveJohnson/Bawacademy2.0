@@ -682,7 +682,7 @@
                             Workshop 2.0 Paid Attendees
                         </h2>
                         <p style="color: #94a3b8; font-size: 0.88rem; margin-top: 4px;">
-                            Verified Paystack admission payments (₦5,000) &amp; participant registration responses.
+                            Direct transfer &amp; admission registrations (₦1,500) &amp; participant responses.
                         </p>
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -705,6 +705,7 @@
                             <tr>
                                 <th>Pass Code</th>
                                 <th>Student Name</th>
+                                <th>Super Mega Challenge</th>
                                 <th>Referrals Made</th>
                                 <th>Referred By</th>
                                 <th>Contact (Email &amp; Phone)</th>
@@ -718,7 +719,7 @@
                         </thead>
                         <tbody id="registrationsTableBody">
                             <tr>
-                                <td colspan="11" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                <td colspan="12" style="text-align: center; padding: 40px; color: #94a3b8;">
                                     Loading registered students...
                                 </td>
                             </tr>
@@ -783,7 +784,7 @@
 
         function updateRegKPIs() {
             const count = registrations.length;
-            const revenue = count * 5000;
+            const revenue = registrations.reduce((acc, r) => acc + (Number(r.amountPaid) || 1500), 0);
             const regCountEl = document.getElementById("kpiRegCount");
             const regRevenueEl = document.getElementById("kpiRegRevenue");
             const tabBadge = document.getElementById("tabBadgeRegs");
@@ -797,10 +798,10 @@
             const leaderboardEl = document.getElementById("referralLeaderboardStrip");
             if (!tbody) return;
 
-            // Render Ambassador / Referral Leaderboard
+            // Render Ambassador / Referral Leaderboard (Only participants opted into Super Mega Challenge)
             if (leaderboardEl) {
                 const topReferrers = [...registrations]
-                    .filter(r => (r.referralCount || 0) > 0)
+                    .filter(r => (r.participateChallenge === 'Yes') && (r.referralCount || 0) > 0)
                     .sort((a, b) => (b.referralCount || 0) - (a.referralCount || 0))
                     .slice(0, 5);
 
@@ -809,7 +810,7 @@
                         <div style="background: rgba(230, 183, 73, 0.08); border: 1px solid var(--admin-border); border-radius: 14px; padding: 18px 20px; margin-bottom: 22px;">
                             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
                                 <strong style="color: var(--admin-gold-light); font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
-                                    <span>🏆</span> Workshop Ambassador / Top Referrers Leaderboard
+                                    <span>🏆</span> Super Mega Challenge · Active Ambassador Leaderboard
                                 </strong>
                                 <span style="font-size: 0.8rem; color: #94a3b8;">${topReferrers.length} Active Ambassador(s)</span>
                             </div>
@@ -839,8 +840,8 @@
             if (!list || list.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="11" style="text-align: center; padding: 40px; color: #94a3b8;">
-                            No registered students yet. Once payments are completed via Paystack, they appear here instantly.
+                        <td colspan="12" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            No registered students yet. Once students register and complete payment, they appear here instantly.
                         </td>
                     </tr>
                 `;
@@ -856,6 +857,12 @@
                         </td>
                         <td>
                             <strong style="color: #fff; font-size: 0.95rem;">${escapeHtml(r.name || '—')}</strong>
+                        </td>
+                        <td>
+                            ${r.participateChallenge === 'Yes'
+                                ? `<span style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 0.78rem; white-space: nowrap;">🏆 Enrolled (Yes)</span>`
+                                : `<span style="color: #94a3b8; font-size: 0.78rem; background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 999px;">No (DM Group)</span>`
+                            }
                         </td>
                         <td>
                             ${r.referralCount > 0 ? `<span style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 0.8rem; white-space: nowrap;">🎯 ${r.referralCount} Invited</span>` : `<span style="color: #64748b; font-size: 0.82rem;">0</span>`}
@@ -881,7 +888,7 @@
                             <span style="font-size: 0.82rem; color: #cbd5e1; font-style: italic;">${escapeHtml(r.qaQuestion || 'None provided')}</span>
                         </td>
                         <td>
-                            <div style="color: #4ade80; font-weight: 700;">₦${(r.amountPaid || 5000).toLocaleString()}</div>
+                            <div style="color: #4ade80; font-weight: 700;">₦${(r.amountPaid || 1500).toLocaleString()}</div>
                             <div style="font-size: 0.75rem; color: #94a3b8; font-family: monospace;">${escapeHtml(r.reference || '—')}</div>
                         </td>
                         <td style="font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">
@@ -917,10 +924,11 @@
                 return;
             }
 
-            const headers = ["Unique Code", "Name", "Referrals Made", "Referred By", "Email", "Phone", "Department", "Level", "Current Status", "Primary Goal", "QA Question", "Fee Paid", "Reference", "Registration Date"];
+            const headers = ["Unique Code", "Name", "Super Mega Challenge", "Referrals Made", "Referred By", "Email", "Phone", "Department", "Level", "Current Status", "Primary Goal", "QA Question", "Fee Paid", "Reference", "Registration Date"];
             const rows = registrations.map(r => [
                 `"${(r.uniqueCode || '').replace(/"/g, '""')}"`,
                 `"${(r.name || '').replace(/"/g, '""')}"`,
+                `"${(r.participateChallenge || 'No').replace(/"/g, '""')}"`,
                 `"${r.referralCount || 0}"`,
                 `"${(r.referredBy || '').replace(/"/g, '""')}"`,
                 `"${(r.email || '').replace(/"/g, '""')}"`,
@@ -930,7 +938,7 @@
                 `"${(r.currentStatus || '').replace(/"/g, '""')}"`,
                 `"${(r.primaryGoal || '').replace(/"/g, '""')}"`,
                 `"${(r.qaQuestion || '').replace(/"/g, '""')}"`,
-                `"${r.amountPaid || 5000}"`,
+                `"${r.amountPaid || 1500}"`,
                 `"${(r.reference || '').replace(/"/g, '""')}"`,
                 `"${r.registeredAt || ''}"`
             ]);

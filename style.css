@@ -2709,21 +2709,23 @@ button, input, textarea, select {
 }
 
 /* --------------------------------------------------------------------------
-   Paystack Pre-Register Modal
+   Direct Bank Transfer & Pre-Register Modal (Fully Mobile Responsive)
    -------------------------------------------------------------------------- */
 .pay-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(3, 20, 11, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(3, 20, 11, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     z-index: 99999;
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     opacity: 0;
     transition: opacity 0.25s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .pay-modal-backdrop.is-open {
@@ -2733,11 +2735,16 @@ button, input, textarea, select {
 
 .pay-modal-dialog {
     background: #072416;
-    border: 1px solid rgba(230, 183, 73, 0.4);
+    color: #ffffff !important;
+    border: 1.5px solid rgba(230, 183, 73, 0.45);
     border-radius: 20px;
     width: 100%;
-    max-width: 480px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    max-width: 490px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+    max-height: calc(100dvh - 32px);
+    display: flex;
+    flex-direction: column;
+    margin: auto;
     overflow: hidden;
     transform: translateY(20px) scale(0.96);
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2748,49 +2755,52 @@ button, input, textarea, select {
 }
 
 .pay-modal-header {
-    padding: 24px 24px 16px;
-    border-bottom: 1px solid rgba(230, 183, 73, 0.2);
+    padding: 20px 22px 14px;
+    border-bottom: 1px solid rgba(230, 183, 73, 0.22);
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    background: rgba(230, 183, 73, 0.05);
+    background: rgba(230, 183, 73, 0.06);
+    flex-shrink: 0;
 }
 
 .pay-modal-badge {
     display: inline-block;
     padding: 4px 10px;
     border-radius: 999px;
-    background: rgba(230, 183, 73, 0.15);
-    border: 1px solid rgba(230, 183, 73, 0.3);
-    color: #f6d27e;
+    background: rgba(230, 183, 73, 0.18);
+    border: 1px solid rgba(230, 183, 73, 0.4);
+    color: #f6d27e !important;
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.5px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .pay-modal-title {
     font-family: var(--font-heading);
     font-size: 1.25rem;
-    color: #ffffff;
+    color: #ffffff !important;
     line-height: 1.3;
+    font-weight: 800;
 }
 
 .pay-modal-sub {
-    font-size: 0.85rem;
-    color: #94a3b8;
+    font-size: 0.86rem;
+    color: #e2e8f0 !important;
     margin-top: 4px;
+    line-height: 1.4;
 }
 
 .pay-modal-close {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    width: 32px;
-    height: 32px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff !important;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2800,38 +2810,390 @@ button, input, textarea, select {
 }
 
 .pay-modal-close:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.25);
     border-color: #ef4444;
-    color: #fca5a5;
+    color: #fca5a5 !important;
 }
 
 .pay-modal-body {
-    padding: 20px 24px;
+    padding: 18px 22px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
 }
 
-.pay-modal-trust {
-    background: rgba(3, 20, 11, 0.6);
-    border: 1px solid rgba(230, 183, 73, 0.15);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-top: 14px;
+/* Bank Account Card Design */
+.bank-details-card {
+    background: linear-gradient(135deg, rgba(14, 51, 32, 0.98) 0%, rgba(5, 25, 15, 0.99) 100%);
+    border: 1.5px solid rgba(230, 183, 73, 0.5);
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(230, 183, 73, 0.25);
+}
+
+.bank-card-top {
+    margin-bottom: 10px;
+}
+
+.bank-chip-row {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.bank-badge-kuda {
+    background: #40196d;
+    color: #ffffff !important;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 999px;
     font-size: 0.82rem;
-    color: #cbd5e1;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bank-fee-pill {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1.5px solid rgba(34, 197, 94, 0.6);
+    color: #4ade80 !important;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.bank-card-field {
+    margin-bottom: 8px;
+}
+
+.bank-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #f6d27e !important;
+    font-weight: 800;
+    margin-bottom: 3px;
+}
+
+.bank-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    line-height: 1.35;
+}
+
+.account-number-field {
+    background: rgba(3, 20, 11, 0.85);
+    border: 1.5px dashed rgba(230, 183, 73, 0.55);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 12px 0;
+}
+
+.account-number-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.account-number-value {
+    font-family: 'Cabinet Grotesk', monospace;
+    font-size: 1.7rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    color: #ffffff !important;
+    text-shadow: 0 0 14px rgba(230, 183, 73, 0.35);
+    user-select: all;
+    -webkit-user-select: all;
+}
+
+.copy-acc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(230, 183, 73, 0.22);
+    border: 1.5px solid var(--gold-primary);
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 9px 15px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+.copy-acc-btn:hover {
+    background: var(--gold-primary);
+    color: #03140b !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(230, 183, 73, 0.4);
+}
+
+.copy-acc-btn.copied {
+    background: #22c55e !important;
+    border-color: #22c55e !important;
+    color: #03140b !important;
+    transform: scale(1.02);
+}
+
+.bank-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+/* WhatsApp Receipt Notice Box */
+.whatsapp-receipt-box {
+    background: rgba(37, 211, 102, 0.12);
+    border: 1.5px solid rgba(37, 211, 102, 0.45);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-top: 14px;
+}
+
+.wa-receipt-header {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    color: #ffffff !important;
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.wa-receipt-header strong {
+    color: #4ade80 !important;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.92rem;
+}
+
+.wa-receipt-header p {
+    margin: 0;
+    color: #f1f5f9 !important;
+    font-size: 0.84rem;
+}
+
+.wa-receipt-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.whatsapp-send-receipt-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #25d366;
+    color: #03140b !important;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.92rem;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-send-receipt-btn:hover {
+    background: #20ba5a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+    color: #03140b !important;
+}
+
+/* Universal Dark Form Inputs with High Contrast */
+.form-input {
+    width: 100%;
+    background: rgba(3, 20, 11, 0.95) !important;
+    border: 1.5px solid rgba(230, 183, 73, 0.4) !important;
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-family: inherit;
+    font-size: 16px !important; /* Prevents auto-zoom on mobile iOS */
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    border-color: #e6b749 !important;
+    box-shadow: 0 0 0 3px rgba(230, 183, 73, 0.25) !important;
+    background: #03140b !important;
+}
+
+.form-input::placeholder {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+/* Fix mobile browser autofill turning text black */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #072416 inset !important;
+    box-shadow: 0 0 0px 1000px #072416 inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    color: #ffffff !important;
 }
 
 .pay-modal-footer {
-    padding: 0 24px 24px;
+    padding: 12px 22px 20px;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(230, 183, 73, 0.15);
 }
 
-.paystack-powered-by {
+.pay-modal-note {
+    text-align: center;
+    color: #cbd5e1 !important;
+    font-size: 0.8rem;
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+/* Mobile Screen Responsive Adaptations */
+@media (max-width: 520px) {
+    .pay-modal-backdrop {
+        padding: 8px;
+        align-items: flex-start;
+    }
+
+    .pay-modal-dialog {
+        max-height: calc(100dvh - 16px);
+        border-radius: 16px;
+        margin: auto 0;
+    }
+
+    .pay-modal-header {
+        padding: 16px 16px 12px;
+    }
+
+    .pay-modal-title {
+        font-size: 1.15rem;
+    }
+
+    .pay-modal-body {
+        padding: 14px 16px;
+    }
+
+    .bank-details-card {
+        padding: 14px 14px;
+    }
+
+    .account-number-field {
+        padding: 12px 10px;
+        margin: 10px 0;
+    }
+
+    .account-number-row {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .account-number-value {
+        font-size: 1.55rem;
+        letter-spacing: 2px;
+        text-align: center;
+        width: 100%;
+        display: block;
+    }
+
+    .copy-acc-btn {
+        width: 100%;
+        padding: 11px 16px;
+        font-size: 0.9rem;
+    }
+
+    .bank-meta-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .whatsapp-send-receipt-btn {
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+        padding: 12px 14px;
+        font-size: 0.86rem;
+    }
+
+    .pay-modal-footer {
+        padding: 10px 16px 16px;
+    }
+}
+
+/* Summary Card in Registration Page */
+.direct-pay-summary {
+    background: linear-gradient(135deg, rgba(14, 51, 32, 0.98) 0%, rgba(5, 25, 15, 0.99) 100%);
+    border: 1.5px solid var(--reg-gold);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.direct-pay-summary-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.78rem;
-    color: #94a3b8;
-    margin-top: 14px;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
 }
+
+.direct-pay-summary-title {
+    color: var(--reg-gold-light);
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.direct-pay-badge {
+    background: #40196d;
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.direct-pay-summary-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 0.92rem;
+    color: #f1f5f9;
+}
+
+.direct-pay-summary-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+

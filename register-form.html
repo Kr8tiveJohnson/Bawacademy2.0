@@ -17,33 +17,47 @@
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 
+    <!-- Vendor Libraries for Instant CSP-Compliant Ticket Generation & Downloads -->
+    <script src="qrcode.min.js"></script>
+    <script src="html2canvas.min.js"></script>
+    <script src="jspdf.umd.min.js"></script>
+
     <style>
         :root {
             --reg-bg: #03140b;
             --reg-surface: #072416;
-            --reg-card: rgba(10, 36, 23, 0.92);
-            --reg-border: rgba(230, 183, 73, 0.28);
+            --reg-card: rgba(10, 36, 23, 0.96);
+            --reg-border: rgba(230, 183, 73, 0.35);
             --reg-gold: #e6b749;
             --reg-gold-light: #f6d27e;
         }
 
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
         body {
             background-color: var(--reg-bg);
-            color: #f1f5f9;
-            font-family: var(--font-body);
+            color: #ffffff !important;
+            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             background-image:
-                radial-gradient(ellipse 70% 45% at 50% 0%, rgba(230, 183, 73, 0.12) 0%, transparent 70%),
-                radial-gradient(circle 350px at 90% 85%, rgba(15, 51, 39, 0.45) 0%, transparent 70%);
+                radial-gradient(ellipse 70% 45% at 50% 0%, rgba(230, 183, 73, 0.14) 0%, transparent 70%),
+                radial-gradient(circle 350px at 90% 85%, rgba(15, 51, 39, 0.5) 0%, transparent 70%);
+            -webkit-text-size-adjust: 100%;
+            overflow-x: hidden;
         }
 
         .reg-header {
-            background: rgba(4, 20, 12, 0.96);
+            background: rgba(4, 20, 12, 0.98);
             border-bottom: 1px solid var(--reg-border);
-            padding: 18px 24px;
+            padding: 14px 20px;
             backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
 
         .reg-header-inner {
@@ -52,27 +66,29 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
+            gap: 12px;
         }
 
         .reg-brand-img {
-            height: 42px;
+            height: 38px;
             width: auto;
+            filter: brightness(0) invert(1);
         }
 
         .reg-back-link {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            color: var(--reg-gold);
+            gap: 6px;
+            color: var(--reg-gold-light);
             text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 7px 14px;
             border-radius: 999px;
-            background: rgba(230, 183, 73, 0.1);
+            background: rgba(230, 183, 73, 0.12);
             border: 1px solid var(--reg-border);
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .reg-back-link:hover {
@@ -84,8 +100,8 @@
             flex: 1;
             max-width: 860px;
             width: 100%;
-            margin: 36px auto;
-            padding: 0 20px;
+            margin: 28px auto;
+            padding: 0 16px;
         }
 
         /* Stepper header */
@@ -93,85 +109,240 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 28px;
+            gap: 10px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .reg-stepper::-webkit-scrollbar {
+            display: none;
         }
 
         .step-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 16px;
+            padding: 7px 16px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             font-size: 0.82rem;
-            color: #94a3b8;
-            font-weight: 600;
+            color: #e2e8f0;
+            font-weight: 700;
         }
 
         .step-pill.is-active {
-            background: rgba(230, 183, 73, 0.18);
+            background: rgba(230, 183, 73, 0.22);
             border-color: var(--reg-gold);
-            color: var(--reg-gold-light);
+            color: #f6d27e !important;
+            box-shadow: 0 0 14px rgba(230, 183, 73, 0.25);
         }
 
         .step-pill.is-done {
-            background: rgba(34, 197, 94, 0.15);
-            border-color: rgba(34, 197, 94, 0.4);
-            color: #4ade80;
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #4ade80 !important;
         }
 
         .step-sep {
-            color: #475569;
-            font-size: 0.8rem;
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 700;
         }
 
         /* Card Container */
         .reg-card {
             background: var(--reg-card);
-            border: 1px solid var(--reg-border);
+            border: 1.5px solid var(--reg-border);
             border-radius: 20px;
-            padding: 36px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: #ffffff !important;
         }
 
-        @media (max-width: 640px) {
-            .reg-card {
-                padding: 24px 18px;
-            }
+        /* Direct Payment Notice Card in Form */
+        .direct-pay-summary {
+            background: linear-gradient(145deg, rgba(14, 46, 29, 0.98) 0%, rgba(4, 22, 13, 0.99) 100%);
+            border: 1.5px solid var(--reg-gold);
+            border-radius: 20px;
+            padding: 22px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+            color: #ffffff !important;
         }
 
-        /* Verification Status Banner */
-        .verify-banner {
+        .direct-pay-summary-header {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
-            border-radius: 12px;
-            background: rgba(34, 197, 94, 0.12);
-            border: 1px solid rgba(34, 197, 94, 0.35);
-            color: #86efac;
-            margin-bottom: 28px;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .verify-icon {
-            font-size: 1.8rem;
-            flex-shrink: 0;
+        .direct-pay-summary-title {
+            color: #f6d27e !important;
+            font-weight: 800;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
         }
 
-        .verify-title {
+        .direct-pay-fee-badge {
+            background: rgba(74, 222, 128, 0.12);
+            color: #4ade80 !important;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(74, 222, 128, 0.35);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .direct-pay-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+            margin: 18px 0 16px;
+        }
+
+        .direct-pay-card {
+            background: rgba(2, 16, 9, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .direct-pay-card:hover {
+            border-color: rgba(230, 183, 73, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .direct-pay-card-highlight {
+            border-color: rgba(74, 222, 128, 0.35);
+            background: linear-gradient(135deg, rgba(4, 26, 14, 0.85), rgba(2, 18, 10, 0.95));
+        }
+
+        .direct-pay-card-label {
+            font-size: 0.72rem;
             font-weight: 700;
-            font-size: 1rem;
-            color: #f0fdf4;
+            color: #94a3b8;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
         }
 
-        .verify-subtitle {
-            font-size: 0.84rem;
-            color: #bbf7d0;
-            margin-top: 2px;
+        .direct-pay-card-val {
+            font-size: 0.96rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .direct-pay-acc-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .direct-pay-acc-num {
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #4ade80;
+            letter-spacing: 1.5px;
+        }
+
+        .direct-pay-copy-btn {
+            background: var(--reg-gold);
+            color: #03140b;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .direct-pay-copy-btn:hover {
+            background: var(--reg-gold-light);
+            transform: scale(1.04);
+        }
+
+        .direct-pay-kuda-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #e2e8f0;
+            font-weight: 800;
+        }
+
+        .direct-pay-kuda-tag::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #a855f7;
+            display: inline-block;
+        }
+
+        .direct-pay-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.88rem;
+        }
+
+        .direct-pay-footer p {
+            color: #cbd5e1;
+            margin: 0;
+            line-height: 1.45;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .direct-pay-wa-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #25d366;
+            color: #03140b !important;
+            text-decoration: none;
+            padding: 9px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.82rem;
+            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+            transition: transform 0.2s ease, filter 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .direct-pay-wa-link:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
         }
 
         /* Form elements */
@@ -179,12 +350,6 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-        }
-
-        @media (max-width: 680px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         .form-full {
@@ -198,81 +363,131 @@
         }
 
         .form-label {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--reg-gold-light);
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #f6d27e !important;
             letter-spacing: 0.02em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
         }
 
         .form-label .req {
-            color: #f87171;
+            color: #f87171 !important;
             margin-left: 2px;
+            font-weight: 800;
         }
 
         .form-input,
         .form-select,
         .form-textarea {
             width: 100%;
-            background: rgba(3, 20, 11, 0.85);
-            border: 1px solid rgba(230, 183, 73, 0.3);
+            background: #04180e !important;
+            border: 1.5px solid rgba(230, 183, 73, 0.45) !important;
             border-radius: 10px;
-            padding: 13px 16px;
-            color: #ffffff;
+            padding: 14px 16px;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 16px !important;
+            /* Critical for iOS Safari to prevent auto-zoom */
             transition: all 0.2s ease;
             outline: none;
+            box-sizing: border-box;
+            min-height: 48px;
+        }
+
+        .form-textarea {
+            min-height: 90px;
+            resize: vertical;
         }
 
         .form-input:focus,
         .form-select:focus,
         .form-textarea:focus {
-            border-color: var(--reg-gold);
-            box-shadow: 0 0 0 3px rgba(230, 183, 73, 0.22);
-            background: rgba(3, 20, 11, 0.95);
+            border-color: #e6b749 !important;
+            box-shadow: 0 0 0 3px rgba(230, 183, 73, 0.28) !important;
+            background: #020f07 !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
         }
 
-        .form-input[readonly] {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #cbd5e1;
-            cursor: not-allowed;
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #cbd5e1 !important;
+            -webkit-text-fill-color: #cbd5e1 !important;
+            opacity: 0.9 !important;
+            font-weight: 500;
+        }
+
+        /* Enforce bright white text across all inputs and textareas */
+        input,
+        textarea,
+        select {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+        }
+
+        /* Fix Chrome/Safari autofill text turning black */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        textarea:-webkit-autofill,
+        select:-webkit-autofill {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #072416 inset !important;
+            box-shadow: 0 0 0px 1000px #072416 inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+            color: #ffffff !important;
+        }
+
+        /* Select Options Dropdown High Contrast */
+        .form-select option {
+            background-color: #072416 !important;
+            color: #ffffff !important;
+            padding: 12px;
+            font-size: 16px;
         }
 
         .unique-code-box {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(230, 183, 73, 0.12);
-            border: 1px dashed var(--reg-gold);
-            padding: 12px 18px;
+            justify-content: space-between;
+            gap: 12px;
+            background: rgba(230, 183, 73, 0.15);
+            border: 1.5px dashed var(--reg-gold);
+            padding: 14px 18px;
             border-radius: 12px;
+            flex-wrap: wrap;
         }
 
         .unique-code-val {
             font-family: monospace;
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--reg-gold);
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #f6d27e !important;
             letter-spacing: 2px;
-            flex: 1;
+            word-break: break-all;
         }
 
         .copy-code-btn {
-            background: rgba(230, 183, 73, 0.2);
-            border: 1px solid var(--reg-gold);
-            color: var(--reg-gold-light);
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            background: rgba(230, 183, 73, 0.22);
+            border: 1.5px solid var(--reg-gold);
+            color: #ffffff !important;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .copy-code-btn:hover {
             background: var(--reg-gold);
-            color: #03140b;
+            color: #03140b !important;
         }
 
         /* Choice options cards */
@@ -285,38 +500,41 @@
         .choice-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            background: rgba(3, 20, 11, 0.6);
-            border: 1px solid rgba(230, 183, 73, 0.2);
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(4, 22, 13, 0.9);
+            border: 1.5px solid rgba(230, 183, 73, 0.35);
             cursor: pointer;
             transition: all 0.2s ease;
+            color: #ffffff !important;
+            min-height: 48px;
         }
 
         .choice-item:hover {
             border-color: var(--reg-gold);
-            background: rgba(230, 183, 73, 0.08);
+            background: rgba(230, 183, 73, 0.15);
         }
 
         .choice-item input[type="radio"] {
-            accent-color: var(--reg-gold);
-            width: 18px;
-            height: 18px;
+            accent-color: #f6d27e;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .choice-label {
-            font-size: 0.92rem;
-            font-weight: 500;
-            color: #e2e8f0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff !important;
             cursor: pointer;
             flex: 1;
+            line-height: 1.35;
         }
 
         .other-input-wrap {
             margin-top: 8px;
-            padding-left: 30px;
             display: none;
         }
 
@@ -324,25 +542,26 @@
             width: 100%;
             padding: 16px 24px;
             background: linear-gradient(135deg, #e6b749 0%, #f6d27e 50%, #b88a22 100%);
-            color: #03140b;
+            color: #03140b !important;
             font-family: inherit;
             font-size: 1.05rem;
-            font-weight: 800;
+            font-weight: 900;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(230, 183, 73, 0.35);
+            box-shadow: 0 10px 25px rgba(230, 183, 73, 0.45);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             margin-top: 10px;
+            min-height: 52px;
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(230, 183, 73, 0.45);
+            box-shadow: 0 15px 35px rgba(230, 183, 73, 0.55);
         }
 
         .submit-btn:disabled {
@@ -374,176 +593,514 @@
         }
 
         .error-card {
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
-            padding: 30px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1.5px solid rgba(239, 68, 68, 0.5);
+            color: #fecaca !important;
+            padding: 30px 20px;
             border-radius: 16px;
             text-align: center;
         }
 
-        /* ── Official Pass / Ticket Card ── */
+        /* ── Horizontal Boarding-Pass Ticket ── */
+        .ticket-wrapper {
+            background: #f0f4f8;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+        }
+
         .ticket-pass {
-            background: linear-gradient(145deg, #09281a 0%, #03150c 100%);
-            border: 2px solid var(--reg-gold);
-            border-radius: 24px;
+            background: #ffffff;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #1a1a1a !important;
             position: relative;
         }
 
-        .ticket-header {
-            background: linear-gradient(90deg, rgba(230, 183, 73, 0.2) 0%, rgba(10, 36, 23, 0.9) 100%);
-            border-bottom: 1px dashed var(--reg-gold);
-            padding: 24px 28px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .ticket-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--reg-gold);
-            color: #03140b;
-            font-size: 0.75rem;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 4px;
-            letter-spacing: 1px;
-        }
-
-        .ticket-body {
-            padding: 32px 28px;
+        /* Perforated tear line between left stub and main body */
+        .ticket-main-row {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 28px;
+            grid-template-columns: 180px 1fr;
+            min-height: 170px;
         }
 
-        @media (max-width: 680px) {
-            .ticket-body {
-                grid-template-columns: 1fr;
-            }
+        /* LEFT STUB — logo + org name */
+        .ticket-stub-left {
+            background: #ffffff;
+            border-right: 2px dashed #c8d0db;
+            padding: 20px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
         }
 
-        .ticket-field {
-            margin-bottom: 16px;
+        .ticket-stub-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
         }
 
-        .ticket-field-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #94a3b8;
-            font-weight: 700;
+        .ticket-stub-brand {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #1a3a2a !important;
+            line-height: 1.3;
+            letter-spacing: 0.01em;
         }
 
-        .ticket-field-val {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #ffffff;
+        .ticket-stub-year {
+            font-size: 1rem;
+            font-weight: 900;
+            color: #1a3a2a !important;
+        }
+
+        .ticket-stub-tagline {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #4a6a5a !important;
+            font-style: italic;
             margin-top: 2px;
         }
 
-        .ticket-code-display {
-            background: rgba(3, 20, 11, 0.95);
-            border: 2px dashed var(--reg-gold);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
+        /* CENTRE — event info */
+        .ticket-center {
+            background: #0a2415;
+            padding: 22px 26px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            gap: 8px;
         }
 
-        .ticket-barcode-mock {
-            font-family: monospace;
-            letter-spacing: 4px;
-            font-size: 0.85rem;
-            color: var(--reg-gold-light);
-            margin-top: 10px;
-            opacity: 0.8;
+        .ticket-admit-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7) !important;
         }
 
-        .ticket-footer {
-            background: rgba(0, 0, 0, 0.4);
-            border-top: 1px solid rgba(230, 183, 73, 0.2);
-            padding: 20px 28px;
+        .ticket-attendee-name {
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: #ffffff !important;
+            line-height: 1.15;
+            margin: 2px 0 6px;
+        }
+
+        .ticket-event-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ffffff !important;
+            margin-bottom: 4px;
+        }
+
+        .ticket-meta-row {
             display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ticket-meta-item {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.85) !important;
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .ticket-meta-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.55) !important;
+            min-width: 58px;
+        }
+
+        /* RIGHT — QR + code */
+        .ticket-stub-right {
+            background: #ffffff;
+            border-left: 2px dashed #c8d0db;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            gap: 16px;
+            justify-content: center;
+            gap: 8px;
+            min-width: 130px;
+        }
+
+        #ticketQRCanvas {
+            width: 90px !important;
+            height: 90px !important;
+        }
+
+        .ticket-code-big {
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #1a1a1a !important;
+            font-family: 'Cabinet Grotesk', monospace;
+            text-align: center;
+        }
+
+        .ticket-scan-note {
+            font-size: 0.6rem;
+            color: #778899 !important;
+            text-align: center;
+            line-height: 1.35;
+        }
+
+        /* BOTTOM NOTE STRIP */
+        .ticket-note-strip {
+            background: #f8f9fb;
+            border-top: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            font-size: 0.72rem;
+            color: #334155 !important;
+            line-height: 1.5;
+        }
+
+        .ticket-note-strip strong {
+            color: #1a1a1a !important;
+        }
+
+        /* Actions below ticket */
+        .ticket-actions {
+            display: flex;
             flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: center;
         }
 
         .whatsapp-vip-btn {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 8px;
             background: #25d366;
-            color: #03140b;
+            color: #03140b !important;
             text-decoration: none;
-            padding: 14px 24px;
-            border-radius: 12px;
+            padding: 12px 20px;
+            border-radius: 10px;
             font-weight: 800;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35);
             transition: all 0.2s ease;
+            flex: 1;
+            min-width: 200px;
         }
 
         .whatsapp-vip-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 28px rgba(37, 211, 102, 0.5);
-            color: #000;
+            color: #000 !important;
         }
 
-        .print-btn {
+        .download-ticket-btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #f1f5f9;
-            padding: 12px 20px;
+            background: linear-gradient(135deg, #0d3d1e 0%, #082b15 100%);
+            border: none;
+            color: #ffffff !important;
+            padding: 12px 22px;
             border-radius: 10px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 800;
+            font-size: 0.88rem;
             transition: all 0.2s ease;
+            box-shadow: 0 6px 18px rgba(13, 61, 30, 0.5);
+            flex: 1;
+            min-width: 200px;
         }
 
-        .print-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .download-ticket-btn:hover {
+            background: linear-gradient(135deg, #145a2a 0%, #0d3d1e 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(13, 61, 30, 0.65);
+        }
+
+        .save-image-ticket-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #166534 0%, #14532d 100%);
+            border: 1px solid rgba(230, 183, 73, 0.4);
+            color: #ffffff !important;
+            padding: 12px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 18px rgba(20, 83, 45, 0.45);
+            flex: 1;
+            min-width: 190px;
+        }
+
+        .save-image-ticket-btn:hover {
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+            border-color: var(--reg-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(22, 101, 52, 0.6);
+        }
+
+        .copy-code-ticket-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff !important;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .copy-code-ticket-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
             border-color: #fff;
         }
 
-        @media print {
-            body {
-                background: #fff !important;
-                color: #000 !important;
+        /* Mobile responsive ticket */
+        @media (max-width: 640px) {
+            .ticket-wrapper {
+                padding: 14px;
+                border-radius: 14px;
             }
-            .reg-header, .reg-stepper, .whatsapp-vip-btn, .print-btn, .reg-back-link {
+
+            .ticket-main-row {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+            }
+
+            .ticket-stub-left {
+                border-right: none;
+                border-bottom: 2px dashed #c8d0db;
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 14px 16px;
+                gap: 14px;
+                text-align: left;
+            }
+
+            .ticket-stub-logo {
+                width: 44px;
+                height: 44px;
+            }
+
+            .ticket-center {
+                padding: 18px 16px;
+            }
+
+            .ticket-attendee-name {
+                font-size: 1.25rem;
+            }
+
+            .ticket-actions {
+                flex-direction: column;
+            }
+
+            .whatsapp-vip-btn,
+            .download-ticket-btn,
+            .copy-code-ticket-btn {
+                width: 100%;
+                min-width: unset;
+                flex: none;
+            }
+        }
+
+        /* ── Mobile Responsive Optimizations ── */
+        @media (max-width: 680px) {
+            .reg-main-wrap {
+                margin: 16px auto;
+                padding: 0 10px;
+            }
+
+            .reg-card {
+                padding: 18px 14px;
+                border-radius: 16px;
+            }
+
+            .reg-stepper {
+                display: flex;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                gap: 5px;
+                width: 100%;
+                margin-bottom: 16px;
+                overflow: hidden;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+
+            .reg-stepper::-webkit-scrollbar {
+                display: none;
+            }
+
+            .step-pill {
+                flex: 1;
+                padding: 7px 4px;
+                font-size: 0.72rem;
+                white-space: nowrap;
+                text-align: center;
+                justify-content: center;
+                border-radius: 999px;
+            }
+
+            .step-sep {
+                display: none;
+            }
+
+            .direct-pay-summary {
+                padding: 14px 14px;
+                border-radius: 14px;
+            }
+
+            .direct-pay-summary-body {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .direct-pay-summary-actions {
+                flex-direction: column;
+                width: 100%;
+                gap: 8px;
+            }
+
+            .direct-pay-summary-actions .copy-code-btn,
+            .direct-pay-summary-actions a {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+                padding: 11px 14px;
+                font-size: 0.88rem;
+                display: flex;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .unique-code-box {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+                padding: 14px 12px;
+            }
+
+            .unique-code-val {
+                font-size: 1.3rem;
+                text-align: center;
+                display: block;
+                width: 100%;
+            }
+
+            .unique-code-box .copy-code-btn {
+                width: 100%;
+                justify-content: center;
+                display: flex;
+                padding: 10px 14px;
+            }
+
+            .ticket-body {
+                grid-template-columns: 1fr;
+                padding: 20px 16px;
+                gap: 18px;
+            }
+
+            .ticket-row-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .ticket-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px 16px;
+                gap: 12px;
+            }
+
+            .ticket-footer {
+                flex-direction: column;
+                padding: 16px;
+                gap: 10px;
+            }
+
+            .ticket-footer a,
+            .ticket-footer button {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .reg-header {
+                padding: 10px 14px;
+            }
+
+            .reg-brand-img {
+                height: 32px;
+            }
+
+            .reg-back-link {
+                font-size: 0.78rem;
+                padding: 5px 10px;
+            }
+
+            .submit-btn {
+                font-size: 0.95rem;
+                padding: 14px 16px;
+            }
+        }
+
+        @media print {
+
+            /* Hide everything except the ticket */
+            body>* {
                 display: none !important;
             }
+
+            #printableTicketContainer {
+                display: block !important;
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 99999;
+                background: white !important;
+                padding: 40px 24px;
+            }
+
+            .ticket-wrapper,
             .ticket-pass {
                 box-shadow: none !important;
-                border: 2px solid #000 !important;
-                background: #fff !important;
-                color: #000 !important;
             }
-            .ticket-field-val, .ticket-header h2 {
-                color: #000 !important;
-            }
-            .ticket-code-display {
-                border-color: #000 !important;
-                background: #f8fafc !important;
-            }
-            .unique-code-val {
-                color: #000 !important;
+
+            .ticket-actions {
+                display: none !important;
             }
         }
     </style>
@@ -568,7 +1125,7 @@
         <!-- Stepper -->
         <div class="reg-stepper">
             <span class="step-pill is-done" id="step1-pill">
-                <span>✓</span> 1. Payment Verified
+                <span>✓</span> 1. Direct Payment (₦1,500)
             </span>
             <span class="step-sep">›</span>
             <span class="step-pill is-active" id="step2-pill">
@@ -583,60 +1140,97 @@
         <!-- Dynamic Content Card -->
         <div class="reg-card" id="form-container">
             <!-- Loading State -->
-            <div class="state-box" id="loading-state">
+            <div class="state-box" id="loading-state" style="display: none;">
                 <div class="spinner-ring"></div>
-                <h2 style="font-family: var(--font-heading); color: var(--reg-gold);">Verifying Your Payment...</h2>
-                <p style="color: #94a3b8; margin-top: 8px;">Please wait while we confirm your transaction with Paystack.</p>
+                <h2 style="font-family: var(--font-heading); color: var(--reg-gold);">Loading Form...</h2>
             </div>
 
             <!-- Error State -->
             <div id="error-state" style="display: none;">
                 <div class="error-card">
                     <div style="font-size: 2.4rem; margin-bottom: 12px;">⚠️</div>
-                    <h2 id="error-title" style="color: #f87171; font-family: var(--font-heading);">Payment Not Verified</h2>
+                    <h2 id="error-title" style="color: #f87171; font-family: var(--font-heading);">Session Notice</h2>
                     <p id="error-desc" style="margin: 12px 0 24px; color: #fca5a5;">
-                        We could not verify a successful ₦5,000 admission payment for this session.
+                        Please complete your direct payment of ₦1,500 to KUDA: 2013539577.
                     </p>
-                    <a href="index.html" class="submit-btn" style="text-decoration: none; max-width: 320px; margin: 0 auto;">
-                        Return Home &amp; Pre-Register
+                    <a href="index.html" class="submit-btn"
+                        style="text-decoration: none; max-width: 320px; margin: 0 auto;">
+                        Return to Homepage
                     </a>
                 </div>
             </div>
 
-            <!-- Form State (When Verified) -->
-            <div id="registration-state" style="display: none;">
-                <!-- Payment Success Banner -->
-                <div class="verify-banner">
-                    <div class="verify-icon">✅</div>
-                    <div>
-                        <div class="verify-title">Payment Confirmed · ₦5,000 Verified</div>
-                        <div class="verify-subtitle" id="verify-meta-text">
-                            Reference: <span id="display-ref" style="font-family: monospace;"></span> · Your slot is securely reserved.
+            <!-- Form State -->
+            <div id="registration-state">
+                <!-- Direct Payment Confirmation / Instructions Banner -->
+                <div class="direct-pay-summary">
+                    <div class="direct-pay-summary-header">
+                        <div class="direct-pay-summary-title">
+                            <span>💳 Direct Transfer Details</span>
                         </div>
+                        <span class="direct-pay-fee-badge">ADMISSION FEE: <strong>₦1,500</strong></span>
+                    </div>
+
+                    <div class="direct-pay-grid">
+                        <!-- Account Number Card (Highlighted with Copy button) -->
+                        <div class="direct-pay-card direct-pay-card-highlight">
+                            <div class="direct-pay-card-label">ACCOUNT NUMBER</div>
+                            <div class="direct-pay-acc-row">
+                                <span id="kudaAccountDisplay" class="direct-pay-acc-num">2013539577</span>
+                                <button type="button" class="direct-pay-copy-btn" id="formCopyAccBtn"
+                                    onclick="copyKudaAccInForm(event)">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bank Card -->
+                        <div class="direct-pay-card">
+                            <div class="direct-pay-card-label">BANK</div>
+                            <div class="direct-pay-card-val">
+                                <span class="direct-pay-kuda-tag">KUDA BANK</span>
+                            </div>
+                        </div>
+
+                        <!-- Account Name Card -->
+                        <div class="direct-pay-card">
+                            <div class="direct-pay-card-label">ACCOUNT NAME</div>
+                            <div class="direct-pay-card-val" style="font-size: 0.9rem; letter-spacing: 0.3px;">
+                                BAKARE FATIMOH OLASHUBOMI
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Action Strip -->
+                    <div class="direct-pay-footer">
+                        <p>
+                            Transfer <strong>₦1,500</strong> to the account above, then complete the participant form
+                            below. Send your payment receipt via WhatsApp:
+                        </p>
+                        <a href="https://wa.me/+2249036900011?text=Hello%20BAW%20Academy,%20I%20have%20transferred%20my%20workshop%20fee%20of%20%E2%82%A61,500.%20Here%20is%20my%20payment%20receipt:"
+                            target="_blank" rel="noopener noreferrer" class="direct-pay-wa-link">
+                            <span>Send Receipt on WhatsApp (+2249036900011)</span>
+                            <span>↗</span>
+                        </a>
                     </div>
                 </div>
 
                 <div style="margin-bottom: 24px;">
-                    <h1 style="font-family: var(--font-heading); font-size: 1.7rem; color: #ffffff;">
+                    <h1
+                        style="font-family: var(--font-heading); font-size: clamp(1.35rem, 5vw, 1.8rem); color: #ffffff; font-weight: 800;">
                         Complete Workshop Participant Form
                     </h1>
-                    <p style="color: #94a3b8; font-size: 0.92rem; margin-top: 4px;">
-                        Fill in your accurate details below to issue your Official 2.0 Workshop Ticket Pass and VIP group access.
+                    <p style="color: #e2e8f0; font-size: 0.94rem; margin-top: 6px; line-height: 1.5;">
+                        Fill in your accurate details below to issue your Official 2.0 Workshop Ticket Pass and VIP
+                        group access.
                     </p>
                 </div>
 
                 <form id="studentRegistrationForm" onsubmit="handleRegistrationSubmit(event)">
                     <div class="form-grid">
-                        
-                        <!-- UNIQUE CODE (Locked / Generated) -->
-                        <div class="form-group form-full">
-                            <label class="form-label">UNIQUE CODE (Your Workshop Pass ID):</label>
-                            <div class="unique-code-box">
-                                <span class="unique-code-val" id="uniqueCodeDisplay">BAW-5K-XXXXXX</span>
-                                <button type="button" class="copy-code-btn" onclick="copyUniqueCode()">📋 Copy Code</button>
-                            </div>
-                            <input type="hidden" id="uniqueCodeInput" name="uniqueCode">
-                        </div>
+
+                        <!-- Hidden Unique Code for Pass ID Assignment -->
+                        <input type="hidden" id="uniqueCodeInput" name="uniqueCode">
 
                         <!-- NAME -->
                         <div class="form-group">
@@ -652,7 +1246,8 @@
                             <label class="form-label" for="studentEmail">
                                 EMAIL: <span class="req">*</span>
                             </label>
-                            <input type="email" id="studentEmail" name="email" class="form-input" required readonly>
+                            <input type="email" id="studentEmail" name="email" class="form-input" required
+                                placeholder="Enter your active email address">
                         </div>
 
                         <!-- PHONE NUMBER -->
@@ -697,28 +1292,35 @@
                             </label>
                             <div class="choice-list">
                                 <label class="choice-item">
-                                    <input type="radio" name="currentStatus" value="STUDENT" required onchange="toggleStatusOther(false)">
+                                    <input type="radio" name="currentStatus" value="STUDENT" required
+                                        onchange="toggleStatusOther(false)">
                                     <span class="choice-label">STUDENT</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="currentStatus" value="Aspiring Entrepreneur / Freelancer" onchange="toggleStatusOther(false)">
+                                    <input type="radio" name="currentStatus" value="Aspiring Entrepreneur / Freelancer"
+                                        onchange="toggleStatusOther(false)">
                                     <span class="choice-label">Aspiring Entrepreneur / Freelancer</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="currentStatus" value="Working Professional / Career Transitioner" onchange="toggleStatusOther(false)">
+                                    <input type="radio" name="currentStatus"
+                                        value="Working Professional / Career Transitioner"
+                                        onchange="toggleStatusOther(false)">
                                     <span class="choice-label">Working Professional / Career Transitioner</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="currentStatus" value="Existing Small Business Owner" onchange="toggleStatusOther(false)">
+                                    <input type="radio" name="currentStatus" value="Existing Small Business Owner"
+                                        onchange="toggleStatusOther(false)">
                                     <span class="choice-label">Existing Small Business Owner</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="currentStatus" value="Other" onchange="toggleStatusOther(true)">
+                                    <input type="radio" name="currentStatus" value="Other"
+                                        onchange="toggleStatusOther(true)">
                                     <span class="choice-label">Other:</span>
                                 </label>
                             </div>
                             <div class="other-input-wrap" id="statusOtherWrap">
-                                <input type="text" id="statusOtherInput" class="form-input" placeholder="Specify your current status...">
+                                <input type="text" id="statusOtherInput" class="form-input"
+                                    placeholder="Specify your current status...">
                             </div>
                         </div>
 
@@ -729,38 +1331,49 @@
                             </label>
                             <div class="choice-list">
                                 <label class="choice-item">
-                                    <input type="radio" name="primaryGoal" value="Start a new business / monetize a skill" required onchange="toggleGoalOther(false)">
+                                    <input type="radio" name="primaryGoal"
+                                        value="Start a new business / monetize a skill" required
+                                        onchange="toggleGoalOther(false)">
                                     <span class="choice-label">Start a new business / monetize a skill</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="primaryGoal" value="Scale / automate an existing business" onchange="toggleGoalOther(false)">
+                                    <input type="radio" name="primaryGoal" value="Scale / automate an existing business"
+                                        onchange="toggleGoalOther(false)">
                                     <span class="choice-label">Scale / automate an existing business</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="primaryGoal" value="Improve productivity / technical workflow" onchange="toggleGoalOther(false)">
+                                    <input type="radio" name="primaryGoal"
+                                        value="Improve productivity / technical workflow"
+                                        onchange="toggleGoalOther(false)">
                                     <span class="choice-label">Improve productivity / technical workflow</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="primaryGoal" value="Network and collaborate with peers" onchange="toggleGoalOther(false)">
+                                    <input type="radio" name="primaryGoal" value="Network and collaborate with peers"
+                                        onchange="toggleGoalOther(false)">
                                     <span class="choice-label">Network and collaborate with peers</span>
                                 </label>
                                 <label class="choice-item">
-                                    <input type="radio" name="primaryGoal" value="Other" onchange="toggleGoalOther(true)">
+                                    <input type="radio" name="primaryGoal" value="Other"
+                                        onchange="toggleGoalOther(true)">
                                     <span class="choice-label">Other:</span>
                                 </label>
                             </div>
                             <div class="other-input-wrap" id="goalOtherWrap">
-                                <input type="text" id="goalOtherInput" class="form-input" placeholder="Specify your primary goal...">
+                                <input type="text" id="goalOtherInput" class="form-input"
+                                    placeholder="Specify your primary goal...">
                             </div>
                         </div>
 
                         <!-- REFERRAL / AMBASSADOR CODE -->
                         <div class="form-group form-full">
                             <label class="form-label" for="referredByInput">
-                                REFERRAL / AMBASSADOR CODE: <span style="color:#94a3b8; font-weight:400; font-size:0.75rem;">(Optional - enter your friend's pass code)</span>
+                                REFERRAL / AMBASSADOR CODE: <span
+                                    style="color:#94a3b8; font-weight:400; font-size:0.75rem;">(Optional - enter your
+                                    friend's pass code)</span>
                             </label>
                             <input type="text" id="referredByInput" name="referredBy" class="form-input"
-                                placeholder="e.g. BAW-5K-XXXXXX" style="text-transform: uppercase; font-family: monospace; letter-spacing: 1px;">
+                                placeholder="e.g. BAW-5K-XXXXXX"
+                                style="text-transform: uppercase; font-family: monospace; letter-spacing: 1px;">
                         </div>
 
                         <!-- Q&A QUESTION -->
@@ -770,6 +1383,49 @@
                             </label>
                             <textarea id="qaQuestion" name="qaQuestion" class="form-textarea" rows="3"
                                 placeholder="Type your burning questions regarding skills, grants, scholarships or mentorship..."></textarea>
+                        </div>
+
+                        <!-- SUPER MEGA CHALLENGE OPT-IN -->
+                        <div class="form-group form-full"
+                            style="background: rgba(10, 36, 23, 0.95); border: 1.5px solid var(--reg-gold); border-radius: 14px; padding: 20px 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); margin-top: 6px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <span style="font-size: 1.5rem;">🏆</span>
+                                <label class="form-label"
+                                    style="margin: 0; color: var(--reg-gold-light); font-size: 1.05rem; font-weight: 800;">
+                                    Do you want to participate in the Super Mega Challenge?: <span class="req">*</span>
+                                </label>
+                            </div>
+                            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.5; margin-bottom: 14px;">
+                                Stand a chance to win brand new laptops, tech gadgets, cash grants, scholarships, and
+                                prestigious ambassador recognition awards by inviting peers.
+                            </p>
+                            <div class="choice-list"
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                                <label class="choice-item"
+                                    style="margin: 0; padding: 14px 18px; border-radius: 10px; background: rgba(3, 20, 11, 0.9); border: 1.5px solid rgba(74, 222, 128, 0.4); cursor: pointer; display: flex; align-items: center; gap: 12px;">
+                                    <input type="radio" name="participateChallenge" value="Yes" required checked>
+                                    <div>
+                                        <span class="choice-label"
+                                            style="font-weight: 800; color: #4ade80; font-size: 0.95rem; display: block;">Yes,
+                                            I want to participate</span>
+                                        <span
+                                            style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 2px;">Generate
+                                            my personal referral code &amp; link</span>
+                                    </div>
+                                </label>
+                                <label class="choice-item"
+                                    style="margin: 0; padding: 14px 18px; border-radius: 10px; background: rgba(3, 20, 11, 0.9); border: 1.5px solid rgba(248, 113, 113, 0.4); cursor: pointer; display: flex; align-items: center; gap: 12px;">
+                                    <input type="radio" name="participateChallenge" value="No" required>
+                                    <div>
+                                        <span class="choice-label"
+                                            style="font-weight: 800; color: #f87171; font-size: 0.95rem; display: block;">No,
+                                            not participating</span>
+                                        <span
+                                            style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 2px;">Direct
+                                            me to WhatsApp DM to join group</span>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-full" style="margin-top: 10px;">
@@ -784,133 +1440,190 @@
 
             <!-- Ticket / Pass State (After submission or if already registered) -->
             <div id="ticket-state" style="display: none;">
-                <div style="text-align: center; margin-bottom: 24px;">
-                    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; font-size: 0.85rem; font-weight: 700; margin-bottom: 12px;">
+                <!-- Confirmation header -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div
+                        style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.45); color: #4ade80; font-size: 0.85rem; font-weight: 800; margin-bottom: 10px; letter-spacing: 0.5px;">
                         ✓ REGISTRATION CONFIRMED
                     </div>
-                    <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.8rem;">
-                        Official Admission Ticket Pass
+                    <h2
+                        style="font-family: var(--font-heading); color: #ffffff; font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 900;">
+                        Your Official Workshop Pass
                     </h2>
-                    <p style="color: #94a3b8; font-size: 0.95rem;">
-                        Please save or screenshot your pass. You will need your Unique Code for event entry.
+                    <p style="color: #e2e8f0; font-size: 0.92rem; margin-top: 4px;">
+                        Screenshot or download your ticket. Show your code at the door.
                     </p>
                 </div>
 
-                <div class="ticket-pass" id="printableTicket">
-                    <!-- Ticket Header -->
-                    <div class="ticket-header">
-                        <div>
-                            <span class="ticket-tag">★ OFFICIAL ADMISSION PASS</span>
-                            <h2 style="font-family: var(--font-heading); font-size: 1.35rem; color: #fff; margin-top: 6px;">
-                                Business / Skill Up Acquisition 2.0
-                            </h2>
-                            <p style="color: var(--reg-gold-light); font-size: 0.85rem; font-weight: 600;">
-                                The Bridge Business Academy × Spotless Connect · November 2026
-                            </p>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Fee Paid</div>
-                            <div style="font-size: 1.3rem; font-weight: 800; color: #4ade80;">₦5,000 · VERIFIED</div>
-                        </div>
+                <!-- The printable ticket wrapper -->
+                <div id="printableTicketContainer">
+                    <div class="ticket-wrapper">
+                        <div class="ticket-pass" id="printableTicket">
+
+                            <!-- Main Row: Left Stub | Center Info | Right QR -->
+                            <div class="ticket-main-row">
+
+                                <!-- LEFT: Logo & Org -->
+                                <div class="ticket-stub-left">
+                                    <img class="ticket-stub-logo" src="LOGOS/Header%20logo.png"
+                                        alt="The Bridge Business Academy" onerror="this.style.display='none'">
+                                    <div>
+                                        <div class="ticket-stub-brand">The Bridge<br>Business Academy</div>
+                                        <div class="ticket-stub-year">2026</div>
+                                    </div>
+                                </div>
+
+                                <!-- CENTER: Event Details -->
+                                <div class="ticket-center">
+                                    <div class="ticket-admit-label">First Pass · Admit One</div>
+                                    <div class="ticket-attendee-name" id="ticketName">—</div>
+                                    <div class="ticket-event-title">Business / Skill Up Acquisition 2.0 Workshop</div>
+                                    <div class="ticket-meta-row">
+                                        <div class="ticket-meta-item">
+                                            <span class="ticket-meta-label">Date</span>
+                                            <span>November 2026</span>
+                                        </div>
+                                        <div class="ticket-meta-item">
+                                            <span class="ticket-meta-label">Dept</span>
+                                            <span id="ticketDept">—</span>
+                                            <span style="margin-left: 10px;" class="ticket-meta-label">Level</span>
+                                            <span id="ticketLevel">—</span>
+                                        </div>
+                                        <div class="ticket-meta-item">
+                                            <span class="ticket-meta-label">Email</span>
+                                            <span id="ticketEmail">—</span>
+                                        </div>
+                                        <div class="ticket-meta-item">
+                                            <span class="ticket-meta-label">Phone</span>
+                                            <span id="ticketPhone">—</span>
+                                        </div>
+                                        <div class="ticket-meta-item">
+                                            <span class="ticket-meta-label">Status</span>
+                                            <span id="ticketStatus">—</span>
+                                        </div>
+                                        <div class="ticket-meta-item" id="ticketReferredByRow" style="display:none;">
+                                            <span class="ticket-meta-label">Ref By</span>
+                                            <span id="ticketReferredBy">—</span>
+                                        </div>
+                                        <div class="ticket-meta-item" id="ticketChallengeRow" style="display:none;">
+                                            <span class="ticket-meta-label">Challenge</span>
+                                            <span id="ticketChallengeVal"
+                                                style="color: #4ade80; font-weight: 700;">Enrolled</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Hidden Unique Code for PDF / Image naming -->
+                                <span id="ticketUniqueCode" style="display: none;"></span>
+
+                            </div><!-- /.ticket-main-row -->
+
+                            <!-- Bottom Note Strip -->
+                            <div class="ticket-note-strip">
+                                <strong>Important:</strong> Kindly present this digital pass on your mobile device or
+                                bring a printed copy. This ticket admits one attendee only. Seats are allocated on a
+                                first-come, first-served basis — early arrival is strongly advised.
+                                &nbsp;·&nbsp; BAW Academy × Spotless Connect.
+                            </div>
+
+                        </div><!-- /.ticket-pass -->
+                    </div><!-- /.ticket-wrapper -->
+                </div><!-- /#printableTicketContainer -->
+
+            <!-- Ticket Action Buttons -->
+            <div class="ticket-actions">
+                <a href="https://wa.me/+2249036900011" id="ticketWaReceiptBtn" target="_blank" rel="noopener noreferrer"
+                    class="whatsapp-vip-btn">
+                    <span>Send Receipt via WhatsApp</span>
+                    <span>↗</span>
+                </a>
+                <button type="button" class="download-ticket-btn" id="downloadTicketBtn" onclick="downloadTicketPDF()">
+                    <span>Download Ticket (PDF)</span>
+                </button>
+                <button type="button" class="save-image-ticket-btn" id="saveImageTicketBtn" onclick="saveTicketImage()">
+                    <span>Save as Image</span>
+                </button>
+            </div>
+
+            <!-- Personal Referral & Ambassador Hub (Shown only if opted into Super Mega Challenge) -->
+            <div id="referralHub"
+                style="display: none; margin-top: 24px; background: rgba(10, 36, 23, 0.95); border: 1.5px solid var(--reg-gold); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 1.6rem;">🏆</span>
+                    <h3 style="font-family: var(--font-heading); color: var(--reg-gold-light); font-size: 1.25rem;">
+                        Super Mega Challenge · Your Referral Code &amp; Link
+                    </h3>
+                </div>
+                <p style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.5;">
+                    You're officially participating in the <strong>Super Mega Challenge</strong>! When your peers
+                    register using your code or link, you earn credit towards laptops, tech gadgets, business grants,
+                    and ambassador recognition awards.
+                </p>
+
+                <!-- Ref Code Box -->
+                <div
+                    style="margin-top: 14px; background: rgba(3, 20, 11, 0.9); border: 1px solid rgba(74, 222, 128, 0.35); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <div>
+                        <div
+                            style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">
+                            Your Referral Code:</div>
+                        <div id="referralCodeDisplay"
+                            style="color: #4ade80; font-family: monospace; font-size: 1.25rem; font-weight: 900; letter-spacing: 1.5px; margin-top: 2px;">
+                            BAW-XXXXXX</div>
                     </div>
+                    <button type="button" class="copy-code-btn" onclick="copyReferralCode()"
+                        style="padding: 9px 18px; font-size: 0.85rem;">
+                        Copy Ref Code
+                    </button>
+                </div>
 
-                    <!-- Ticket Body -->
-                    <div class="ticket-body">
-                        <div>
-                            <div class="ticket-field">
-                                <div class="ticket-field-label">Participant Full Name</div>
-                                <div class="ticket-field-val" id="ticketName">—</div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div class="ticket-field">
-                                    <div class="ticket-field-label">Department</div>
-                                    <div class="ticket-field-val" id="ticketDept">—</div>
-                                </div>
-                                <div class="ticket-field">
-                                    <div class="ticket-field-label">Level</div>
-                                    <div class="ticket-field-val" id="ticketLevel">—</div>
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div class="ticket-field">
-                                    <div class="ticket-field-label">Email</div>
-                                    <div class="ticket-field-val" id="ticketEmail" style="font-size: 0.95rem;">—</div>
-                                </div>
-                                <div class="ticket-field">
-                                    <div class="ticket-field-label">Phone</div>
-                                    <div class="ticket-field-val" id="ticketPhone">—</div>
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div class="ticket-field">
-                                    <div class="ticket-field-label">Current Status</div>
-                                    <div class="ticket-field-val" id="ticketStatus" style="font-size: 0.95rem; color: var(--reg-gold-light);">—</div>
-                                </div>
-                                <div class="ticket-field">
-                                    <div class="ticket-field-label">Referred By</div>
-                                    <div class="ticket-field-val" id="ticketReferredBy" style="font-size: 0.95rem; font-family: monospace; color: #94a3b8;">None</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Code box -->
-                        <div class="ticket-code-display">
-                            <div style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px;">
-                                UNIQUE ADMISSION CODE
-                            </div>
-                            <div class="unique-code-val" id="ticketUniqueCode" style="font-size: 1.5rem; margin: 12px 0;">
-                                BAW-5K-XXXXXX
-                            </div>
-                            <div class="ticket-barcode-mock">||| | ||||| || |||| ||</div>
-                            <button type="button" class="copy-code-btn" style="margin-top: 14px;" onclick="copyTicketCode()">
-                                📋 Copy Pass Code
-                            </button>
-                        </div>
+                <!-- Ref Link Box -->
+                <div
+                    style="margin-top: 12px; background: rgba(3, 20, 11, 0.9); border: 1px dashed var(--reg-gold); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 220px;">
+                        <div
+                            style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">
+                            Your Shareable Referral Link:</div>
+                        <div id="referralShareLink"
+                            style="color: #fff; font-family: monospace; font-size: 0.88rem; font-weight: 700; word-break: break-all; margin-top: 4px;">
+                            https://.../?ref=BAW-XXXXXX</div>
                     </div>
-
-                    <!-- Ticket Footer with Action -->
-                    <div class="ticket-footer">
-                        <a href="https://chat.whatsapp.com/GtnF5vTA67XKzeDS4zlLFF" target="_blank" rel="noopener noreferrer" class="whatsapp-vip-btn">
-                            <span>💬 Join WhatsApp VIP Community</span>
-                            <span>↗</span>
-                        </a>
-                        <button type="button" class="print-btn" onclick="window.print()">
-                            <span>🖨️ Print / Save Ticket (PDF)</span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="copy-code-btn" onclick="copyReferralLink()"
+                            style="padding: 9px 16px; font-size: 0.82rem;">
+                            Copy Link
                         </button>
-                    </div>
-                </div>
-
-                <!-- Personal Referral & Ambassador Hub -->
-                <div style="margin-top: 24px; background: rgba(10, 36, 23, 0.95); border: 1.5px solid var(--reg-gold); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                        <span style="font-size: 1.6rem;">🎁</span>
-                        <h3 style="font-family: var(--font-heading); color: var(--reg-gold-light); font-size: 1.25rem;">
-                            Your Personal Referral Link &amp; Code
-                        </h3>
-                    </div>
-                    <p style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.5;">
-                        Invite friends to the <strong>Business &amp; Skill Up Acquisition 2.0 Workshop</strong>! When your peers register with your code, you earn credit towards laptops, tech gadgets, scholarships, and ambassador awards.
-                    </p>
-                    
-                    <div style="margin-top: 16px; background: rgba(3, 20, 11, 0.85); border: 1px dashed var(--reg-gold); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
-                        <div style="flex: 1; min-width: 240px;">
-                            <div style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">Your Shareable Referral Link:</div>
-                            <div id="referralShareLink" style="color: #fff; font-family: monospace; font-size: 0.95rem; font-weight: 700; word-break: break-all; margin-top: 4px;">
-                                https://.../?ref=BAW-5K-XXXXXX
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button type="button" class="copy-code-btn" onclick="copyReferralLink()" style="padding: 10px 16px; font-size: 0.85rem;">
-                                📋 Copy Link
-                            </button>
-                            <a id="shareWhatsappReferralBtn" href="#" target="_blank" rel="noopener noreferrer"
-                               style="display: inline-flex; align-items: center; gap: 6px; background: #25d366; color: #03140b; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
-                                <span>💬 Share on WhatsApp</span>
-                            </a>
-                        </div>
+                        <a id="shareWhatsappReferralBtn" href="#" target="_blank" rel="noopener noreferrer"
+                            style="display: inline-flex; align-items: center; gap: 6px; background: #25d366; color: #03140b; text-decoration: none; padding: 9px 16px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
+                            <span>Share on WhatsApp</span>
+                        </a>
                     </div>
                 </div>
             </div>
+
+            <!-- Direct to WhatsApp Group Hub (Shown if NOT participating in Super Mega Challenge) -->
+            <div id="joinGroupHub"
+                style="display: none; margin-top: 24px; background: rgba(10, 36, 23, 0.95); border: 1.5px solid #25d366; border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 1.6rem;">💬</span>
+                    <h3 style="font-family: var(--font-heading); color: #4ade80; font-size: 1.25rem;">
+                        Next Step: Send Receipt to WhatsApp DM &amp; Join Group
+                    </h3>
+                </div>
+                <p style="color: #e2e8f0; font-size: 0.92rem; line-height: 1.6;">
+                    Your registration has been submitted! Since you are not participating in the referral challenge, no
+                    referral code is required. Simply send your payment receipt to our WhatsApp DM now. Once our team
+                    verifies your receipt, you will be added directly to the official workshop WhatsApp group!
+                </p>
+                <div style="margin-top: 18px;">
+                    <a id="joinGroupWaBtn" href="https://wa.me/+2249036900011" target="_blank" rel="noopener noreferrer"
+                        style="display: inline-flex; align-items: center; gap: 8px; background: #25d366; color: #03140b; text-decoration: none; padding: 13px 22px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35); transition: all 0.2s ease;">
+                        <span>Send Receipt to WhatsApp DM &amp; Join Group</span>
+                        <span>↗</span>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         </div>
     </main>
@@ -946,17 +1659,245 @@
         }
 
         function copyTicketCode() {
-            const code = document.getElementById('ticketUniqueCode').textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                alert('Admission Pass Code copied: ' + code);
-            });
+            const code = (document.getElementById('ticketUniqueCode').textContent || '').trim();
+            const btn = document.querySelector('.copy-code-ticket-btn');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    if (btn) { const o = btn.innerHTML; btn.innerHTML = '✓ Copied!'; setTimeout(() => { btn.innerHTML = o; }, 2000); }
+                }).catch(() => alert('Pass Code: ' + code));
+            } else {
+                alert('Pass Code: ' + code);
+            }
+        }
+
+        async function ensureLibraries() {
+            const promises = [];
+            if (typeof html2canvas === 'undefined') {
+                promises.push(new Promise((resolve) => {
+                    const s = document.createElement('script');
+                    s.src = 'html2canvas.min.js';
+                    s.onload = () => resolve();
+                    s.onerror = () => {
+                        const s2 = document.createElement('script');
+                        s2.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                        s2.onload = () => resolve();
+                        s2.onerror = () => resolve();
+                        document.head.appendChild(s2);
+                    };
+                    document.head.appendChild(s);
+                }));
+            }
+            if (typeof window.jspdf === 'undefined') {
+                promises.push(new Promise((resolve) => {
+                    const s = document.createElement('script');
+                    s.src = 'jspdf.umd.min.js';
+                    s.onload = () => resolve();
+                    s.onerror = () => {
+                        const s2 = document.createElement('script');
+                        s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                        s2.onload = () => resolve();
+                        s2.onerror = () => resolve();
+                        document.head.appendChild(s2);
+                    };
+                    document.head.appendChild(s);
+                }));
+            }
+            if (promises.length > 0) {
+                await Promise.all(promises);
+            }
+        }
+
+        async function downloadTicketPDF() {
+            const btn = document.getElementById('downloadTicketBtn');
+            const ticket = document.getElementById('printableTicket');
+            if (!ticket) return;
+
+            const origText = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span>⏳ Generating PDF...</span>'; }
+
+            try {
+                await ensureLibraries();
+
+                if (typeof html2canvas === 'undefined') {
+                    throw new Error('Screenshot engine is loading. Please try again in a second.');
+                }
+
+                const canvas = await html2canvas(ticket, {
+                    scale: 2.5,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+                const uniqueCode = (document.getElementById('ticketUniqueCode')?.textContent || 'ticket').trim();
+                const fileName = `BAW-Workshop-Pass-${uniqueCode}.pdf`;
+                const imgData = canvas.toDataURL('image/png');
+
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    const { jsPDF } = window.jspdf;
+                    const isLandscape = canvas.width >= canvas.height;
+                    const pdf = new jsPDF({
+                        orientation: isLandscape ? 'landscape' : 'portrait',
+                        unit: 'pt',
+                        format: 'a4'
+                    });
+
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+
+                    // Margin of 30pt
+                    const margin = 30;
+                    const maxWidth = pageWidth - (margin * 2);
+                    const maxHeight = pageHeight - (margin * 2);
+
+                    let renderWidth = maxWidth;
+                    let renderHeight = (canvas.height * maxWidth) / canvas.width;
+
+                    if (renderHeight > maxHeight) {
+                        renderHeight = maxHeight;
+                        renderWidth = (canvas.width * maxHeight) / canvas.height;
+                    }
+
+                    const x = (pageWidth - renderWidth) / 2;
+                    const y = (pageHeight - renderHeight) / 2;
+
+                    pdf.addImage(imgData, 'PNG', x, y, renderWidth, renderHeight);
+                    pdf.save(fileName);
+                } else {
+                    // Direct file fallback
+                    const a = document.createElement('a');
+                    a.href = imgData;
+                    a.download = `BAW-Workshop-Pass-${uniqueCode}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            } catch (err) {
+                console.error('PDF error:', err);
+                const msg = (err && err.message) ? err.message : (err && err.type ? 'Resource loading error' : 'Could not generate PDF');
+                alert('Could not download ticket PDF: ' + msg);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+            }
+        }
+
+        async function saveTicketImage() {
+            const btn = document.getElementById('saveImageTicketBtn');
+            const ticket = document.getElementById('printableTicket');
+            if (!ticket) return;
+
+            const origText = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span>⏳ Saving Image...</span>'; }
+
+            try {
+                await ensureLibraries();
+
+                if (typeof html2canvas === 'undefined') {
+                    throw new Error('Screenshot engine is loading. Please try again in a second.');
+                }
+
+                const canvas = await html2canvas(ticket, {
+                    scale: 2.5,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+                const uniqueCode = (document.getElementById('ticketUniqueCode')?.textContent || 'ticket').trim();
+                const fileName = `BAW-Workshop-Pass-${uniqueCode}.png`;
+
+                if (canvas.toBlob) {
+                    canvas.toBlob((blob) => {
+                        if (!blob) throw new Error('Could not create image blob');
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        }, 1000);
+                    }, 'image/png');
+                } else {
+                    const a = document.createElement('a');
+                    a.href = canvas.toDataURL('image/png');
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            } catch (err) {
+                console.error('Save image error:', err);
+                const msg = (err && err.message) ? err.message : (err && err.type ? 'Resource loading error' : 'Could not save image');
+                alert('Could not save image: ' + msg);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+            }
         }
 
         function copyReferralLink() {
             const link = document.getElementById('referralShareLink').textContent.trim();
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Your personal referral link is copied:\n' + link);
-            });
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    alert('Your personal referral link is copied:\n' + link);
+                });
+            } else {
+                alert('Your referral link:\n' + link);
+            }
+        }
+
+        function copyReferralCode() {
+            const code = (document.getElementById('referralCodeDisplay')?.textContent || '').trim();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('Your Super Mega Challenge Referral Code copied:\n' + code);
+                });
+            } else {
+                alert('Referral Code: ' + code);
+            }
+        }
+
+        function copyTicketCode() {
+            const code = (document.getElementById('ticketUniqueCode')?.textContent || '').trim();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('Ticket Pass Code copied:\n' + code);
+                });
+            } else {
+                alert('Ticket Pass Code: ' + code);
+            }
+        }
+
+        function copyKudaAccInForm(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            const acc = "2013539577";
+            const btn = document.getElementById("formCopyAccBtn");
+
+            function onCopied() {
+                if (btn) {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '✓ Copied!';
+                    btn.style.background = '#22c55e';
+                    btn.style.color = '#03140b';
+                    setTimeout(() => {
+                        btn.innerHTML = orig;
+                        btn.style.background = '';
+                        btn.style.color = '';
+                    }, 2500);
+                }
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(acc).then(onCopied).catch(() => {
+                    alert("Account Number: " + acc);
+                });
+            } else {
+                alert("Account Number: " + acc);
+            }
         }
 
         function renderTicket(reg) {
@@ -977,85 +1918,157 @@
             document.getElementById('ticketEmail').textContent = reg.email || '—';
             document.getElementById('ticketPhone').textContent = reg.phone || '—';
             document.getElementById('ticketStatus').textContent = reg.currentStatus || '—';
-            document.getElementById('ticketReferredBy').textContent = reg.referredBy || 'None';
-            document.getElementById('ticketUniqueCode').textContent = reg.uniqueCode || '—';
 
-            // Setup Shareable Referral Link & WhatsApp Button
-            const myCode = reg.uniqueCode || '';
-            const refUrl = window.location.origin + '/?ref=' + encodeURIComponent(myCode);
-            const linkEl = document.getElementById('referralShareLink');
-            if (linkEl) linkEl.textContent = refUrl;
+            // Show referred by only if present
+            const refByEl = document.getElementById('ticketReferredBy');
+            const refByRow = document.getElementById('ticketReferredByRow');
+            if (reg.referredBy && reg.referredBy.trim()) {
+                refByEl.textContent = reg.referredBy;
+                if (refByRow) refByRow.style.display = 'flex';
+            }
 
-            const waBtn = document.getElementById('shareWhatsappReferralBtn');
-            if (waBtn) {
-                const msg = `Hey! I just secured my admission ticket for the Business & Skill Up Acquisition 2.0 Workshop (Coming November 2026)! Join me and stand a chance to win laptops, scholarships, gadgets and business grants.\n\nUse my referral code: ${myCode}\nRegister here: ${refUrl}`;
-                waBtn.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
+            const codeEl = document.getElementById('ticketUniqueCode');
+            const uniqueCode = reg.uniqueCode || 'BAW-XXXXXX';
+            codeEl.textContent = uniqueCode;
+
+            // Generate QR code from unique code (compatible with node-qrcode and qrcodejs)
+            const qrCanvas = document.getElementById('ticketQRCanvas');
+            const qrBox = document.getElementById('ticketQRBox');
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    if (typeof QRCode.toCanvas === 'function' && qrCanvas) {
+                        QRCode.toCanvas(qrCanvas, uniqueCode, {
+                            width: 90,
+                            margin: 1,
+                            color: { dark: '#1a1a2e', light: '#ffffff' }
+                        }, function (err) { if (err) console.warn('QR error:', err); });
+                    } else if (qrBox) {
+                        qrBox.innerHTML = '';
+                        new QRCode(qrBox, {
+                            text: uniqueCode,
+                            width: 90,
+                            height: 90,
+                            colorDark: '#1a1a2e',
+                            colorLight: '#ffffff',
+                            correctLevel: (typeof QRCode.CorrectLevel !== 'undefined') ? QRCode.CorrectLevel.M : 0
+                        });
+                    }
+                } catch (qrErr) {
+                    console.warn('QR render error:', qrErr);
+                }
+            }
+
+            // Handle Super Mega Challenge opt-in display vs WhatsApp group DM redirect
+            const isOptedChallenge = String(reg.participateChallenge || '').trim().toLowerCase() === 'yes';
+
+            const challengeRow = document.getElementById('ticketChallengeRow');
+            const challengeVal = document.getElementById('ticketChallengeVal');
+            if (challengeRow && challengeVal) {
+                if (isOptedChallenge) {
+                    challengeRow.style.display = 'flex';
+                    challengeVal.textContent = 'Enrolled (Super Mega Challenge)';
+                } else {
+                    challengeRow.style.display = 'none';
+                }
+            }
+
+            const referralHub = document.getElementById('referralHub');
+            const joinGroupHub = document.getElementById('joinGroupHub');
+            const waReceiptBtn = document.getElementById('ticketWaReceiptBtn');
+
+            if (isOptedChallenge) {
+                if (referralHub) referralHub.style.display = 'block';
+                if (joinGroupHub) joinGroupHub.style.display = 'none';
+
+                // Setup Shareable Referral Link & WhatsApp Button
+                const myCode = reg.uniqueCode || '';
+                const codeDisplayEl = document.getElementById('referralCodeDisplay');
+                if (codeDisplayEl) codeDisplayEl.textContent = myCode;
+
+                const refUrl = window.location.origin + '/?ref=' + encodeURIComponent(myCode);
+                const linkEl = document.getElementById('referralShareLink');
+                if (linkEl) linkEl.textContent = refUrl;
+
+                const waBtn = document.getElementById('shareWhatsappReferralBtn');
+                if (waBtn) {
+                    const msg = `Hey! I just secured my admission ticket for the Business & Skill Up Acquisition 2.0 Workshop (Coming November 2026)! Join me and stand a chance to win laptops, scholarships, gadgets and business grants.\n\nUse my referral code: ${myCode}\nRegister here: ${refUrl}`;
+                    waBtn.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
+                }
+
+                if (waReceiptBtn) {
+                    const receiptMsg = `Hello BAW Academy, I have paid ₦1,500 and registered for the Business & Skill Up Acquisition 2.0 Workshop.\nName: ${reg.name || ''}\nSuper Mega Challenge Code: ${reg.uniqueCode || ''}\nHere is my payment receipt screenshot:`;
+                    waReceiptBtn.href = 'https://wa.me/+2249036900011?text=' + encodeURIComponent(receiptMsg);
+                    waReceiptBtn.innerHTML = '<span>Send Receipt via WhatsApp</span> <span>↗</span>';
+                }
+            } else {
+                if (referralHub) referralHub.style.display = 'none';
+                if (joinGroupHub) joinGroupHub.style.display = 'block';
+
+                const groupMsg = `Hello BAW Academy, I have paid ₦1,500 and registered for the Business & Skill Up Acquisition 2.0 Workshop.\nName: ${reg.name || ''}\nHere is my payment receipt screenshot. Kindly add me to the official workshop WhatsApp group!`;
+
+                const joinGroupWaBtn = document.getElementById('joinGroupWaBtn');
+                if (joinGroupWaBtn) {
+                    joinGroupWaBtn.href = 'https://wa.me/+2249036900011?text=' + encodeURIComponent(groupMsg);
+                }
+                if (waReceiptBtn) {
+                    waReceiptBtn.href = 'https://wa.me/+2249036900011?text=' + encodeURIComponent(groupMsg);
+                    waReceiptBtn.innerHTML = '<span>Send Receipt to DM &amp; Join Group</span> <span>↗</span>';
+                }
             }
         }
 
-        // Initialize Verification on Page Load
+        // Initialize Form on Page Load
         async function initPage() {
-            const ref = getQueryParam('reference') || getQueryParam('trxref');
-            if (!ref) {
-                document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('error-state').style.display = 'block';
-                document.getElementById('error-title').textContent = 'No Payment Session Found';
-                document.getElementById('error-desc').textContent = 'Please start from the homepage to complete your ₦5,000 admission payment.';
-                return;
+            // Check if user is looking up their ticket with ?code= or ?reference=
+            const codeParam = getQueryParam('code') || getQueryParam('uniqueCode');
+            if (codeParam) {
+                try {
+                    const res = await fetch(`/api/referrals/verify?code=${encodeURIComponent(codeParam)}`);
+                    const data = await res.json();
+                    if (data && data.valid && data.registration) {
+                        renderTicket(data.registration);
+                        return;
+                    }
+                } catch (e) { }
             }
 
-            try {
-                const res = await fetch(`/api/paystack/verify?reference=${encodeURIComponent(ref)}`);
-                const data = await res.json();
-
-                if (!res.ok || !data.verified) {
-                    document.getElementById('loading-state').style.display = 'none';
-                    document.getElementById('error-state').style.display = 'block';
-                    document.getElementById('error-title').textContent = 'Payment Verification Failed';
-                    document.getElementById('error-desc').textContent = data.error || 'We could not confirm your payment. Please try again or contact support.';
-                    return;
+            // Generate unique code — fetch sequential BAW-200, BAW-201… from server
+            const codeInput = document.getElementById('uniqueCodeInput');
+            if (codeInput && !codeInput.value) {
+                try {
+                    const codeRes = await fetch('/api/generate-code');
+                    const codeData = await codeRes.json();
+                    const newCode = codeData.code || `BAW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+                    const disp = document.getElementById('uniqueCodeDisplay');
+                    if (disp) disp.textContent = newCode;
+                    codeInput.value = newCode;
+                } catch (e) {
+                    // Fallback to random on network error
+                    const newCode = `BAW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+                    const disp = document.getElementById('uniqueCodeDisplay');
+                    if (disp) disp.textContent = newCode;
+                    codeInput.value = newCode;
                 }
-
-                // If already completed registration, display ticket immediately
-                if (data.alreadyRegistered && data.registration) {
-                    renderTicket(data.registration);
-                    return;
-                }
-
-                // Store verified payment context
-                verifiedPayment = data;
-
-                // Populate form fields
-                document.getElementById('display-ref').textContent = data.reference;
-                document.getElementById('uniqueCodeDisplay').textContent = data.uniqueCode;
-                document.getElementById('uniqueCodeInput').value = data.uniqueCode;
-                document.getElementById('studentEmail').value = data.email || '';
-                if (data.customerName) {
-                    document.getElementById('studentName').value = data.customerName;
-                }
-
-                // Use referral code from the verified payment data (stored in database via Paystack metadata)
-                const autoRef = data.referredBy || '';
-                const refInput = document.getElementById('referredByInput');
-                if (refInput && autoRef) {
-                    refInput.value = autoRef;
-                }
-
-                document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('registration-state').style.display = 'block';
-
-            } catch (err) {
-                document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('error-state').style.display = 'block';
-                document.getElementById('error-desc').textContent = err.message || 'Network connection issue while verifying payment.';
             }
+
+            // Check if URL has ?ref= and auto-fill referral input
+            const urlRef = getQueryParam('ref');
+            const refInput = document.getElementById('referredByInput');
+            if (refInput && urlRef && !urlRef.startsWith('TRF-')) {
+                refInput.value = urlRef.trim().toUpperCase();
+            }
+
+            // Show registration form directly
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('registration-state').style.display = 'block';
         }
 
         async function handleRegistrationSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('submitFormBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span>Registering...</span> <span>⏳</span>';
+            btn.innerHTML = '<span>Issuing Workshop Pass...</span> <span>⏳</span>';
 
             try {
                 // Collect radio values
@@ -1071,18 +2084,23 @@
                     goalVal = customGoal ? `Other: ${customGoal}` : 'Other';
                 }
 
+                const challengeVal = document.querySelector('input[name="participateChallenge"]:checked')?.value || 'Yes';
                 const refInput = document.getElementById('referredByInput');
+                const uniqueCode = document.getElementById('uniqueCodeInput').value.trim();
+                const trfRef = `BAW-KUDA-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
                 const payload = {
-                    reference: verifiedPayment.reference,
-                    uniqueCode: document.getElementById('uniqueCodeInput').value,
-                    name: document.getElementById('studentName').value,
-                    department: document.getElementById('studentDept').value,
+                    reference: trfRef,
+                    uniqueCode: uniqueCode,
+                    name: document.getElementById('studentName').value.trim(),
+                    department: document.getElementById('studentDept').value.trim(),
                     level: document.getElementById('studentLevel').value,
-                    phone: document.getElementById('studentPhone').value,
-                    email: document.getElementById('studentEmail').value,
+                    phone: document.getElementById('studentPhone').value.trim(),
+                    email: document.getElementById('studentEmail').value.trim().toLowerCase(),
                     currentStatus: statusVal,
                     primaryGoal: goalVal,
-                    qaQuestion: document.getElementById('qaQuestion').value,
+                    qaQuestion: document.getElementById('qaQuestion').value.trim(),
+                    participateChallenge: challengeVal,
                     referredBy: refInput ? refInput.value.trim().toUpperCase() : ''
                 };
 

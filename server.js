@@ -1,6 +1,5 @@
 require('dotenv').config();
 const http = require('http');
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { MongoClient } = require('mongodb');
@@ -106,16 +105,18 @@ function applySecurityHeaders(res) {
   res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://js.paystack.co",
+    "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com blob:",
+    "script-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com blob:",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: https: blob:",
     "media-src 'self' data: blob:",
-    "connect-src 'self' https://api.paystack.co",
-    "frame-src 'self' https://checkout.paystack.com",
+    "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+    "worker-src 'self' blob:",
+    "frame-src 'self'",
     "frame-ancestors 'self'",
     "base-uri 'self'",
-    "form-action 'self' https://checkout.paystack.com",
+    "form-action 'self' https://wa.me https://chat.whatsapp.com",
     "object-src 'none'"
   ].join('; '));
 }
@@ -413,45 +414,6 @@ async function saveRegistration(regDoc) {
   return true;
 }
 
-// ── Paystack API HTTPS Request Helper ──
-function paystackRequest(endpoint, method = 'GET', data = null) {
-  return new Promise((resolve, reject) => {
-    const secretKey = (process.env.PAYSTACK_SECRET_KEY || '').trim();
-    if (!secretKey) {
-      return reject(new Error('Paystack secret key is missing in environment variables.'));
-    }
-
-    const payload = data ? JSON.stringify(data) : null;
-    const options = {
-      hostname: 'api.paystack.co',
-      port: 443,
-      path: endpoint,
-      method: method,
-      headers: {
-        'Authorization': `Bearer ${secretKey}`,
-        'Content-Type': 'application/json',
-        ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {})
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', chunk => { body += chunk; });
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(body);
-          resolve({ status: res.statusCode, data: parsed });
-        } catch (e) {
-          resolve({ status: res.statusCode, raw: body });
-        }
-      });
-    });
-
-    req.on('error', err => reject(err));
-    if (payload) req.write(payload);
-    req.end();
-  });
-}
 
 // ── HTTP Request Handler ──
 const server = http.createServer(async (req, res) => {
@@ -468,7 +430,7 @@ const server = http.createServer(async (req, res) => {
   const isWriteMethod = req.method === 'POST';
   if (checkRateLimit(clientIP, isWriteMethod)) {
     applySecurityHeaders(res);
-    res.writeHead(429, { 
+    res.writeHead(429, {
       'Content-Type': 'application/json',
       'Retry-After': '60'
     });
@@ -519,7 +481,7 @@ const server = http.createServer(async (req, res) => {
       projectCount: list.length,
       registrationCount: regs.length,
       hasUriConfigured: Boolean(process.env.MONGODB_URI && process.env.MONGODB_URI.trim()),
-      feeNgn: parseInt(process.env.WORKSHOP_FEE_NGN) || 5000
+      feeNgn: parseInt(process.env.WORKSHOP_FEE_NGN) || 1500
     }));
     return;
   }
@@ -544,10 +506,10 @@ const server = http.createServer(async (req, res) => {
         if (Array.isArray(parsed)) {
           await saveProjects(parsed);
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ 
-            success: true, 
-            count: parsed.length, 
-            storage: isMongoConnected ? 'MongoDB Atlas' : 'Local File' 
+          res.end(JSON.stringify({
+            success: true,
+            count: parsed.length,
+            storage: isMongoConnected ? 'MongoDB Atlas' : 'Local File'
           }));
         } else {
           res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -561,145 +523,24 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // ── Paystack Initialize Endpoint ──
-  if (reqPath === '/api/paystack/initialize' && req.method === 'POST') {
+  // ── Generate Next Sequential Referral Code ──
+  // Returns next BAW-200, BAW-201, etc. based on existing registrations
+  if (reqPath === '/api/generate-code' && req.method === 'GET') {
     try {
-      const { email, name, phone, referredBy } = await parseJsonBody(req, 1024 * 64);
-      if (!email || !email.includes('@')) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'A valid email address is required for payment.' }));
-        return;
-      }
-
-      const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 5000;
-      const amountKobo = feeNGN * 100;
-
-      // Unique transaction reference
-      const reference = `baw_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-      // Resolve origin for automatic redirect
-      let origin = req.headers.origin;
-      if (!origin && req.headers.host) {
-        const proto = req.headers['x-forwarded-proto'] || 'http';
-        origin = `${proto}://${req.headers.host}`;
-      }
-      if (!origin) origin = `http://localhost:${PORT}`;
-
-      const callbackUrl = `${origin}/register-form.html`;
-
-      const paystackData = {
-        email: email.trim().toLowerCase(),
-        amount: amountKobo,
-        reference: reference,
-        callback_url: callbackUrl,
-        channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
-        metadata: {
-          custom_fields: [
-            { display_name: 'Student Name', variable_name: 'student_name', value: name || 'Student' },
-            { display_name: 'Workshop', variable_name: 'workshop', value: 'Business / Skill Up Acquisition 2.0' },
-            { display_name: 'Phone', variable_name: 'phone', value: phone || '' },
-            { display_name: 'Referred By', variable_name: 'referred_by', value: (referredBy || '').trim().toUpperCase() }
-          ]
-        }
-      };
-
-      const result = await paystackRequest('/transaction/initialize', 'POST', paystackData);
-
-      if (result.data && result.data.status && result.data.data) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: true,
-          authorization_url: result.data.data.authorization_url,
-          access_code: result.data.data.access_code,
-          reference: reference
-        }));
-      } else {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          error: result.data ? result.data.message : 'Could not initialize Paystack payment.'
-        }));
-      }
+      const all = await getRegistrations();
+      // Extract all numeric codes in BAW-NNN format (200+)
+      const numericCodes = all
+        .map(r => {
+          const m = (r.uniqueCode || '').match(/^BAW-(\d+)$/i);
+          return m ? parseInt(m[1], 10) : null;
+        })
+        .filter(n => n !== null && n >= 200);
+      const nextNum = numericCodes.length > 0 ? Math.max(...numericCodes) + 1 : 200;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ code: `BAW-${nextNum}` }));
     } catch (err) {
-      console.error('[Paystack Init Error]:', err.message);
       res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message || 'Server error initializing checkout' }));
-    }
-    return;
-  }
-
-  // ── Paystack Verify Endpoint ──
-  if (reqPath === '/api/paystack/verify' && req.method === 'GET') {
-    try {
-      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-      const reference = (urlObj.searchParams.get('reference') || urlObj.searchParams.get('trxref') || '').trim();
-
-      if (!reference) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Missing payment transaction reference' }));
-        return;
-      }
-
-      // Check if registration already completed with this reference
-      const existing = await findRegistrationByReference(reference);
-      if (existing) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          verified: true,
-          alreadyRegistered: true,
-          registration: existing
-        }));
-        return;
-      }
-
-      // Verify transaction directly with Paystack API
-      const paystackRes = await paystackRequest(`/transaction/verify/${encodeURIComponent(reference)}`, 'GET');
-
-      if (paystackRes.data && paystackRes.data.status && paystackRes.data.data && paystackRes.data.data.status === 'success') {
-        const txData = paystackRes.data.data;
-        const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 5000;
-        const requiredKobo = feeNGN * 100;
-
-        if (txData.amount < requiredKobo) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: `Amount paid (${txData.amount / 100}) is less than workshop ticket price (₦${feeNGN}).` }));
-          return;
-        }
-
-        // Generate unique attendee registration code: e.g. BAW-5K-XXXXXX
-        const randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const uniqueCode = `BAW-5K-${randPart}`;
-
-        let customerName = '';
-        let referredBy = '';
-        if (txData.metadata && txData.metadata.custom_fields) {
-          const nameField = txData.metadata.custom_fields.find(f => f.variable_name === 'student_name');
-          if (nameField) customerName = nameField.value;
-          const refField = txData.metadata.custom_fields.find(f => f.variable_name === 'referred_by');
-          if (refField) referredBy = refField.value;
-        }
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          verified: true,
-          alreadyRegistered: false,
-          reference: reference,
-          email: txData.customer ? txData.customer.email : '',
-          amount: txData.amount / 100,
-          customerName: customerName,
-          referredBy: referredBy,
-          paidAt: txData.paid_at,
-          uniqueCode: uniqueCode
-        }));
-      } else {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          error: (paystackRes.data && paystackRes.data.message) || 'Transaction verification unsuccessful or pending.'
-        }));
-      }
-    } catch (err) {
-      console.error('[Paystack Verify Error]:', err.message);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message || 'Error verifying transaction' }));
+      res.end(JSON.stringify({ error: 'Could not generate code' }));
     }
     return;
   }
@@ -735,44 +576,48 @@ const server = http.createServer(async (req, res) => {
           referredBy
         } = body;
 
-        if (!reference || !uniqueCode || !name || !email) {
+        if (!uniqueCode || !name || !email) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Reference, Unique Code, Name, and Email are required.' }));
+          res.end(JSON.stringify({ error: 'Unique Code, Name, and Email are required.' }));
           return;
         }
 
-        // Check if already registered
-        const existing = await findRegistrationByReference(reference);
-        if (existing) {
+        const cleanUniqueCode = String(uniqueCode).trim().toUpperCase();
+        const cleanRef = String(reference || `BAW-TRF-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`).trim();
+
+        // Check if already registered by unique code or reference
+        const existingByCode = await findRegistrationByUniqueCode(cleanUniqueCode);
+        if (existingByCode) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true, alreadyRegistered: true, registration: existing }));
+          res.end(JSON.stringify({ success: true, alreadyRegistered: true, registration: existingByCode }));
           return;
         }
 
-        // Verify transaction with Paystack for security
-        const paystackRes = await paystackRequest(`/transaction/verify/${encodeURIComponent(reference)}`, 'GET');
-        if (!paystackRes.data || !paystackRes.data.status || paystackRes.data.data.status !== 'success') {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid or unverified Paystack payment reference.' }));
+        const existingByRef = await findRegistrationByReference(cleanRef);
+        if (existingByRef) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, alreadyRegistered: true, registration: existingByRef }));
           return;
         }
 
-        const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 5000;
-        const cleanRef = String(referredBy || '').trim().toUpperCase();
+        const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 1500;
+        const cleanReferredBy = String(referredBy || '').trim().toUpperCase();
         let finalReferredBy = '';
 
         // Validate referrer strictly against the database
-        if (cleanRef && cleanRef !== uniqueCode.trim().toUpperCase()) {
-          const referrerDoc = await findRegistrationByUniqueCode(cleanRef);
-          if (referrerDoc) {
+        if (cleanReferredBy && cleanReferredBy !== cleanUniqueCode) {
+          const referrerDoc = await findRegistrationByUniqueCode(cleanReferredBy);
+          if (referrerDoc && referrerDoc.participateChallenge === 'Yes') {
             finalReferredBy = referrerDoc.uniqueCode;
           }
         }
 
+        const isOptedChallenge = String(body.participateChallenge || '').trim().toLowerCase() === 'yes';
+
         const regDoc = {
           id: `reg-${Date.now()}`,
-          reference: reference.trim(),
-          uniqueCode: uniqueCode.trim(),
+          reference: cleanRef,
+          uniqueCode: isOptedChallenge ? cleanUniqueCode : '',
           name: String(name || '').trim(),
           department: String(department || '').trim(),
           level: String(level || '').trim(),
@@ -781,11 +626,14 @@ const server = http.createServer(async (req, res) => {
           currentStatus: String(currentStatus || '').trim(),
           primaryGoal: String(primaryGoal || '').trim(),
           qaQuestion: String(qaQuestion || '').trim(),
+          participateChallenge: isOptedChallenge ? 'Yes' : 'No',
           referredBy: finalReferredBy,
           amountPaid: feeNGN,
-          paystackData: {
-            channel: paystackRes.data.data.channel,
-            paidAt: paystackRes.data.data.paid_at
+          paymentMethod: 'Direct Bank Transfer (KUDA: 2013539577)',
+          bankDetails: {
+            bank: 'KUDA',
+            accountNumber: '2013539577',
+            accountName: 'BAKARE FATIMOH OLASHUBOMI'
           },
           registeredAt: new Date().toISOString()
         };
@@ -957,7 +805,7 @@ const server = http.createServer(async (req, res) => {
 
   // 4. Block access to all .js files EXCEPT designated public client scripts
   const ext = path.extname(normalizedReqPath).toLowerCase();
-  const ALLOWED_JS_FILES = new Set(['script.js']);
+  const ALLOWED_JS_FILES = new Set(['script.js', 'qrcode.min.js', 'html2canvas.min.js', 'jspdf.umd.min.js']);
   if (ext === '.js' && !ALLOWED_JS_FILES.has(baseName)) {
     return send404(res);
   }

@@ -125,8 +125,8 @@ window.closeFlyerModal = function (e) {
     }
 };
 
-// ── Global Helper: Paystack Pre-Register Modal ──────────────
-window.openPaystackModal = function (e) {
+// ── Global Helper: Direct Transfer Payment Modal ──────────────
+window.openPaymentModal = function (e) {
     if (e && e.preventDefault) e.preventDefault();
     var modal = document.querySelector("#payModalBackdrop");
     if (modal) {
@@ -136,10 +136,9 @@ window.openPaystackModal = function (e) {
         modal.classList.add("is-open");
         modal.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
-        var nameInput = document.getElementById("payModalName");
         var referralInput = document.getElementById("payModalReferral");
         if (referralInput && !referralInput.value) {
-            // Read referral code directly from URL query param (?ref=BAW-5K-...)
+            // Read referral code directly from URL query param (?ref=BAW-...)
             try {
                 var params = new URLSearchParams(window.location.search);
                 var urlRef = params.get("ref");
@@ -149,11 +148,10 @@ window.openPaystackModal = function (e) {
                 }
             } catch (e) {}
         }
-        if (nameInput) setTimeout(function () { nameInput.focus(); }, 120);
     }
 };
 
-window.closePaystackModal = function (e) {
+window.closePaymentModal = function (e) {
     if (e && e.preventDefault) e.preventDefault();
     var modal = document.querySelector("#payModalBackdrop");
     if (modal) {
@@ -166,56 +164,76 @@ window.closePaystackModal = function (e) {
     }
 };
 
-window.handlePayInitSubmit = async function (e) {
+// Aliases for backward compatibility
+window.openPaystackModal = window.openPaymentModal;
+window.closePaystackModal = window.closePaymentModal;
+
+// ── Copy Kuda Account Number to Clipboard ──
+window.copyKudaAccount = function (e) {
     if (e && e.preventDefault) e.preventDefault();
-    var btn = document.getElementById("payInitSubmitBtn");
-    var nameInput = document.getElementById("payModalName");
-    var emailInput = document.getElementById("payModalEmail");
-    var refInput = document.getElementById("payModalReferral");
-    var referredBy = refInput ? refInput.value.trim().toUpperCase() : "";
+    var acc = "2013539577";
+    var btn = document.getElementById("copyAccBtn") || (e && e.currentTarget);
 
-    if (!emailInput || !emailInput.value.trim() || !emailInput.value.includes("@")) {
-        alert("Please enter a valid email address to receive your ticket confirmation.");
-        return;
-    }
-
-    var originalHtml = btn ? btn.innerHTML : "";
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span>Connecting to Paystack...</span> <span>⏳</span>';
-    }
-
-    try {
-        var res = await fetch('/api/paystack/initialize', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: nameInput ? nameInput.value.trim() : '',
-                email: emailInput.value.trim(),
-                referredBy: referredBy
-            })
-        });
-
-        var data = await res.json();
-        if (!res.ok || !data.success || !data.authorization_url) {
-            throw new Error(data.error || 'Failed to initialize payment.');
-        }
-
-        // Direct student to official Paystack checkout
-        window.location.href = data.authorization_url;
-    } catch (err) {
-        alert("Payment Gateway Error: " + err.message);
+    function notifySuccess() {
         if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = originalHtml;
+            var origHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="copy-icon">✓</span> <span class="copy-text">Copied!</span>';
+            btn.classList.add("copied");
+            setTimeout(function () {
+                btn.innerHTML = origHtml;
+                btn.classList.remove("copied");
+            }, 2500);
         }
     }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(acc).then(notifySuccess).catch(function () {
+            fallbackCopyText(acc, notifySuccess);
+        });
+    } else {
+        fallbackCopyText(acc, notifySuccess);
+    }
+};
+
+function fallbackCopyText(text, cb) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+        document.execCommand("copy");
+        if (cb) cb();
+    } catch (err) {
+        alert("Account Number: " + text);
+    }
+    document.body.removeChild(ta);
+}
+
+// ── Proceed to Registration Form CTA Handler ──
+window.proceedToRegistration = function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var referralInput = document.getElementById("payModalReferral");
+    var refCode = referralInput ? referralInput.value.trim().toUpperCase() : "";
+    if (!refCode) {
+        try {
+            var params = new URLSearchParams(window.location.search);
+            refCode = (params.get("ref") || "").trim().toUpperCase();
+        } catch (err) {}
+    }
+    var targetUrl = "register-form.html";
+    if (refCode) {
+        targetUrl += "?ref=" + encodeURIComponent(refCode);
+    }
+    window.location.href = targetUrl;
 };
 
 // ── Database-Backed Referral Code Verification ──
 async function verifyReferralCode(code) {
     var feedback = document.getElementById("payModalReferralFeedback");
-    if (!code || code.length < 6) {
+    if (!code || code.length < 5) {
         if (feedback) { feedback.textContent = ""; feedback.style.display = "none"; }
         return;
     }
@@ -242,7 +260,7 @@ async function verifyReferralCode(code) {
     }
 }
 
-// Auto-verify referral code when the user leaves the input field
+// Auto-verify referral code when user leaves the input field
 (function () {
     document.addEventListener("DOMContentLoaded", function () {
         var refInput = document.getElementById("payModalReferral");
@@ -259,7 +277,7 @@ async function verifyReferralCode(code) {
         var ref = params.get("ref");
         if (ref && ref.trim()) {
             window.addEventListener("DOMContentLoaded", function () {
-                setTimeout(function () { window.openPaystackModal(); }, 600);
+                setTimeout(function () { window.openPaymentModal(); }, 600);
             });
         }
     } catch (e) {}
@@ -330,21 +348,21 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 4. Paystack Pre-Register Modal Listeners
+    // 4. Pre-Register Payment Modal Listeners
     var payModalClose = document.querySelector("#payModalClose");
     var payModalBackdrop = document.querySelector("#payModalBackdrop");
     if (payModalClose) {
-        payModalClose.addEventListener("click", window.closePaystackModal);
+        payModalClose.addEventListener("click", window.closePaymentModal);
     }
     if (payModalBackdrop) {
         payModalBackdrop.addEventListener("click", function (e) {
             if (e.target === payModalBackdrop) {
-                window.closePaystackModal();
+                window.closePaymentModal();
             }
         });
         document.addEventListener("keydown", function (e) {
             if (e.key === "Escape" && payModalBackdrop.classList.contains("is-open")) {
-                window.closePaystackModal();
+                window.closePaymentModal();
             }
         });
     }
@@ -352,8 +370,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Auto-open modal if URL has #pre-register
     if (window.location.hash === "#pre-register") {
         setTimeout(function () {
-            if (typeof window.openPaystackModal === "function") {
-                window.openPaystackModal();
+            if (typeof window.openPaymentModal === "function") {
+                window.openPaymentModal();
             }
         }, 350);
     }
