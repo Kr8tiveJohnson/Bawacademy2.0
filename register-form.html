@@ -570,6 +570,38 @@
             transform: none;
         }
 
+        /* Form Lock & Verification Gate */
+        .form-fields-locked {
+            opacity: 0.35 !important;
+            pointer-events: none !important;
+            user-select: none !important;
+            filter: grayscale(80%) blur(0.4px);
+            transition: all 0.3s ease;
+        }
+
+        .form-fields-unlocked {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            user-select: auto !important;
+            filter: none !important;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes btnNoticePulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
+            }
+            50% {
+                transform: scale(1.03);
+                box-shadow: 0 0 24px 8px rgba(37, 211, 102, 0.7);
+            }
+        }
+
+        .btn-pulse-attention {
+            animation: btnNoticePulse 1.2s infinite ease-in-out !important;
+        }
+
         /* Loader & error screens */
         .state-box {
             text-align: center;
@@ -1247,10 +1279,32 @@
                             below. Send your payment receipt via WhatsApp:
                         </p>
                         <a href="https://wa.me/+2249036900011?text=Hello%20BAW%20Academy,%20I%20have%20transferred%20my%20workshop%20fee%20of%20%E2%82%A61,500.%20Here%20is%20my%20payment%20receipt:"
-                            target="_blank" rel="noopener noreferrer" class="direct-pay-wa-link">
+                            target="_blank" rel="noopener noreferrer" class="direct-pay-wa-link btn-pulse-attention" id="btnSendWaReceipt" onclick="onSendReceiptClicked()">
                             <span>Send Receipt on WhatsApp (+2249036900011)</span>
                             <span>↗</span>
                         </a>
+
+                        <!-- Consent Checkbox (Student must click button first, then check) -->
+                        <div class="payment-consent-box" style="margin-top: 14px; background: rgba(3, 20, 11, 0.95); border: 1.5px solid rgba(230, 183, 73, 0.45); border-radius: 12px; padding: 13px 16px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+                            <input type="checkbox" id="consentPaymentCheckbox" onchange="onConsentCheckboxChanged()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #22c55e; cursor: pointer; flex-shrink: 0;">
+                            <label for="consentPaymentCheckbox" style="cursor: pointer; user-select: none; font-size: 0.88rem; color: #f1f5f9; line-height: 1.45;">
+                                <strong style="color: #4ade80; display: block; font-size: 0.92rem;">I have consented and sent my payment receipt.</strong>
+                                <span style="display: block; font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">
+                                    (Click the green button above to open WhatsApp DM and send your receipt screenshot, then tick this checkbox to unlock the registration form)
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Lock / Unlock Notice Banner -->
+                <div id="formLockedNotice" style="background: rgba(245, 158, 11, 0.12); border: 1.5px dashed rgba(245, 158, 11, 0.6); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px; transition: all 0.3s ease;">
+                    <span id="formLockIcon" style="font-size: 1.8rem;">🔒</span>
+                    <div style="flex: 1;">
+                        <strong id="formLockTitle" style="color: #fbbf24; font-size: 0.98rem; display: block;">Registration Form is Locked</strong>
+                        <span id="formLockSub" style="color: #cbd5e1; font-size: 0.84rem; line-height: 1.45; display: block; margin-top: 2px;">
+                            To prevent unverified submissions, you must click <strong>"Send Receipt on WhatsApp (+2249036900011)"</strong> above and check the confirmation box to unlock the form.
+                        </span>
                     </div>
                 </div>
 
@@ -1266,7 +1320,7 @@
                 </div>
 
                 <form id="studentRegistrationForm" onsubmit="handleRegistrationSubmit(event)">
-                    <div class="form-grid">
+                    <div class="form-grid form-fields-locked" id="registrationFormFields">
 
                         <!-- Hidden Unique Code for Pass ID Assignment -->
                         <input type="hidden" id="uniqueCodeInput" name="uniqueCode">
@@ -2151,8 +2205,101 @@
             document.getElementById('registration-state').style.display = 'block';
         }
 
+        // ── WhatsApp Receipt & Payment Verification Gate ──
+        let hasClickedReceiptButton = false;
+
+        function onSendReceiptClicked() {
+            hasClickedReceiptButton = true;
+            const btn = document.getElementById('btnSendWaReceipt');
+            if (btn) {
+                btn.classList.remove('btn-pulse-attention');
+                btn.style.boxShadow = '0 0 18px rgba(34, 197, 94, 0.7)';
+            }
+            const cb = document.getElementById('consentPaymentCheckbox');
+            if (cb && cb.checked) {
+                updateFormLockState(true);
+            }
+        }
+
+        function onConsentCheckboxChanged() {
+            const cb = document.getElementById('consentPaymentCheckbox');
+            if (!cb) return;
+
+            if (cb.checked) {
+                if (!hasClickedReceiptButton) {
+                    cb.checked = false;
+                    alert("⚠️ Action Required:\n\nPlease click the green 'Send Receipt on WhatsApp (+2249036900011)' button first to open WhatsApp and send your transfer receipt screenshot, then check this box.");
+                    const btn = document.getElementById('btnSendWaReceipt');
+                    if (btn) {
+                        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        btn.classList.add('btn-pulse-attention');
+                    }
+                    return;
+                }
+                updateFormLockState(true);
+            } else {
+                updateFormLockState(false);
+            }
+        }
+
+        function updateFormLockState(isUnlocked) {
+            const fields = document.getElementById('registrationFormFields');
+            const notice = document.getElementById('formLockedNotice');
+            const icon = document.getElementById('formLockIcon');
+            const title = document.getElementById('formLockTitle');
+            const sub = document.getElementById('formLockSub');
+            const submitBtn = document.getElementById('submitFormBtn');
+
+            if (isUnlocked) {
+                if (fields) {
+                    fields.classList.remove('form-fields-locked');
+                    fields.classList.add('form-fields-unlocked');
+                }
+                if (submitBtn) submitBtn.disabled = false;
+                if (notice) {
+                    notice.style.background = 'rgba(34, 197, 94, 0.14)';
+                    notice.style.borderColor = 'rgba(34, 197, 94, 0.6)';
+                    if (icon) icon.textContent = '🔓';
+                    if (title) {
+                        title.style.color = '#4ade80';
+                        title.textContent = 'Form Unlocked — Receipt Sent & Confirmed';
+                    }
+                    if (sub) {
+                        sub.style.color = '#e2e8f0';
+                        sub.innerHTML = 'Thank you! You can now proceed to complete your workshop participant form below and claim your pass.';
+                    }
+                }
+            } else {
+                if (fields) {
+                    fields.classList.remove('form-fields-unlocked');
+                    fields.classList.add('form-fields-locked');
+                }
+                if (submitBtn) submitBtn.disabled = true;
+                if (notice) {
+                    notice.style.background = 'rgba(245, 158, 11, 0.12)';
+                    notice.style.borderColor = 'rgba(245, 158, 11, 0.6)';
+                    if (icon) icon.textContent = '🔒';
+                    if (title) {
+                        title.style.color = '#fbbf24';
+                        title.textContent = 'Registration Form is Locked';
+                    }
+                    if (sub) {
+                        sub.style.color = '#cbd5e1';
+                        sub.innerHTML = 'To prevent unverified submissions, you must click <strong>"Send Receipt on WhatsApp (+2249036900011)"</strong> above and check the confirmation box to unlock the form.';
+                    }
+                }
+            }
+        }
+
         async function handleRegistrationSubmit(e) {
             e.preventDefault();
+            if (!hasClickedReceiptButton || !document.getElementById('consentPaymentCheckbox')?.checked) {
+                alert("Payment Verification Required:\n\nYou must click 'Send Receipt on WhatsApp (+2249036900011)' and check the receipt confirmation box before submitting your registration.");
+                const btn = document.getElementById('btnSendWaReceipt');
+                if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
             const btn = document.getElementById('submitFormBtn');
             btn.disabled = true;
             btn.innerHTML = '<span>Issuing Workshop Pass...</span> <span>⏳</span>';
