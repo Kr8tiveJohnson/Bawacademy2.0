@@ -1174,6 +1174,240 @@
                 display: none !important;
             }
         }
+
+        /* ── Compact Card & Verification Gate Styles ── */
+        .compact-pay-card {
+            background: rgba(10, 36, 23, 0.95);
+            border: 1.5px solid var(--reg-gold);
+            border-radius: 14px !important;
+            padding: 14px 18px !important;
+            margin-bottom: 14px !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+        }
+
+        .compact-pay-card .direct-pay-summary-header {
+            padding-bottom: 8px;
+            margin-bottom: 4px;
+        }
+
+        .compact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 10px;
+            margin: 8px 0 10px !important;
+        }
+
+        @media (max-width: 640px) {
+            .compact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .compact-grid .direct-pay-card {
+            padding: 8px 12px !important;
+            border-radius: 10px !important;
+        }
+
+        .compact-receipt-wrap {
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .compact-action-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .receipt-dropzone-compact {
+            flex: 1;
+            min-width: 220px;
+            background: rgba(230, 183, 73, 0.05);
+            border: 1.5px dashed rgba(230, 183, 73, 0.45);
+            border-radius: 10px;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .receipt-dropzone-compact:hover,
+        .receipt-dropzone-compact.dragover {
+            background: rgba(230, 183, 73, 0.12);
+            border-color: var(--reg-gold);
+        }
+
+        .compact-dz-empty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .dz-mini-icon {
+            font-size: 1.15rem;
+        }
+
+        .dz-mini-title {
+            color: #ffffff;
+            font-size: 0.84rem;
+            font-weight: 700;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dz-mini-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            background: rgba(230, 183, 73, 0.18);
+            color: var(--reg-gold-light);
+            padding: 2px 7px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .compact-dz-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .receipt-preview-thumb-mini {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+        }
+
+        .receipt-preview-thumb-mini img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .receipt-preview-info-mini {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .receipt-preview-name-mini {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .receipt-preview-status-mini {
+            font-size: 0.72rem;
+            color: #4ade80;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+        }
+
+        .receipt-preview-status-mini .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .receipt-preview-status-mini.is-uploading {
+            color: #f6d27e;
+        }
+
+        .receipt-preview-status-mini.is-uploading .status-dot {
+            background: #f6d27e;
+            animation: pulseDot 1s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .btn-mini-remove {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-mini-remove:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .compact-wa-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #25d366;
+            color: #03140b !important;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            min-height: 40px;
+        }
+
+        .compact-wa-link:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .compact-consent-box {
+            background: rgba(3, 20, 11, 0.85);
+            border: 1px solid rgba(230, 183, 73, 0.3);
+            border-radius: 8px;
+            padding: 7px 11px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slim-audit-notice {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px dashed rgba(245, 158, 11, 0.45);
+            border-radius: 10px;
+            padding: 8px 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 
@@ -1233,19 +1467,19 @@
 
             <!-- Form State -->
             <div id="registration-state">
-                <!-- Direct Payment Confirmation / Instructions Banner -->
-                <div class="direct-pay-summary">
+                <!-- Direct Payment Confirmation / Instructions Banner (Compact Card) -->
+                <div class="direct-pay-summary compact-pay-card">
                     <div class="direct-pay-summary-header">
                         <div class="direct-pay-summary-title">
-                            <span>💳 Direct Transfer Details</span>
+                            <span>💳 Direct Bank Transfer</span>
                         </div>
-                        <span class="direct-pay-fee-badge">ADMISSION FEE: <strong>₦1,500</strong></span>
+                        <span class="direct-pay-fee-badge">WORKSHOP FEE: ₦1,500</span>
                     </div>
 
-                    <div class="direct-pay-grid">
-                        <!-- Account Number Card (Highlighted with Copy button) -->
+                    <div class="direct-pay-grid compact-grid">
+                        <!-- Account Number Card -->
                         <div class="direct-pay-card direct-pay-card-highlight">
-                            <div class="direct-pay-card-label">ACCOUNT NUMBER</div>
+                            <div class="direct-pay-card-label">ACCOUNT NUMBER (KUDA BANK)</div>
                             <div class="direct-pay-acc-row">
                                 <span id="kudaAccountDisplay" class="direct-pay-acc-num">2013539577</span>
                                 <button type="button" class="direct-pay-copy-btn" id="formCopyAccBtn"
@@ -1255,57 +1489,65 @@
                             </div>
                         </div>
 
-                        <!-- Bank Card -->
-                        <div class="direct-pay-card">
-                            <div class="direct-pay-card-label">BANK</div>
-                            <div class="direct-pay-card-val">
-                                <span class="direct-pay-kuda-tag">KUDA BANK</span>
-                            </div>
-                        </div>
-
                         <!-- Account Name Card -->
                         <div class="direct-pay-card">
                             <div class="direct-pay-card-label">ACCOUNT NAME</div>
-                            <div class="direct-pay-card-val" style="font-size: 0.9rem; letter-spacing: 0.3px;">
+                            <div class="direct-pay-card-val" style="font-size: 0.88rem; color: #f1f5f9; letter-spacing: 0.2px;">
                                 BAKARE FATIMOH OLASHUBOMI
                             </div>
                         </div>
                     </div>
 
-                    <!-- Footer Action Strip -->
-                    <div class="direct-pay-footer">
-                        <p>
-                            Transfer <strong>₦1,500</strong> to the account above, then complete the participant form
-                            below. Send your payment receipt via WhatsApp:
-                        </p>
-                        <a href="https://wa.me/+2349036900011?text=Hello%20BAW%20Academy,%20I%20have%20transferred%20my%20workshop%20fee%20of%20%E2%82%A61,500.%20Here%20is%20my%20payment%20receipt:"
-                            target="_blank" rel="noopener noreferrer" class="direct-pay-wa-link btn-pulse-attention" id="btnSendWaReceipt" onclick="onSendReceiptClicked()">
-                            <span>Send Receipt on WhatsApp (+2349036900011)</span>
-                            <span>↗</span>
-                        </a>
+                    <!-- Compact Verification Action Row -->
+                    <div class="compact-receipt-wrap">
+                        <div class="compact-action-row">
+                            <!-- Compact Dropzone Button -->
+                            <div class="receipt-dropzone-compact" id="receiptDropzone" onclick="document.getElementById('receiptFileInput').click()" title="Click to upload transfer screenshot">
+                                <input type="file" id="receiptFileInput" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display: none;" onchange="handleReceiptFileSelect(event)">
+                                
+                                <div id="dropzoneEmptyState" class="compact-dz-empty">
+                                    <span class="dz-mini-icon">📤</span>
+                                    <span class="dz-mini-title">Upload Payment Receipt</span>
+                                    <span class="dz-mini-badge">JPG / PNG / PDF</span>
+                                </div>
 
-                        <!-- Consent Checkbox (Student must click button first, then check) -->
-                        <div class="payment-consent-box" style="margin-top: 14px; background: rgba(3, 20, 11, 0.95); border: 1.5px solid rgba(230, 183, 73, 0.45); border-radius: 12px; padding: 13px 16px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
-                            <input type="checkbox" id="consentPaymentCheckbox" onchange="onConsentCheckboxChanged()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #22c55e; cursor: pointer; flex-shrink: 0;">
-                            <label for="consentPaymentCheckbox" style="cursor: pointer; user-select: none; font-size: 0.88rem; color: #f1f5f9; line-height: 1.45;">
-                                <strong style="color: #4ade80; display: block; font-size: 0.92rem;">I confirm that I have transferred ₦1,500 and submitted my genuine payment receipt.</strong>
-                                <span style="display: block; font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">
-                                    I understand that submissions without corresponding verified bank deposits will be revoked and denied access at the accreditation desk.
-                                </span>
+                                <div id="dropzonePreviewState" style="display: none;" class="compact-dz-preview">
+                                    <div class="receipt-preview-thumb-mini" id="receiptPreviewThumb">📄</div>
+                                    <div class="receipt-preview-info-mini">
+                                        <div class="receipt-preview-name-mini" id="receiptFileName">receipt.jpg</div>
+                                        <div class="receipt-preview-status-mini" id="receiptUploadStatus">
+                                            <span class="status-dot"></span>
+                                            <span id="receiptUploadStatusText">Uploading...</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-mini-remove" onclick="event.stopPropagation(); removeReceiptFile()" title="Change file">✕ Change</button>
+                                </div>
+                            </div>
+
+                            <!-- WhatsApp Alternative Link -->
+                            <a href="https://wa.me/+2349036900011?text=Hello%20BAW%20Academy,%20I%20have%20transferred%20my%20workshop%20fee%20of%20%E2%82%A61,500.%20Here%20is%20my%20payment%20receipt:"
+                                target="_blank" rel="noopener noreferrer" class="compact-wa-link" id="btnSendWaReceipt" onclick="onSendReceiptClicked()">
+                                <span>Send on WhatsApp</span>
+                                <span>↗</span>
+                            </a>
+                        </div>
+
+                        <!-- Compact Consent Checkbox -->
+                        <div class="compact-consent-box">
+                            <input type="checkbox" id="consentPaymentCheckbox" onchange="onConsentCheckboxChanged()" style="width: 17px; height: 17px; accent-color: #22c55e; cursor: pointer; flex-shrink: 0;">
+                            <label for="consentPaymentCheckbox" style="cursor: pointer; user-select: none; font-size: 0.82rem; color: #f1f5f9; line-height: 1.35;">
+                                <strong style="color: #4ade80;">I confirm that I have transferred ₦1,500 and attached my genuine payment receipt proof.</strong>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <!-- Form Verification Notice Banner -->
-                <div id="formLockedNotice" style="background: rgba(245, 158, 11, 0.12); border: 1.5px dashed rgba(245, 158, 11, 0.6); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px; transition: all 0.3s ease;">
-                    <span id="formLockIcon" style="font-size: 1.8rem;">🛡️</span>
-                    <div style="flex: 1;">
-                        <strong id="formLockTitle" style="color: #fbbf24; font-size: 0.98rem; display: block;">Strict Payment Audit in Effect</strong>
-                        <span id="formLockSub" style="color: #cbd5e1; font-size: 0.84rem; line-height: 1.45; display: block; margin-top: 2px;">
-                            All transfers are strictly reconciled with official bank statements. Send your valid ₦1,500 receipt screenshot to WhatsApp (+2349036900011) and verify payment above to unlock registration. Fake or unverified proofs will be disqualified.
-                        </span>
-                    </div>
+                <!-- Slim Audit Notice Strip -->
+                <div id="formLockedNotice" class="slim-audit-notice">
+                    <span id="formLockIcon" style="font-size: 1.2rem;">🛡️</span>
+                    <span id="formLockSub" style="color: #cbd5e1; font-size: 0.8rem; line-height: 1.35;">
+                        Transfers are strictly reconciled with official bank statements. Upload receipt screenshot above or verify payment to unlock registration.
+                    </span>
                 </div>
 
                 <div style="margin-bottom: 24px;">
@@ -2205,8 +2447,197 @@
             document.getElementById('registration-state').style.display = 'block';
         }
 
-        // ── WhatsApp Receipt & Payment Verification Gate ──
+        // ── Direct Receipt Upload & WhatsApp Verification Gate ──
+        let uploadedReceiptUrl = '';
+        let uploadedReceiptName = '';
+        let isUploadingReceipt = false;
         let hasClickedReceiptButton = false;
+
+        function handleReceiptFileSelect(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            processReceiptFile(file);
+        }
+
+        function processReceiptFile(file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+            const isExtValid = Boolean(file.name && file.name.match(/\.(jpg|jpeg|png|webp|gif|pdf)$/i));
+            if (!validTypes.includes(file.type) && !isExtValid) {
+                alert("Invalid file format. Please upload an image (JPG, PNG, WEBP) or PDF receipt.");
+                return;
+            }
+
+            if (file.size > 25 * 1024 * 1024) {
+                alert("Receipt file is too large. Maximum size is 25MB.");
+                return;
+            }
+
+            const previewState = document.getElementById('dropzonePreviewState');
+            const emptyState = document.getElementById('dropzoneEmptyState');
+            const thumbEl = document.getElementById('receiptPreviewThumb');
+            const nameEl = document.getElementById('receiptFileName');
+            const sizeEl = document.getElementById('receiptFileSize');
+            const statusWrap = document.getElementById('receiptUploadStatus');
+            const statusText = document.getElementById('receiptUploadStatusText');
+
+            if (nameEl) nameEl.textContent = file.name;
+            const originalSizeKb = (file.size / 1024).toFixed(1);
+            if (sizeEl) sizeEl.textContent = file.size > 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(2) + ' MB' : originalSizeKb + ' KB';
+
+            if (emptyState) emptyState.style.display = 'none';
+            if (previewState) previewState.style.display = 'flex';
+
+            if (statusWrap) statusWrap.className = 'receipt-preview-status-mini is-uploading';
+            if (statusText) {
+                statusText.style.color = '#38bdf8';
+                statusText.textContent = 'Optimizing & uploading...';
+            }
+
+            // If PDF, upload directly
+            if (file.type === 'application/pdf' || (file.name && file.name.toLowerCase().endsWith('.pdf'))) {
+                if (thumbEl) thumbEl.innerHTML = `<span style="font-size:18px;">📑</span>`;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadReceiptData(file.name, e.target.result);
+                };
+                reader.readAsDataURL(file);
+                return;
+            }
+
+            // Image file: Compress client-side via Canvas to max 1200px @ 80% quality (~80-120KB)
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const maxDim = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.82);
+                    if (thumbEl) thumbEl.innerHTML = `<img src="${compressedBase64}" alt="Receipt Preview">`;
+
+                    const approxBytes = Math.round((compressedBase64.length - 'data:image/jpeg;base64,'.length) * 3 / 4);
+                    if (sizeEl) sizeEl.textContent = (approxBytes / 1024).toFixed(1) + ' KB (compressed)';
+
+                    const finalFilename = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                    uploadReceiptData(finalFilename, compressedBase64);
+                };
+                img.onerror = function() {
+                    if (thumbEl) thumbEl.innerHTML = `<img src="${e.target.result}" alt="Receipt Preview">`;
+                    uploadReceiptData(file.name, e.target.result);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadReceiptData(filename, base64Data) {
+            isUploadingReceipt = true;
+            const statusWrap = document.getElementById('receiptUploadStatus');
+            const statusText = document.getElementById('receiptUploadStatusText');
+            const cb = document.getElementById('consentPaymentCheckbox');
+
+            try {
+                const res = await fetch('/api/upload-receipt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: filename, data: base64Data })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to upload receipt file');
+                }
+
+                uploadedReceiptUrl = data.url;
+                uploadedReceiptName = filename;
+                isUploadingReceipt = false;
+
+                if (statusWrap) statusWrap.className = 'receipt-preview-status-mini';
+                if (statusText) {
+                    statusText.style.color = '#4ade80';
+                    statusText.textContent = '✅ Attached & Verified';
+                }
+
+                // Automatically check consent box and unlock form
+                if (cb) {
+                    cb.checked = true;
+                    updateFormLockState(true);
+                }
+            } catch (err) {
+                isUploadingReceipt = false;
+                console.error('Receipt upload error:', err);
+                if (statusWrap) statusWrap.className = 'receipt-preview-status-mini';
+                if (statusText) {
+                    statusText.style.color = '#f87171';
+                    statusText.textContent = '❌ Upload failed: ' + err.message;
+                }
+            }
+        }
+
+        function removeReceiptFile() {
+            uploadedReceiptUrl = '';
+            uploadedReceiptName = '';
+            isUploadingReceipt = false;
+            const fileInput = document.getElementById('receiptFileInput');
+            if (fileInput) fileInput.value = '';
+
+            const emptyState = document.getElementById('dropzoneEmptyState');
+            const previewState = document.getElementById('dropzonePreviewState');
+            if (emptyState) emptyState.style.display = 'flex';
+            if (previewState) previewState.style.display = 'none';
+
+            if (!hasClickedReceiptButton) {
+                const cb = document.getElementById('consentPaymentCheckbox');
+                if (cb) cb.checked = false;
+                updateFormLockState(false);
+            }
+        }
+
+        function setupReceiptDropzone() {
+            const dz = document.getElementById('receiptDropzone');
+            if (!dz) return;
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dz.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dz.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dz.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dz.classList.remove('dragover');
+                }, false);
+            });
+
+            dz.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    processReceiptFile(files[0]);
+                }
+            }, false);
+        }
 
         function onSendReceiptClicked() {
             hasClickedReceiptButton = true;
@@ -2226,13 +2657,12 @@
             if (!cb) return;
 
             if (cb.checked) {
-                if (!hasClickedReceiptButton) {
+                if (!uploadedReceiptUrl && !hasClickedReceiptButton) {
                     cb.checked = false;
-                    alert("⚠️ Verification Required:\n\nPlease submit your genuine ₦1,500 payment receipt screenshot to our official WhatsApp (+2349036900011) first before confirming.");
-                    const btn = document.getElementById('btnSendWaReceipt');
-                    if (btn) {
-                        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        btn.classList.add('btn-pulse-attention');
+                    alert("⚠️ Verification Required:\n\nPlease either upload your ₦1,500 payment receipt screenshot above or send it to our official WhatsApp (+2349036900011) first before confirming.");
+                    const dz = document.getElementById('receiptDropzone');
+                    if (dz) {
+                        dz.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                     return;
                 }
@@ -2266,7 +2696,9 @@
                     }
                     if (sub) {
                         sub.style.color = '#e2e8f0';
-                        sub.innerHTML = 'Receipt submission confirmed. Fill out your accurate attendee details below. Note: Final pass admission remains subject to bank audit reconciliation.';
+                        sub.innerHTML = uploadedReceiptUrl
+                            ? 'Receipt proof attached and ready for admin approval. Complete your accurate attendee details below.'
+                            : 'Payment confirmation acknowledged. Complete your accurate attendee details below.';
                     }
                 }
             } else {
@@ -2285,7 +2717,7 @@
                     }
                     if (sub) {
                         sub.style.color = '#cbd5e1';
-                        sub.innerHTML = 'All transfers are strictly reconciled with official bank statements. Send your valid ₦1,500 receipt screenshot to WhatsApp (+2349036900011) and verify payment above to unlock registration. Fake or unverified proofs will be disqualified.';
+                        sub.innerHTML = 'All transfers are strictly reconciled with official bank statements. Upload your ₦1,500 receipt screenshot above or forward to WhatsApp (+2349036900011) to unlock registration. Fake or unverified proofs will be disqualified.';
                     }
                 }
             }
@@ -2293,10 +2725,16 @@
 
         async function handleRegistrationSubmit(e) {
             e.preventDefault();
-            if (!hasClickedReceiptButton || !document.getElementById('consentPaymentCheckbox')?.checked) {
-                alert("Payment Verification Required:\n\nPlease ensure you have transferred ₦1,500 and submitted your genuine payment receipt to official WhatsApp (+2349036900011) before registering.");
-                const btn = document.getElementById('btnSendWaReceipt');
-                if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            if (isUploadingReceipt) {
+                alert("Please wait: Receipt is still uploading to server.");
+                return;
+            }
+
+            if (!uploadedReceiptUrl && !hasClickedReceiptButton && !document.getElementById('consentPaymentCheckbox')?.checked) {
+                alert("Payment Verification Required:\n\nPlease ensure you have transferred ₦1,500 and uploaded your genuine payment receipt proof (or sent via WhatsApp) before registering.");
+                const dz = document.getElementById('receiptDropzone');
+                if (dz) dz.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
@@ -2335,7 +2773,8 @@
                     primaryGoal: goalVal,
                     qaQuestion: document.getElementById('qaQuestion').value.trim(),
                     participateChallenge: challengeVal,
-                    referredBy: refInput ? refInput.value.trim().toUpperCase() : ''
+                    referredBy: refInput ? refInput.value.trim().toUpperCase() : '',
+                    receiptUrl: uploadedReceiptUrl
                 };
 
                 const res = await fetch('/api/registrations', {
@@ -2360,7 +2799,10 @@
         }
 
         // Run verification on start
-        window.addEventListener('DOMContentLoaded', initPage);
+        window.addEventListener('DOMContentLoaded', () => {
+            initPage();
+            setupReceiptDropzone();
+        });
     </script>
 </body>
 

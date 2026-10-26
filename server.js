@@ -8,11 +8,15 @@ const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'projects.json');
 const REGISTRATIONS_FILE = path.join(__dirname, 'registrations.json');
 const UPLOAD_DIR = path.join(__dirname, 'assets', 'projects');
+const RECEIPTS_DIR = path.join(__dirname, 'assets', 'receipts');
 const NOT_FOUND_PAGE = path.join(__dirname, '404.html');
 
-// Ensure upload directory exists
+// Ensure upload directories exist
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+if (!fs.existsSync(RECEIPTS_DIR)) {
+  fs.mkdirSync(RECEIPTS_DIR, { recursive: true });
 }
 
 // MIME Types whitelist
@@ -32,6 +36,7 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
   '.ttf': 'font/ttf',
   '.mp4': 'video/mp4',
+  '.pdf': 'application/pdf',
 };
 
 // Sensitive files strictly prohibited from public web access
@@ -646,7 +651,7 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST') {
       try {
-        const body = await parseJsonBody(req, 1024 * 128);
+        const body = await parseJsonBody(req, 1024 * 512);
         const {
           reference,
           uniqueCode,
@@ -658,7 +663,8 @@ const server = http.createServer(async (req, res) => {
           currentStatus,
           primaryGoal,
           qaQuestion,
-          referredBy
+          referredBy,
+          receiptUrl
         } = body;
 
         if (!uniqueCode || !name || !email) {
@@ -669,10 +675,15 @@ const server = http.createServer(async (req, res) => {
 
         const cleanUniqueCode = String(uniqueCode).trim().toUpperCase();
         const cleanRef = String(reference || `BAW-TRF-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`).trim();
+        const cleanReceiptUrl = String(receiptUrl || '').trim();
 
         // Check if already registered by unique code or reference
         const existingByCode = await findRegistrationByUniqueCode(cleanUniqueCode);
         if (existingByCode) {
+          if (cleanReceiptUrl && !existingByCode.receiptUrl) {
+            existingByCode.receiptUrl = cleanReceiptUrl;
+            await saveRegistration(existingByCode);
+          }
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: true, alreadyRegistered: true, registration: existingByCode }));
           return;
@@ -680,6 +691,10 @@ const server = http.createServer(async (req, res) => {
 
         const existingByRef = await findRegistrationByReference(cleanRef);
         if (existingByRef) {
+          if (cleanReceiptUrl && !existingByRef.receiptUrl) {
+            existingByRef.receiptUrl = cleanReceiptUrl;
+            await saveRegistration(existingByRef);
+          }
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: true, alreadyRegistered: true, registration: existingByRef }));
           return;
@@ -713,6 +728,7 @@ const server = http.createServer(async (req, res) => {
           qaQuestion: String(qaQuestion || '').trim(),
           participateChallenge: isOptedChallenge ? 'Yes' : 'No',
           referredBy: finalReferredBy,
+          receiptUrl: cleanReceiptUrl,
           amountPaid: feeNGN,
           paymentMethod: 'Direct Bank Transfer (KUDA: 2013539577)',
           bankDetails: {
@@ -865,6 +881,61 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Database query failed.' }));
     }
+    return;
+  }
+
+  // Upload API route for saving attendee payment receipts
+  if (reqPath === '/api/upload-receipt' && req.method === 'POST') {
+    let body = '';
+    const MAX_RECEIPT_SIZE = 15 * 1024 * 1024; // 15MB
+    let exceeded = false;
+
+    req.on('data', chunk => {
+      body += chunk;
+      if (body.length > MAX_RECEIPT_SIZE) {
+        exceeded = true;
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Receipt file exceeds maximum permitted size of 15MB.' }));
+        req.destroy();
+      }
+    });
+
+    req.on('end', () => {
+      if (exceeded) return;
+      try {
+        const { filename, data } = JSON.parse(body);
+        if (!filename || !data) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Missing filename or receipt data' }));
+          return;
+        }
+
+        const ext = path.extname(filename).toLowerCase();
+        const SAFE_RECEIPT_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.pdf']);
+        if (!SAFE_RECEIPT_EXTS.has(ext)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Invalid receipt file type. Allowed: JPG, PNG, WEBP, GIF, PDF' }));
+          return;
+        }
+
+        const safeBaseName = path.basename(filename, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const cleanName = `receipt-${Date.now()}-${safeBaseName}${ext}`;
+        const targetPath = path.join(RECEIPTS_DIR, cleanName);
+
+        const base64Data = data.replace(/^data:[^;]+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        fs.writeFileSync(targetPath, buffer);
+        const publicUrl = 'assets/receipts/' + cleanName;
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, url: publicUrl, filename: cleanName }));
+      } catch (err) {
+        console.error('[Receipt Upload Error]:', err.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Failed to process receipt upload' }));
+      }
+    });
     return;
   }
 

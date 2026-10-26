@@ -510,6 +510,99 @@
             border: 1px solid rgba(230, 183, 73, 0.3);
             white-space: nowrap;
         }
+
+        /* Receipt Viewer Styles */
+        .btn-receipt-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.16);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            padding: 5px 11px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-receipt-view:hover {
+            background: #22c55e;
+            color: #03140b;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+        }
+
+        .receipt-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 10, 6, 0.9);
+            backdrop-filter: blur(16px);
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .receipt-modal-card {
+            background: var(--admin-surface);
+            border: 1.5px solid var(--admin-border);
+            border-radius: 20px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
+            animation: modalFadeIn 0.2s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .receipt-modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--admin-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(4, 20, 12, 0.98);
+        }
+
+        .receipt-modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.55);
+            min-height: 280px;
+        }
+
+        .receipt-modal-body img {
+            max-width: 100%;
+            max-height: 62vh;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .receipt-modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid var(--admin-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(4, 20, 12, 0.98);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 
@@ -575,6 +668,10 @@
             <div class="admin-kpi-card">
                 <div class="admin-kpi-label"><span>💰</span> Revenue Collected</div>
                 <div class="admin-kpi-val" id="kpiRegRevenue" style="color: #f6d27e;">₦0</div>
+            </div>
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label"><span>🧾</span> Receipts Uploaded</div>
+                <div class="admin-kpi-val" id="kpiReceiptCount" style="color: #38bdf8;">0</div>
             </div>
         </div>
 
@@ -667,7 +764,13 @@
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                         <input type="text" id="regSearchInput" placeholder="🔍 Search name, code, dept..." oninput="filterRegistrations()"
-                            style="background: rgba(3,20,11,0.8); border: 1px solid var(--admin-border); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 0.9rem; min-width: 240px;">
+                            style="background: rgba(3,20,11,0.8); border: 1px solid var(--admin-border); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 0.9rem; min-width: 220px;">
+                        <select id="receiptFilterSelect" onchange="filterRegistrations()"
+                            style="background: rgba(3,20,11,0.8); border: 1px solid var(--admin-border); color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 0.88rem; cursor: pointer;">
+                            <option value="all">Filter: All Registrations</option>
+                            <option value="with_receipt">🧾 With Uploaded Receipt</option>
+                            <option value="wa_only">📱 WhatsApp DM Only</option>
+                        </select>
                         <button class="button button-gold" onclick="exportRegistrationsCSV()" style="font-size: 0.88rem; padding: 10px 16px;">
                             <span>📥 Export CSV</span>
                         </button>
@@ -688,6 +791,7 @@
                             <tr>
                                 <th>Pass Code</th>
                                 <th>Student Name</th>
+                                <th>Receipt Proof</th>
                                 <th>Super Mega Challenge</th>
                                 <th>Referrals Made</th>
                                 <th>Referred By</th>
@@ -703,7 +807,7 @@
                         </thead>
                         <tbody id="registrationsTableBody">
                             <tr>
-                                <td colspan="13" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                <td colspan="14" style="text-align: center; padding: 40px; color: #94a3b8;">
                                     Loading registered students...
                                 </td>
                             </tr>
@@ -715,6 +819,41 @@
     </main>
 
     <div class="toast-notify" id="toastNotify">Project saved successfully!</div>
+
+    <!-- Admin Receipt Preview Modal -->
+    <div id="receiptModal" class="receipt-modal-overlay" style="display: none;" onclick="closeReceiptModal()">
+        <div class="receipt-modal-card" onclick="event.stopPropagation()">
+            <div class="receipt-modal-header">
+                <div>
+                    <h3 id="receiptModalStudentName" style="color: #fff; font-size: 1.25rem; font-family: var(--font-heading); margin-bottom: 4px;">
+                        Payment Receipt Proof
+                    </h3>
+                    <div style="font-size: 0.82rem; color: var(--admin-gold); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <span id="receiptModalCode" class="reg-code-badge">BAW-200</span>
+                        <span id="receiptModalRef" style="color: #94a3b8; font-family: monospace;">BAW-KUDA-XXX</span>
+                        <span id="receiptModalDate" style="color: #94a3b8; font-size: 0.78rem;"></span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeReceiptModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer; padding: 4px 10px; border-radius: 8px;">✕</button>
+            </div>
+            <div class="receipt-modal-body" id="receiptModalBody">
+                <!-- Preview image or PDF frame inserted here -->
+            </div>
+            <div class="receipt-modal-footer">
+                <span style="font-size: 0.82rem; color: #4ade80; font-weight: 700;">
+                    ✓ Attached to Attendee Registration Record
+                </span>
+                <div style="display: flex; gap: 8px;">
+                    <a id="receiptModalOpenBtn" href="#" target="_blank" class="button button-gold" style="font-size: 0.85rem; padding: 8px 16px;">
+                        <span>Open Fullscreen / Download ↗</span>
+                    </a>
+                    <button type="button" class="btn-action-sm btn-del" onclick="closeReceiptModal()" style="font-size: 0.85rem; padding: 8px 16px;">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const AUTH_PASSCODE = "spotless2026";
@@ -769,11 +908,14 @@
         function updateRegKPIs() {
             const count = registrations.length;
             const revenue = registrations.reduce((acc, r) => acc + (Number(r.amountPaid) || 1500), 0);
+            const receiptCount = registrations.filter(r => Boolean(r.receiptUrl)).length;
             const regCountEl = document.getElementById("kpiRegCount");
             const regRevenueEl = document.getElementById("kpiRegRevenue");
+            const receiptCountEl = document.getElementById("kpiReceiptCount");
             const tabBadge = document.getElementById("tabBadgeRegs");
             if (regCountEl) regCountEl.textContent = count;
             if (regRevenueEl) regRevenueEl.textContent = "₦" + revenue.toLocaleString();
+            if (receiptCountEl) receiptCountEl.textContent = receiptCount;
             if (tabBadge) tabBadge.textContent = count;
         }
 
@@ -824,7 +966,7 @@
             if (!list || list.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="12" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        <td colspan="14" style="text-align: center; padding: 40px; color: #94a3b8;">
                             No registered students yet. Once students register and complete payment, they appear here instantly.
                         </td>
                     </tr>
@@ -841,6 +983,18 @@
                         </td>
                         <td>
                             <strong style="color: #fff; font-size: 0.95rem;">${escapeHtml(r.name || '—')}</strong>
+                        </td>
+                        <td>
+                            ${r.receiptUrl ? `
+                                <button type="button" class="btn-receipt-view" onclick="openReceiptModal('${escapeHtml(r.receiptUrl)}', '${escapeHtml(r.name || 'Student')}', '${escapeHtml(r.uniqueCode || '')}', '${escapeHtml(r.reference || '')}', '${r.registeredAt || ''}')">
+                                    <span>🧾 View Receipt</span>
+                                    <span>🔍</span>
+                                </button>
+                            ` : `
+                                <span style="color: #94a3b8; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;">
+                                    <span>📱</span> WhatsApp DM
+                                </span>
+                            `}
                         </td>
                         <td>
                             ${r.participateChallenge === 'Yes'
@@ -890,20 +1044,28 @@
 
         function filterRegistrations() {
             const query = (document.getElementById("regSearchInput")?.value || "").toLowerCase().trim();
-            if (!query) {
-                renderRegistrationsTable(registrations);
-                return;
+            const filterType = (document.getElementById("receiptFilterSelect")?.value || "all");
+
+            let filtered = registrations;
+
+            if (filterType === 'with_receipt') {
+                filtered = filtered.filter(r => Boolean(r.receiptUrl));
+            } else if (filterType === 'wa_only') {
+                filtered = filtered.filter(r => !r.receiptUrl);
             }
-            const filtered = registrations.filter(r => {
-                return (r.name && r.name.toLowerCase().includes(query)) ||
-                    (r.uniqueCode && r.uniqueCode.toLowerCase().includes(query)) ||
-                    (r.email && r.email.toLowerCase().includes(query)) ||
-                    (r.phone && r.phone.toLowerCase().includes(query)) ||
-                    (r.department && r.department.toLowerCase().includes(query)) ||
-                    (r.level && r.level.toLowerCase().includes(query)) ||
-                    (r.referredBy && r.referredBy.toLowerCase().includes(query)) ||
-                    (r.reference && r.reference.toLowerCase().includes(query));
-            });
+
+            if (query) {
+                filtered = filtered.filter(r => {
+                    return (r.name && r.name.toLowerCase().includes(query)) ||
+                        (r.uniqueCode && r.uniqueCode.toLowerCase().includes(query)) ||
+                        (r.email && r.email.toLowerCase().includes(query)) ||
+                        (r.phone && r.phone.toLowerCase().includes(query)) ||
+                        (r.department && r.department.toLowerCase().includes(query)) ||
+                        (r.level && r.level.toLowerCase().includes(query)) ||
+                        (r.referredBy && r.referredBy.toLowerCase().includes(query)) ||
+                        (r.reference && r.reference.toLowerCase().includes(query));
+                });
+            }
             renderRegistrationsTable(filtered);
         }
 
@@ -913,10 +1075,11 @@
                 return;
             }
 
-            const headers = ["Unique Code", "Name", "Super Mega Challenge", "Referrals Made", "Referred By", "Email", "Phone", "Department", "Level", "Current Status", "Primary Goal", "QA Question", "Fee Paid", "Reference", "Registration Date"];
+            const headers = ["Unique Code", "Name", "Payment Receipt Proof URL", "Super Mega Challenge", "Referrals Made", "Referred By", "Email", "Phone", "Department", "Level", "Current Status", "Primary Goal", "QA Question", "Fee Paid", "Reference", "Registration Date"];
             const rows = registrations.map(r => [
                 `"${(r.uniqueCode || '').replace(/"/g, '""')}"`,
                 `"${(r.name || '').replace(/"/g, '""')}"`,
+                `"${(r.receiptUrl ? window.location.origin + '/' + r.receiptUrl : 'WhatsApp DM Only').replace(/"/g, '""')}"`,
                 `"${(r.participateChallenge || 'No').replace(/"/g, '""')}"`,
                 `"${r.referralCount || 0}"`,
                 `"${(r.referredBy || '').replace(/"/g, '""')}"`,
@@ -942,6 +1105,56 @@
             document.body.removeChild(link);
             showToast("CSV exported successfully!");
         }
+
+        function openReceiptModal(url, name, code, ref, date) {
+            const modal = document.getElementById("receiptModal");
+            const nameEl = document.getElementById("receiptModalStudentName");
+            const codeEl = document.getElementById("receiptModalCode");
+            const refEl = document.getElementById("receiptModalRef");
+            const dateEl = document.getElementById("receiptModalDate");
+            const bodyEl = document.getElementById("receiptModalBody");
+            const openBtn = document.getElementById("receiptModalOpenBtn");
+
+            if (nameEl) nameEl.textContent = `Receipt Proof: ${name || 'Attendee'}`;
+            if (codeEl) codeEl.textContent = code || 'Direct Pass';
+            if (refEl) refEl.textContent = ref || '—';
+            if (dateEl) {
+                dateEl.textContent = date ? new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : '';
+            }
+
+            if (openBtn) {
+                openBtn.href = url;
+            }
+
+            if (bodyEl) {
+                if (url.toLowerCase().endsWith('.pdf')) {
+                    bodyEl.innerHTML = `
+                        <div style="text-align: center; padding: 30px;">
+                            <div style="font-size: 3.5rem; margin-bottom: 12px;">📑</div>
+                            <h4 style="color: #fff; margin-bottom: 8px;">PDF Bank Payment Document</h4>
+                            <p style="color: #cbd5e1; font-size: 0.88rem; margin-bottom: 20px;">Uploaded bank transaction document file.</p>
+                            <a href="${url}" target="_blank" class="button button-gold" style="font-size: 0.9rem; padding: 10px 20px;">
+                                <span>Open PDF Document in Fullscreen ↗</span>
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    bodyEl.innerHTML = `<img src="${url}" alt="Receipt Proof for ${escapeHtml(name)}" style="max-width: 100%; max-height: 62vh; object-fit: contain; border-radius: 10px;">`;
+                }
+            }
+
+            if (modal) modal.style.display = "flex";
+        }
+
+        function closeReceiptModal() {
+            const modal = document.getElementById("receiptModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        // Close modal on Escape key
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeReceiptModal();
+        });
 
         async function deleteSingleRegistration(id, name) {
             if (!confirm(`Are you sure you want to delete registration for "${name || 'this participant'}"? This action cannot be undone.`)) {
