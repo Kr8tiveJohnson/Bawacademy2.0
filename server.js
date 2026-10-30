@@ -304,12 +304,60 @@ function writeRegistrationsToFile(registrations) {
   }
 }
 
-// --- MongoDB Atlas Connection ---
+// --- MongoDB Atlas Connection & Auto-Recovery Pool ---
 let dbClient = null;
 let projectsCollection = null;
 let registrationsCollection = null;
 let isMongoConnected = false;
+let isReconnecting = false;
 let cachedProjects = null;
+
+function handleMongoError(err, operation = 'operation') {
+  console.error(`[Database] Error during ${operation} in MongoDB:`, err.message);
+  const msg = (err.message || '').toLowerCase();
+  if (
+    msg.includes('timed out') ||
+    msg.includes('timeout') ||
+    msg.includes('econnreset') ||
+    msg.includes('closed') ||
+    msg.includes('topology') ||
+    msg.includes('not connected') ||
+    msg.includes('secureconnect')
+  ) {
+    triggerMongoReconnect();
+  }
+}
+
+function triggerMongoReconnect() {
+  if (isReconnecting) return;
+  isReconnecting = true;
+  isMongoConnected = false;
+  console.log('[Database] 🔄 Socket/connection drop detected. Scheduling background MongoDB reconnect in 2s...');
+  setTimeout(async () => {
+    try {
+      if (dbClient) {
+        try { await dbClient.close(); } catch (e) {}
+      }
+      await initMongoDB();
+    } catch (e) {
+      console.warn('[Database] Background reconnect attempt failed:', e.message);
+    } finally {
+      isReconnecting = false;
+    }
+  }, 2000);
+}
+
+// Background Keepalive Ping every 45 seconds to keep the Atlas connection warm
+setInterval(async () => {
+  if (isMongoConnected && dbClient) {
+    try {
+      await dbClient.db().command({ ping: 1 });
+    } catch (err) {
+      console.warn('[Database] Background keepalive ping failed:', err.message);
+      triggerMongoReconnect();
+    }
+  }
+}, 45 * 1000);
 
 async function initMongoDB() {
   let uri = process.env.MONGODB_URI;
@@ -325,8 +373,15 @@ async function initMongoDB() {
   try {
     console.log('[Database] ⏳ Connecting to MongoDB Atlas...');
     dbClient = new MongoClient(uri, {
-      serverSelectionTimeoutMS: 7000,
+      serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      maxIdleTimeMS: 30000,         // Cleanly close idle sockets every 30s before Atlas drops them
+      heartbeatFrequencyMS: 10000,  // Proactively check cluster health every 10s
+      minPoolSize: 1,               // Maintain warm connection
+      maxPoolSize: 15,
+      retryWrites: true,
+      retryReads: true,
     });
     await dbClient.connect();
     const db = dbClient.db();
@@ -413,7 +468,7 @@ async function getProjects() {
       });
       return cachedProjects;
     } catch (err) {
-      console.error('[Database] Failed to read from MongoDB Atlas, falling back to local file:', err.message);
+      handleMongoError(err, 'reading projects');
     }
   }
   cachedProjects = readProjectsFromFile();
@@ -437,7 +492,7 @@ async function saveProjects(projectsList) {
       }
       return true;
     } catch (err) {
-      console.error('[Database] Failed to save to MongoDB Atlas:', err.message);
+      handleMongoError(err, 'saving projects');
       return false;
     }
   }
@@ -454,7 +509,7 @@ async function getRegistrations() {
         return { id: rest.id || (_id ? _id.toString() : 'reg-' + Date.now()), ...rest };
       });
     } catch (err) {
-      console.error('[Database] Failed to read registrations from MongoDB:', err.message);
+      handleMongoError(err, 'reading registrations');
       docs = readRegistrationsFromFile();
     }
   } else {
@@ -486,7 +541,7 @@ async function findRegistrationByReference(ref) {
         return rest;
       }
     } catch (err) {
-      console.error('[Database] Error finding registration:', err.message);
+      handleMongoError(err, 'finding registration by reference');
     }
   }
   const all = readRegistrationsFromFile();
@@ -504,7 +559,7 @@ async function findRegistrationByUniqueCode(code) {
         return rest;
       }
     } catch (err) {
-      console.error('[Database] Error finding registration by uniqueCode in MongoDB:', err.message);
+      handleMongoError(err, 'finding registration by uniqueCode');
     }
   }
   const all = readRegistrationsFromFile();
@@ -522,7 +577,7 @@ async function findRegistrationByEmail(email) {
         return rest;
       }
     } catch (err) {
-      console.error('[Database] Error finding registration by email in MongoDB:', err.message);
+      handleMongoError(err, 'finding registration by email');
     }
   }
   const all = readRegistrationsFromFile();
@@ -551,7 +606,7 @@ async function findRegistrationById(identifier) {
         return rest;
       }
     } catch (err) {
-      console.error('[Database] Error finding registration by identifier in MongoDB:', err.message);
+      handleMongoError(err, 'finding registration by identifier');
     }
   }
   const all = readRegistrationsFromFile();
@@ -599,7 +654,7 @@ async function getReferralsForCode(code) {
         registeredAt: d.registeredAt
       }));
     } catch (err) {
-      console.error('[Database] Error finding referrals in MongoDB:', err.message);
+      handleMongoError(err, 'finding referrals');
     }
   }
   const all = readRegistrationsFromFile();
@@ -633,7 +688,7 @@ async function saveRegistration(regDoc) {
       );
       return true;
     } catch (err) {
-      console.error('[Database] Failed to save registration in MongoDB:', err.message);
+      handleMongoError(err, 'saving registration');
       return false;
     }
   }
@@ -682,7 +737,7 @@ async function updateRegistration(identifier, updateFields) {
         return rest;
       }
     } catch (err) {
-      console.error('[Database] Error updating registration in MongoDB:', err.message);
+      handleMongoError(err, 'updating registration');
     }
   }
   return idx >= 0 ? list[idx] : null;
@@ -710,7 +765,7 @@ async function deleteRegistration(identifier) {
       });
       return true;
     } catch (err) {
-      console.error('[Database] Failed to delete registration in MongoDB:', err.message);
+      handleMongoError(err, 'deleting registration');
       return false;
     }
   }
@@ -724,7 +779,7 @@ async function clearAllRegistrations() {
       await registrationsCollection.deleteMany({});
       return true;
     } catch (err) {
-      console.error('[Database] Failed to clear all registrations in MongoDB:', err.message);
+      handleMongoError(err, 'clearing all registrations');
       return false;
     }
   }
