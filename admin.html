@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#030f08">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#030d07">
     <title>Executive Admin Dashboard | The Bridge Business Academy</title>
 
     <!-- Google Fonts -->
@@ -22,10 +22,10 @@
         :root {
             --bg-base: #030d07;
             --bg-sidebar: #05140b;
-            --bg-card: rgba(8, 26, 16, 0.75);
-            --bg-card-hover: rgba(12, 38, 24, 0.85);
+            --bg-card: rgba(8, 26, 16, 0.78);
+            --bg-card-hover: rgba(12, 38, 24, 0.9);
             --bg-surface: #071f11;
-            --bg-input: #031209;
+            --bg-input: #020e06;
             
             --border-glass: rgba(230, 183, 73, 0.18);
             --border-glass-light: rgba(255, 255, 255, 0.08);
@@ -56,6 +56,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -72,8 +73,8 @@
 
         /* Scrollbars */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: rgba(3, 13, 7, 0.7);
@@ -90,6 +91,24 @@
         .app-shell {
             display: flex;
             min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Backdrop on Mobile */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-backdrop.is-active {
+            display: block;
+            opacity: 1;
         }
 
         /* Sidebar */
@@ -101,20 +120,27 @@
             top: 0;
             bottom: 0;
             left: 0;
-            z-index: 90;
+            z-index: 100;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 24px 18px;
             backdrop-filter: blur(20px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sidebar-brand-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-glass-light);
         }
 
         .sidebar-brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-glass-light);
             text-decoration: none;
         }
 
@@ -144,6 +170,20 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 700;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-glass-light);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
         }
 
         .sidebar-nav {
@@ -255,13 +295,54 @@
             100% { transform: scale(0.9); opacity: 0.8; }
         }
 
-        /* Main Workspace Container */
+        /* ---------------- MAIN WORKSPACE ---------------- */
         .main-content {
             margin-left: var(--sidebar-w);
             flex: 1;
             min-width: 0;
             padding: 28px 36px 60px;
             max-width: 1600px;
+            width: 100%;
+        }
+
+        /* Mobile Header Bar */
+        .mobile-header-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(4, 18, 10, 0.95);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 80;
+            backdrop-filter: blur(16px);
+            margin: -16px -16px 16px -16px;
+        }
+
+        .mobile-header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .mobile-header-brand img {
+            height: 30px;
+            width: auto;
+        }
+
+        .mobile-header-title {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .mobile-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* Top Bar */
@@ -270,7 +351,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 20px;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border-glass-light);
             flex-wrap: wrap;
@@ -278,7 +359,7 @@
 
         .top-bar-title-wrap h1 {
             font-family: var(--font-heading);
-            font-size: 1.75rem;
+            font-size: 1.7rem;
             font-weight: 800;
             color: #fff;
             letter-spacing: -0.02em;
@@ -287,7 +368,7 @@
 
         .top-bar-title-wrap p {
             color: var(--text-muted);
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             margin-top: 4px;
         }
 
@@ -303,7 +384,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
             gap: 16px;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
         .kpi-card {
@@ -328,7 +409,7 @@
         }
 
         .kpi-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             border-color: var(--border-glass);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
         }
@@ -342,7 +423,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .kpi-label {
@@ -366,7 +447,7 @@
 
         .kpi-val {
             font-family: var(--font-heading);
-            font-size: 2.1rem;
+            font-size: 2rem;
             font-weight: 800;
             line-height: 1;
             letter-spacing: -0.02em;
@@ -383,12 +464,12 @@
             margin-top: 6px;
         }
 
-        /* ---------------- WORKSPACE CARDS & PANELS ---------------- */
+        /* ---------------- CONTENT CARDS & PANELS ---------------- */
         .content-card {
             background: var(--bg-card);
             border: 1px solid var(--border-glass);
             border-radius: 20px;
-            padding: 28px;
+            padding: 24px;
             backdrop-filter: blur(16px);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
         }
@@ -397,8 +478,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 22px;
+            gap: 14px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
@@ -407,13 +488,13 @@
             align-items: center;
             gap: 10px;
             flex: 1;
-            min-width: 280px;
-            max-width: 580px;
+            min-width: 260px;
         }
 
         .search-box {
             position: relative;
             flex: 1;
+            min-width: 180px;
         }
 
         .search-box input {
@@ -422,7 +503,7 @@
             border: 1px solid var(--border-glass-light);
             border-radius: 12px;
             color: #fff;
-            padding: 11px 16px 11px 40px;
+            padding: 11px 16px 11px 38px;
             font-size: 0.88rem;
             font-family: var(--font-body);
             transition: all 0.2s ease;
@@ -436,7 +517,7 @@
 
         .search-box-icon {
             position: absolute;
-            left: 14px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 0.95rem;
@@ -468,10 +549,42 @@
             flex-wrap: wrap;
         }
 
+        /* View Mode Segmented Switch */
+        .view-switch {
+            display: inline-flex;
+            background: rgba(2, 14, 8, 0.9);
+            border: 1px solid var(--border-glass-light);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 2px;
+        }
+
+        .view-switch-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .view-switch-btn.is-active {
+            background: rgba(230, 183, 73, 0.18);
+            color: var(--accent-gold-light);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
         /* ---------------- BUTTONS ---------------- */
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             padding: 10px 18px;
             border-radius: 10px;
@@ -548,20 +661,87 @@
             color: #fff;
         }
 
-        /* Icon action buttons */
-        .btn-icon {
-            padding: 7px 11px;
-            font-size: 0.8rem;
+        .btn-action-sm {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 12px;
             border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
-        /* ---------------- REGISTRATION TABLE ---------------- */
+        .btn-action-sm.btn-edit {
+            background: rgba(230, 183, 73, 0.12);
+            border-color: rgba(230, 183, 73, 0.3);
+            color: var(--accent-gold-light);
+        }
+        .btn-action-sm.btn-edit:hover {
+            background: rgba(230, 183, 73, 0.25);
+            border-color: var(--accent-gold);
+            color: #fff;
+        }
+
+        .btn-action-sm.btn-del {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        .btn-action-sm.btn-del:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: #ef4444;
+            color: #fff;
+        }
+
+        .btn-receipt-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #4ade80;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-receipt-view:hover {
+            background: rgba(34, 197, 94, 0.25);
+            border-color: #4ade80;
+        }
+
+        .reg-code-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            background: rgba(230, 183, 73, 0.12);
+            border: 1px solid rgba(230, 183, 73, 0.35);
+            color: var(--accent-gold-light);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 8px;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        /* ---------------- REGISTRATION TABLE & CARDS ---------------- */
         .reg-table-container {
             overflow-x: auto;
             border-radius: 14px;
             border: 1px solid var(--border-glass-light);
             background: rgba(3, 15, 8, 0.6);
             margin-top: 10px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .reg-table {
@@ -573,7 +753,7 @@
         }
 
         .reg-table thead {
-            background: rgba(5, 20, 11, 0.95);
+            background: rgba(5, 20, 11, 0.98);
             position: sticky;
             top: 0;
             z-index: 10;
@@ -606,92 +786,142 @@
             border-bottom: none;
         }
 
-        /* Badges & Pills */
-        .reg-code-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            background: rgba(230, 183, 73, 0.12);
-            border: 1px solid rgba(230, 183, 73, 0.35);
-            color: var(--accent-gold-light);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
-            border-radius: 8px;
-            letter-spacing: 0.05em;
-            white-space: nowrap;
+        /* ---------------- MOBILE CARD VIEW MODE ---------------- */
+        /* Applied when screen is <= 768px, or when user selects Cards View */
+        body.mode-cards .reg-table-container {
+            border: none;
+            background: transparent;
+            overflow: visible;
         }
 
-        .btn-receipt-view {
+        body.mode-cards .reg-table {
+            display: block;
+            width: 100%;
+        }
+
+        body.mode-cards .reg-table thead {
+            display: none;
+        }
+
+        body.mode-cards .reg-table tbody {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            width: 100%;
+        }
+
+        body.mode-cards .reg-table tbody tr {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: linear-gradient(180deg, rgba(8, 28, 17, 0.9) 0%, rgba(4, 16, 9, 0.95) 100%);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            position: relative;
+        }
+
+        body.mode-cards .reg-table tbody tr:hover td {
+            background: transparent;
+        }
+
+        body.mode-cards .reg-table td {
+            padding: 0 !important;
+            border: none !important;
+            display: block;
+        }
+
+        /* Semantic Card Sub-blocks */
+        .card-row-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .card-student-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+        }
+
+        .card-contacts-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 10px 12px;
+            background: rgba(3, 14, 8, 0.85);
+            border-radius: 10px;
+            border: 1px solid var(--border-glass-light);
+        }
+
+        .card-contact-link {
+            font-size: 0.82rem;
+            color: var(--accent-gold-light);
+            text-decoration: none;
             display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            word-break: break-all;
+        }
+
+        .card-badge-strip {
+            display: flex;
             align-items: center;
             gap: 6px;
-            padding: 5px 12px;
-            border-radius: 8px;
-            background: rgba(34, 197, 94, 0.15);
-            border: 1px solid rgba(34, 197, 94, 0.35);
+            flex-wrap: wrap;
+        }
+
+        .card-tag {
+            font-size: 0.76rem;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+        }
+
+        .card-tag.tag-highlight {
+            background: rgba(34, 197, 94, 0.18);
+            border-color: rgba(34, 197, 94, 0.4);
             color: #4ade80;
-            font-size: 0.78rem;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
         }
 
-        .btn-receipt-view:hover {
-            background: rgba(34, 197, 94, 0.25);
-            border-color: #4ade80;
-            transform: scale(1.02);
-        }
-
-        .btn-action-sm {
-            display: inline-flex;
+        .card-fee-row {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.15s ease;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.82rem;
         }
 
-        .btn-action-sm.btn-edit {
-            background: rgba(230, 183, 73, 0.12);
-            border-color: rgba(230, 183, 73, 0.3);
-            color: var(--accent-gold-light);
-        }
-        .btn-action-sm.btn-edit:hover {
-            background: rgba(230, 183, 73, 0.25);
-            border-color: var(--accent-gold);
-            color: #fff;
+        .card-actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
+            margin-top: 4px;
         }
 
-        .btn-action-sm.btn-del {
-            background: rgba(239, 68, 68, 0.12);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-        }
-        .btn-action-sm.btn-del:hover {
-            background: rgba(239, 68, 68, 0.25);
-            border-color: #ef4444;
-            color: #fff;
+        .card-actions-grid .btn-action-sm {
+            padding: 9px 12px;
+            font-size: 0.84rem;
+            width: 100%;
         }
 
         /* ---------------- PROJECTS CMS PANEL ---------------- */
         .projects-grid {
             display: grid;
             grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-            gap: 28px;
+            gap: 24px;
             align-items: start;
-        }
-
-        @media (max-width: 1080px) {
-            .projects-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         .form-field {
@@ -717,7 +947,7 @@
             border-radius: 10px;
             color: #fff;
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-size: 16px; /* Prevents auto-zoom on iOS */
             transition: all 0.2s ease;
         }
 
@@ -729,10 +959,16 @@
             box-shadow: 0 0 0 3px rgba(230, 183, 73, 0.15);
         }
 
+        .form-row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
         .upload-dropzone {
             border: 2px dashed rgba(230, 183, 73, 0.35);
             border-radius: 14px;
-            padding: 32px 20px;
+            padding: 28px 16px;
             text-align: center;
             background: rgba(3, 18, 10, 0.5);
             cursor: pointer;
@@ -752,9 +988,9 @@
 
         .photo-previews {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 10px;
-            margin-top: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
         }
 
         .photo-thumb {
@@ -793,10 +1029,10 @@
             background: rgba(4, 18, 10, 0.8);
             border: 1px solid var(--border-glass-light);
             border-radius: 14px;
-            padding: 14px;
+            padding: 12px 14px;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             margin-bottom: 12px;
             transition: all 0.2s ease;
         }
@@ -808,8 +1044,8 @@
         }
 
         .project-item-cover {
-            width: 64px;
-            height: 64px;
+            width: 58px;
+            height: 58px;
             border-radius: 10px;
             object-fit: cover;
             border: 1px solid var(--border-glass-light);
@@ -825,15 +1061,15 @@
         .project-item-title {
             font-weight: 700;
             color: #fff;
-            font-size: 0.95rem;
-            margin-bottom: 4px;
+            font-size: 0.92rem;
+            margin-bottom: 3px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .project-item-meta {
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
             display: flex;
             align-items: center;
@@ -851,21 +1087,21 @@
         .auth-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(2, 8, 4, 0.92);
+            background: rgba(2, 8, 4, 0.94);
             backdrop-filter: blur(24px);
             z-index: 9999;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
         }
 
         .auth-card {
             background: linear-gradient(180deg, rgba(8, 28, 17, 0.95) 0%, rgba(4, 16, 9, 0.98) 100%);
             border: 1px solid var(--border-glass);
             border-radius: 24px;
-            padding: 40px 36px;
-            max-width: 440px;
+            padding: 36px 28px;
+            max-width: 420px;
             width: 100%;
             text-align: center;
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(230, 183, 73, 0.1);
@@ -883,8 +1119,8 @@
         }
 
         .auth-lock-icon {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
+            font-size: 2.3rem;
+            margin-bottom: 14px;
             display: inline-block;
             filter: drop-shadow(0 4px 12px rgba(230, 183, 73, 0.4));
         }
@@ -899,7 +1135,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
             animation: fadeIn 0.2s ease-out;
         }
 
@@ -928,53 +1164,54 @@
         }
 
         .receipt-modal-header {
-            padding: 18px 24px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border-glass-light);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(4, 18, 10, 0.9);
+            background: rgba(4, 18, 10, 0.95);
         }
 
         .receipt-modal-body {
-            padding: 24px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #020905;
-            min-height: 240px;
+            min-height: 220px;
         }
 
         .receipt-modal-footer {
-            padding: 16px 24px;
+            padding: 14px 20px;
             border-top: 1px solid var(--border-glass-light);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(4, 18, 10, 0.95);
-            gap: 12px;
+            background: rgba(4, 18, 10, 0.98);
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         /* ---------------- TOAST NOTIFICATION ---------------- */
         .toast-notify {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 24px;
+            right: 24px;
             background: linear-gradient(135deg, #072e18, #03170b);
             border: 1px solid var(--accent-gold);
             color: #fff;
-            padding: 14px 22px;
+            padding: 12px 20px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(230, 183, 73, 0.2);
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 600;
             z-index: 10000;
             opacity: 0;
             transform: translateY(20px);
             pointer-events: none;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: calc(100vw - 32px);
         }
 
         .toast-notify.is-show {
@@ -983,46 +1220,154 @@
             pointer-events: auto;
         }
 
-        /* Responsive */
+        /* ---------------- COMPREHENSIVE RESPONSIVE FITNESS ---------------- */
         @media (max-width: 900px) {
             .sidebar {
                 transform: translateX(-100%);
-                transition: transform 0.3s ease;
             }
             .sidebar.mobile-open {
                 transform: translateX(0);
+                box-shadow: 10px 0 40px rgba(0, 0, 0, 0.8);
+            }
+            .sidebar-close-btn {
+                display: inline-flex;
             }
             .main-content {
                 margin-left: 0;
-                padding: 18px;
+                padding: 16px 14px 50px;
             }
-            .mobile-menu-toggle {
-                display: block !important;
+            .mobile-header-bar {
+                display: flex;
+            }
+            .top-bar-title-wrap h1 {
+                font-size: 1.35rem;
+            }
+            .top-bar {
+                margin-bottom: 18px;
+                padding-bottom: 16px;
+            }
+            .top-bar-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .top-bar-actions .btn {
+                width: 100%;
+                padding: 10px 6px;
+                font-size: 0.8rem;
+                gap: 4px;
+            }
+            .desktop-only-toggle {
+                display: none !important;
             }
         }
 
-        .mobile-menu-toggle {
-            display: none;
-            background: transparent;
-            border: 1px solid var(--border-glass);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            cursor: pointer;
+        @media (max-width: 768px) {
+            .kpi-strip {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 18px;
+            }
+            .kpi-card {
+                padding: 14px 14px;
+                border-radius: 12px;
+            }
+            .kpi-header {
+                margin-bottom: 6px;
+            }
+            .kpi-label {
+                font-size: 0.7rem;
+            }
+            .kpi-icon-bubble {
+                width: 26px;
+                height: 26px;
+                font-size: 0.85rem;
+            }
+            .kpi-val {
+                font-size: 1.55rem;
+            }
+            .kpi-sub {
+                font-size: 0.68rem;
+                margin-top: 4px;
+            }
+
+            .content-card {
+                padding: 16px 14px;
+                border-radius: 16px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .toolbar-search-wrap {
+                flex-direction: column;
+                width: 100%;
+                min-width: 0;
+                gap: 8px;
+            }
+
+            .search-box, .select-filter {
+                width: 100%;
+            }
+
+            .toolbar-btn-group {
+                display: grid;
+                grid-template-columns: auto 1fr 1fr;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .toolbar-btn-group .btn {
+                padding: 9px 10px;
+                font-size: 0.8rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .form-row-2col {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 28px 18px;
+            }
+            .auth-lock-icon {
+                font-size: 2rem;
+            }
+            .top-bar-actions .btn span:last-child {
+                display: inline;
+            }
+            .receipt-modal-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .receipt-modal-footer .btn,
+            .receipt-modal-footer .btn-action-sm {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 
-<body>
+<body class="mode-cards">
     <!-- Passcode Auth Overlay -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-card">
             <div class="auth-lock-icon">🔒</div>
-            <h2 style="color: #fff; font-family: var(--font-heading); margin-bottom: 8px; font-size: 1.6rem; letter-spacing: -0.02em;">
+            <h2 style="color: #fff; font-family: var(--font-heading); margin-bottom: 8px; font-size: 1.5rem; letter-spacing: -0.02em;">
                 Executive Portal Access
             </h2>
-            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 24px; line-height: 1.45;">
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 22px; line-height: 1.45;">
                 Enter verified administrator passcode to manage Workshop 2.0 attendees, financial ledgers, and portfolio gallery.
             </p>
             <form id="authForm" onsubmit="handleAuth(event)">
@@ -1040,19 +1385,25 @@
         </div>
     </div>
 
+    <!-- Backdrop for Mobile Drawer -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
+
     <!-- App Shell Layout -->
     <div class="app-shell">
         <!-- Sidebar Navigation -->
         <aside class="sidebar" id="appSidebar">
             <div>
-                <!-- Brand / Logo -->
-                <a href="index.html" class="sidebar-brand">
-                    <img src="LOGOS/Header%20logo.png" alt="The Bridge Business Academy">
-                    <div class="sidebar-brand-text">
-                        <span class="sidebar-brand-title">BAW 2.0</span>
-                        <span class="sidebar-brand-badge">Executive Suite</span>
-                    </div>
-                </a>
+                <!-- Brand & Close on Mobile -->
+                <div class="sidebar-brand-row">
+                    <a href="index.html" class="sidebar-brand">
+                        <img src="LOGOS/Header%20logo.png" alt="The Bridge Business Academy">
+                        <div class="sidebar-brand-text">
+                            <span class="sidebar-brand-title">BAW 2.0</span>
+                            <span class="sidebar-brand-badge">Executive Suite</span>
+                        </div>
+                    </a>
+                    <button type="button" class="sidebar-close-btn" onclick="toggleMobileSidebar(false)" title="Close Navigation">✕</button>
+                </div>
 
                 <!-- Nav Menu -->
                 <nav class="sidebar-nav">
@@ -1097,29 +1448,40 @@
 
         <!-- Main Content Area -->
         <main class="main-content">
-            <!-- Top Bar -->
+            <!-- Mobile Sticky Header Bar -->
+            <div class="mobile-header-bar">
+                <button type="button" onclick="toggleMobileSidebar(true)" style="background: rgba(230,183,73,0.12); border: 1px solid var(--border-glass); color: var(--accent-gold); padding: 8px 12px; border-radius: 8px; font-size: 1.15rem; cursor: pointer;">
+                    ☰
+                </button>
+                <div class="mobile-header-brand">
+                    <img src="LOGOS/Header%20logo.png" alt="BAW 2.0">
+                    <span class="mobile-header-title">BAW 2.0 Admin</span>
+                </div>
+                <button type="button" onclick="handleLogout()" title="Lock Portal" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 7px 11px; border-radius: 8px; font-size: 0.95rem; cursor: pointer;">
+                    🔒
+                </button>
+            </div>
+
+            <!-- Top Bar (Desktop & Tablet) -->
             <div class="top-bar">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <button class="mobile-menu-toggle" onclick="document.getElementById('appSidebar').classList.toggle('mobile-open')">☰</button>
-                    <div class="top-bar-title-wrap">
-                        <h1>Workshop 2.0 Executive Command</h1>
-                        <p>Real-time ticket issuance, payment proof ledger, and portfolio CMS.</p>
-                    </div>
+                <div class="top-bar-title-wrap">
+                    <h1>Workshop 2.0 Command Center</h1>
+                    <p>Live attendee verification, payment ledgers, and portfolio CMS.</p>
                 </div>
                 <div class="top-bar-actions">
                     <button class="btn btn-green" onclick="openAddAttendeeModal()">
-                        <span>➕ Add Attendee</span>
+                        <span>➕</span> <span>Add Attendee</span>
                     </button>
                     <button class="btn btn-blue" onclick="openBulkImportModal()">
-                        <span>📋 Bulk Import</span>
+                        <span>📋</span> <span>Bulk Import</span>
                     </button>
                     <button class="btn btn-gold" onclick="exportRegistrationsCSV()">
-                        <span>📥 Export CSV</span>
+                        <span>📥</span> <span>Export CSV</span>
                     </button>
                 </div>
             </div>
 
-            <!-- KPI Strip -->
+            <!-- KPI Strip (2x2 on Mobile, 4x1 on Desktop) -->
             <div class="kpi-strip">
                 <div class="kpi-card kpi-green">
                     <div class="kpi-header">
@@ -1161,12 +1523,12 @@
             <!-- Registrations Section (Default Active Tab) -->
             <div id="registrationsSection">
                 <div class="content-card">
-                    <!-- Toolbar -->
+                    <!-- Toolbar with Search, Filter & View Mode Toggle -->
                     <div class="toolbar">
                         <div class="toolbar-search-wrap">
                             <div class="search-box">
                                 <span class="search-box-icon">🔍</span>
-                                <input type="text" id="regSearchInput" placeholder="Search by student name, pass code, department, or phone..." oninput="filterRegistrations()">
+                                <input type="text" id="regSearchInput" placeholder="Search by name, code, dept, or phone..." oninput="filterRegistrations()">
                             </div>
                             <select id="receiptFilterSelect" class="select-filter" onchange="filterRegistrations()">
                                 <option value="all">All Records</option>
@@ -1176,11 +1538,21 @@
                         </div>
 
                         <div class="toolbar-btn-group">
+                            <!-- View Toggle Switch (Cards vs Table) -->
+                            <div class="view-switch" id="viewModeSwitch">
+                                <button type="button" class="view-switch-btn is-active" id="btnViewCards" onclick="setViewMode('cards')">
+                                    🗂️ Cards
+                                </button>
+                                <button type="button" class="view-switch-btn" id="btnViewTable" onclick="setViewMode('table')">
+                                    📊 Table
+                                </button>
+                            </div>
+
                             <button class="btn btn-outline" onclick="loadRegistrations()" title="Refresh Registrations from Server">
-                                <span>🔄 Refresh</span>
+                                <span>🔄</span>
                             </button>
                             <button class="btn btn-danger-ghost" onclick="clearAllRegistrations()" title="Clear All Records">
-                                <span>🗑️ Clear All</span>
+                                <span>🗑️</span>
                             </button>
                         </div>
                     </div>
@@ -1308,13 +1680,13 @@
         <div class="receipt-modal-card" onclick="event.stopPropagation()">
             <div class="receipt-modal-header">
                 <div>
-                    <h3 id="receiptModalStudentName" style="color: #fff; font-size: 1.25rem; font-family: var(--font-heading); margin-bottom: 4px;">
+                    <h3 id="receiptModalStudentName" style="color: #fff; font-size: 1.15rem; font-family: var(--font-heading); margin-bottom: 4px;">
                         Payment Receipt Proof
                     </h3>
-                    <div style="font-size: 0.82rem; color: var(--accent-gold); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div style="font-size: 0.8rem; color: var(--accent-gold); display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                         <span id="receiptModalCode" class="reg-code-badge">BAW-200</span>
                         <span id="receiptModalRef" style="color: var(--text-muted); font-family: var(--font-mono);">BAW-KUDA-XXX</span>
-                        <span id="receiptModalDate" style="color: var(--text-dim); font-size: 0.78rem;"></span>
+                        <span id="receiptModalDate" style="color: var(--text-dim); font-size: 0.76rem;"></span>
                     </div>
                 </div>
                 <button type="button" onclick="closeReceiptModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer; padding: 4px 10px; border-radius: 8px;">✕</button>
@@ -1323,14 +1695,14 @@
                 <!-- Preview image or PDF frame inserted here -->
             </div>
             <div class="receipt-modal-footer">
-                <span style="font-size: 0.82rem; color: #4ade80; font-weight: 700;">
+                <span style="font-size: 0.8rem; color: #4ade80; font-weight: 700;">
                     ✓ Attached to Attendee Registration Record
                 </span>
-                <div style="display: flex; gap: 8px;">
-                    <a id="receiptModalOpenBtn" href="#" target="_blank" class="btn btn-gold" style="font-size: 0.85rem; padding: 8px 16px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a id="receiptModalOpenBtn" href="#" target="_blank" class="btn btn-gold" style="font-size: 0.84rem; padding: 8px 14px;">
                         <span>Open Fullscreen / Download ↗</span>
                     </a>
-                    <button type="button" class="btn-action-sm btn-del" onclick="closeReceiptModal()" style="font-size: 0.85rem; padding: 8px 16px;">
+                    <button type="button" class="btn-action-sm btn-del" onclick="closeReceiptModal()" style="font-size: 0.84rem; padding: 8px 14px;">
                         Close
                     </button>
                 </div>
@@ -1344,37 +1716,37 @@
             <div class="receipt-modal-header">
                 <div>
                     <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">➕ Add Workshop Attendee</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">Manually record a student (from WhatsApp / Kuda transfer) and issue their official ticket pass code.</p>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">Manually record a student (WhatsApp / Kuda transfer) and issue their official ticket pass.</p>
                 </div>
                 <button type="button" onclick="closeAddAttendeeModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
             </div>
-            <form onsubmit="handleAddAttendeeSubmit(event)" style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 120px); display: flex; flex-direction: column; gap: 14px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <form onsubmit="handleAddAttendeeSubmit(event)" style="padding: 20px; overflow-y: auto; max-height: calc(85vh - 120px); display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Full Name *</label>
-                        <input type="text" id="addAttName" required placeholder="Student's Full Name" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="text" id="addAttName" required placeholder="Student's Full Name" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Email Address *</label>
-                        <input type="email" id="addAttEmail" required placeholder="student@gmail.com" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="email" id="addAttEmail" required placeholder="student@gmail.com" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Phone Number *</label>
-                        <input type="tel" id="addAttPhone" required placeholder="080... or 090..." style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="tel" id="addAttPhone" required placeholder="080... or 090..." style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Department</label>
-                        <input type="text" id="addAttDept" placeholder="e.g. Computer Science" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="text" id="addAttDept" placeholder="e.g. Computer Science" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Level</label>
-                        <select id="addAttLevel" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                        <select id="addAttLevel" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                             <option value="100 Level">100 Level</option>
                             <option value="200 Level">200 Level</option>
                             <option value="300 Level">300 Level</option>
@@ -1386,17 +1758,17 @@
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Super Mega Challenge?</label>
-                        <select id="addAttChallenge" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                        <select id="addAttChallenge" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                             <option value="Yes">Yes (Ambassador Challenge)</option>
                             <option value="No">No (Standard Attendance)</option>
                         </select>
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Current Status</label>
-                        <select id="addAttStatus" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                        <select id="addAttStatus" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                             <option value="STUDENT">STUDENT</option>
                             <option value="Aspiring Entrepreneur / Freelancer">Aspiring Entrepreneur / Freelancer</option>
                             <option value="Working Professional / Career Transitioner">Working Professional / Career Transitioner</option>
@@ -1406,21 +1778,21 @@
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Referred By (Code)</label>
-                        <input type="text" id="addAttReferredBy" placeholder="e.g. BAW-205 (optional)" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="text" id="addAttReferredBy" placeholder="e.g. BAW-205 (optional)" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                 </div>
 
                 <div>
-                    <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Custom Pass Code (Optional - leave blank to auto-generate next sequential code)</label>
-                    <input type="text" id="addAttCustomCode" placeholder="e.g. BAW-247 (or leave blank to auto-generate)" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: var(--accent-gold); font-size: 0.9rem; font-family: var(--font-mono);">
+                    <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Custom Pass Code (Optional - blank to auto-generate)</label>
+                    <input type="text" id="addAttCustomCode" placeholder="e.g. BAW-247 (or leave blank)" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: var(--accent-gold); font-size: 16px; font-family: var(--font-mono);">
                 </div>
 
                 <div>
                     <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Payment Proof URL / Note</label>
-                    <input type="text" id="addAttReceiptUrl" placeholder="assets/receipts/... or Verified via Kuda Bank Statement" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    <input type="text" id="addAttReceiptUrl" placeholder="assets/receipts/... or Verified via Kuda Bank Statement" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
                     <button type="button" class="btn-action-sm btn-del" onclick="closeAddAttendeeModal()" style="padding: 10px 18px; font-size: 0.88rem;">Cancel</button>
                     <button type="submit" id="btnAddAttendeeSubmit" class="btn btn-green" style="padding: 10px 20px; font-size: 0.9rem;">
                         <span>Save &amp; Issue Ticket Pass</span> <span>🎟️</span>
@@ -1436,43 +1808,43 @@
             <div class="receipt-modal-header">
                 <div>
                     <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">✏️ Edit Attendee Details</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">Update student information, phone, department, or challenge participation.</p>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">Update student information, phone, department, or challenge participation.</p>
                 </div>
                 <button type="button" onclick="closeEditAttendeeModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
             </div>
-            <form onsubmit="handleEditAttendeeSubmit(event)" style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 120px); display: flex; flex-direction: column; gap: 14px;">
+            <form onsubmit="handleEditAttendeeSubmit(event)" style="padding: 20px; overflow-y: auto; max-height: calc(85vh - 120px); display: flex; flex-direction: column; gap: 14px;">
                 <input type="hidden" id="editAttId">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Pass Code (Read-Only)</label>
-                        <input type="text" id="editAttCode" readonly style="width: 100%; padding: 10px; background: rgba(230,183,73,0.1); border: 1px solid rgba(230,183,73,0.3); border-radius: 8px; color: var(--accent-gold); font-size: 0.9rem; font-family: var(--font-mono); font-weight: 700;">
+                        <input type="text" id="editAttCode" readonly style="width: 100%; padding: 11px; background: rgba(230,183,73,0.1); border: 1px solid rgba(230,183,73,0.3); border-radius: 8px; color: var(--accent-gold); font-size: 16px; font-family: var(--font-mono); font-weight: 700;">
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Full Name *</label>
-                        <input type="text" id="editAttName" required style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="text" id="editAttName" required style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Email Address *</label>
-                        <input type="email" id="editAttEmail" required style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="email" id="editAttEmail" required style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Phone Number *</label>
-                        <input type="tel" id="editAttPhone" required style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="tel" id="editAttPhone" required style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Department</label>
-                        <input type="text" id="editAttDept" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="text" id="editAttDept" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Level</label>
-                        <select id="editAttLevel" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                        <select id="editAttLevel" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                             <option value="100 Level">100 Level</option>
                             <option value="200 Level">200 Level</option>
                             <option value="300 Level">300 Level</option>
@@ -1484,26 +1856,26 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Super Mega Challenge?</label>
-                        <select id="editAttChallenge" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                        <select id="editAttChallenge" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                             <option value="Yes">Yes (Ambassador Challenge)</option>
                             <option value="No">No (Standard Attendance)</option>
                         </select>
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Referred By (Code)</label>
-                        <input type="text" id="editAttReferredBy" placeholder="e.g. BAW-205" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="text" id="editAttReferredBy" placeholder="e.g. BAW-205" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                 </div>
 
                 <div>
                     <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Payment Receipt Proof URL / Note</label>
-                    <input type="text" id="editAttReceiptUrl" placeholder="assets/receipts/... or WhatsApp Verified" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    <input type="text" id="editAttReceiptUrl" placeholder="assets/receipts/... or WhatsApp Verified" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
                     <button type="button" class="btn-action-sm btn-del" onclick="closeEditAttendeeModal()" style="padding: 10px 18px; font-size: 0.88rem;">Cancel</button>
                     <button type="submit" id="btnEditAttendeeSubmit" class="btn btn-gold" style="padding: 10px 20px; font-size: 0.9rem;">
                         <span>Update Attendee Details</span> <span>💾</span>
@@ -1518,12 +1890,12 @@
         <div class="receipt-modal-card" style="max-width: 680px;">
             <div class="receipt-modal-header">
                 <div>
-                    <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">📋 Bulk Import Missing Attendees</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">Paste names from your Kuda statement, WhatsApp chat, or Excel to register multiple students in one click.</p>
+                    <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">📋 Bulk Import Attendees</h3>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">Paste names from Kuda statement, WhatsApp, or Excel to register multiple students in one click.</p>
                 </div>
                 <button type="button" onclick="closeBulkImportModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
             </div>
-            <form onsubmit="handleBulkImportSubmit(event)" style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+            <form onsubmit="handleBulkImportSubmit(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
                 <div style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.45;">
                     <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">Paste Format (1 attendee per line):</strong>
                     <code>Name, Phone, Email, Department</code> &nbsp;<em>(or just Name and Phone)</em><br>
@@ -1539,22 +1911,22 @@
                         <span>Attendee List (Paste Below) *</span>
                         <span id="bulkCountBadge" style="color: #4ade80; font-weight: 700;">0 attendees detected</span>
                     </label>
-                    <textarea id="bulkImportTextarea" oninput="updateBulkCount()" rows="10" required
+                    <textarea id="bulkImportTextarea" oninput="updateBulkCount()" rows="8" required
                         placeholder="Paste your attendee names here, one per line..."
-                        style="width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 10px; color: #fff; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.5; resize: vertical;"></textarea>
+                        style="width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 10px; color: #fff; font-family: var(--font-mono); font-size: 16px; line-height: 1.5; resize: vertical;"></textarea>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-row-2col">
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Enroll in Super Mega Challenge?</label>
-                        <select id="bulkImportChallenge" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                        <select id="bulkImportChallenge" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                             <option value="Yes">Yes (Ambassador Challenge)</option>
                             <option value="No">No (Standard Attendance)</option>
                         </select>
                     </div>
                     <div>
                         <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Default Department (if omitted)</label>
-                        <input type="text" id="bulkDefaultDept" placeholder="e.g. General Participant" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                        <input type="text" id="bulkDefaultDept" placeholder="e.g. General Participant" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                     </div>
                 </div>
 
@@ -1572,6 +1944,51 @@
         let projects = [];
         let currentPhotos = [];
         let registrations = [];
+
+        // Mobile Sidebar Control
+        function toggleMobileSidebar(open) {
+            const sidebar = document.getElementById("appSidebar");
+            const backdrop = document.getElementById("sidebarBackdrop");
+            if (!sidebar || !backdrop) return;
+            if (open) {
+                sidebar.classList.add("mobile-open");
+                backdrop.classList.add("is-active");
+                document.body.style.overflow = "hidden";
+            } else {
+                sidebar.classList.remove("mobile-open");
+                backdrop.classList.remove("is-active");
+                document.body.style.overflow = "";
+            }
+        }
+
+        // View Mode Switch (Cards vs Table)
+        function setViewMode(mode) {
+            sessionStorage.setItem("tbba_view_mode", mode);
+            const btnCards = document.getElementById("btnViewCards");
+            const btnTable = document.getElementById("btnViewTable");
+
+            if (mode === 'cards') {
+                document.body.classList.add("mode-cards");
+                if (btnCards) btnCards.classList.add("is-active");
+                if (btnTable) btnTable.classList.remove("is-active");
+            } else {
+                document.body.classList.remove("mode-cards");
+                if (btnCards) btnCards.classList.remove("is-active");
+                if (btnTable) btnTable.classList.add("is-active");
+            }
+        }
+
+        // Auto-initialize view mode based on screen size or user preference
+        (function initViewMode() {
+            const saved = sessionStorage.getItem("tbba_view_mode");
+            if (saved) {
+                setViewMode(saved);
+            } else if (window.innerWidth <= 768) {
+                setViewMode('cards');
+            } else {
+                setViewMode('table');
+            }
+        })();
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -1604,6 +2021,11 @@
                 if (projects.length === 0) {
                     loadProjects();
                 }
+            }
+
+            // Auto-close sidebar on mobile when tab is selected
+            if (window.innerWidth <= 900) {
+                toggleMobileSidebar(false);
             }
         }
 
@@ -1640,7 +2062,7 @@
             const leaderboardEl = document.getElementById("referralLeaderboardStrip");
             if (!tbody) return;
 
-            // Render Ambassador / Referral Leaderboard (Only participants opted into Super Mega Challenge)
+            // Render Ambassador / Referral Leaderboard
             if (leaderboardEl) {
                 const topReferrers = [...registrations]
                     .filter(r => (r.participateChallenge === 'Yes') && (r.referralCount || 0) > 0)
@@ -1649,24 +2071,24 @@
 
                 if (topReferrers.length > 0) {
                     leaderboardEl.innerHTML = `
-                        <div style="background: rgba(230, 183, 73, 0.08); border: 1px solid var(--border-glass); border-radius: 14px; padding: 18px 20px; margin-bottom: 22px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-                                <strong style="color: var(--accent-gold-light); font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
-                                    <span>🏆</span> Super Mega Challenge · Active Ambassador Leaderboard
+                        <div style="background: rgba(230, 183, 73, 0.08); border: 1px solid var(--border-glass); border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                                <strong style="color: var(--accent-gold-light); font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏆</span> Super Mega Challenge · Active Ambassadors
                                 </strong>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">${topReferrers.length} Active Ambassador(s)</span>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">${topReferrers.length} Active</span>
                             </div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
                                 ${topReferrers.map((top, idx) => {
                                     const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '⭐';
                                     return `
-                                        <div style="background: rgba(4, 20, 12, 0.95); border: 1px solid rgba(230,183,73,0.3); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                        <div style="background: rgba(4, 20, 12, 0.95); border: 1px solid rgba(230,183,73,0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                                             <div>
-                                                <div style="font-size: 0.9rem; font-weight: 700; color: #fff;">${medal} ${escapeHtml(top.name || 'Student')}</div>
-                                                <div style="font-size: 0.75rem; color: var(--accent-gold); font-family: var(--font-mono);">${escapeHtml(top.uniqueCode || '')}</div>
+                                                <div style="font-size: 0.86rem; font-weight: 700; color: #fff;">${medal} ${escapeHtml(top.name || 'Student')}</div>
+                                                <div style="font-size: 0.74rem; color: var(--accent-gold); font-family: var(--font-mono);">${escapeHtml(top.uniqueCode || '')}</div>
                                             </div>
-                                            <div style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; white-space: nowrap;">
-                                                ${top.referralCount} ${top.referralCount === 1 ? 'Referral' : 'Referrals'}
+                                            <div style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 3px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem; white-space: nowrap;">
+                                                ${top.referralCount} ${top.referralCount === 1 ? 'Ref' : 'Refs'}
                                             </div>
                                         </div>
                                     `;
@@ -1682,8 +2104,9 @@
             if (!list || list.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="14" style="text-align: center; padding: 48px; color: var(--text-muted);">
-                            No registered students found matching your criteria. Once students register and complete payment, they appear here instantly.
+                        <td colspan="14" style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
+                            <div style="font-size: 1.8rem; margin-bottom: 8px;">🔍</div>
+                            <div>No registered students found matching criteria.</div>
                         </td>
                     </tr>
                 `;
@@ -1692,72 +2115,129 @@
 
             tbody.innerHTML = list.map((r, i) => {
                 const dateStr = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+                
                 return `
                     <tr>
+                        <!-- Mobile Card Header / Desktop Col 1 -->
                         <td>
-                            <span class="reg-code-badge">${escapeHtml(r.uniqueCode || '—')}</span>
+                            <div class="card-row-header">
+                                <span class="reg-code-badge">${escapeHtml(r.uniqueCode || '—')}</span>
+                                ${r.receiptUrl ? `
+                                    <button type="button" class="btn-receipt-view" onclick="openReceiptModal('${escapeHtml(r.receiptUrl)}', '${escapeHtml(r.name || 'Student')}', '${escapeHtml(r.uniqueCode || '')}', '${escapeHtml(r.reference || '')}', '${r.registeredAt || ''}')">
+                                        <span>🧾 View Proof</span>
+                                        <span>🔍</span>
+                                    </button>
+                                ` : `
+                                    <span style="color: var(--text-muted); font-size: 0.76rem; display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
+                                        <span>📱</span> WA Only
+                                    </span>
+                                `}
+                            </div>
                         </td>
+
+                        <!-- Student Name -->
                         <td>
-                            <strong style="color: #fff; font-size: 0.95rem;">${escapeHtml(r.name || '—')}</strong>
+                            <div class="card-student-name">${escapeHtml(r.name || '—')}</div>
                         </td>
-                        <td>
+
+                        <!-- Receipt Proof (Desktop view fallback) -->
+                        <td class="desktop-only-toggle">
                             ${r.receiptUrl ? `
                                 <button type="button" class="btn-receipt-view" onclick="openReceiptModal('${escapeHtml(r.receiptUrl)}', '${escapeHtml(r.name || 'Student')}', '${escapeHtml(r.uniqueCode || '')}', '${escapeHtml(r.reference || '')}', '${r.registeredAt || ''}')">
                                     <span>🧾 View</span>
                                     <span>🔍</span>
                                 </button>
                             ` : `
-                                <span style="color: var(--text-muted); font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;">
-                                    <span>📱</span> WA Only
-                                </span>
+                                <span style="color: var(--text-muted); font-size: 0.78rem;">📱 WA Only</span>
                             `}
                         </td>
+
+                        <!-- Challenge enrolled status -->
                         <td>
-                            ${r.participateChallenge === 'Yes'
-                                ? `<span style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 0.76rem; white-space: nowrap;">🏆 Enrolled</span>`
-                                : `<span style="color: var(--text-muted); font-size: 0.76rem; background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 999px;">Standard</span>`
-                            }
+                            <div class="card-badge-strip">
+                                ${r.participateChallenge === 'Yes'
+                                    ? `<span class="card-tag tag-highlight">🏆 Challenge (Yes)</span>`
+                                    : `<span class="card-tag">Standard Attendance</span>`
+                                }
+                                ${r.referralCount > 0 ? `<span class="card-tag tag-highlight">🎯 ${r.referralCount} Invited</span>` : ''}
+                                ${r.referredBy ? `<span class="card-tag" style="color: var(--accent-gold);">Ref by: ${escapeHtml(r.referredBy)}</span>` : ''}
+                            </div>
                         </td>
-                        <td>
+
+                        <!-- Referrals Made (Desktop) -->
+                        <td class="desktop-only-toggle">
                             ${r.referralCount > 0 ? `<span style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 0.8rem; white-space: nowrap;">🎯 ${r.referralCount}</span>` : `<span style="color: var(--text-dim); font-size: 0.82rem;">0</span>`}
                         </td>
-                        <td>
+
+                        <!-- Referred By (Desktop) -->
+                        <td class="desktop-only-toggle">
                             ${r.referredBy ? `<span class="reg-code-badge" style="background: rgba(230,183,73,0.12);">${escapeHtml(r.referredBy)}</span>` : `<span style="color: var(--text-dim); font-size: 0.82rem;">Direct</span>`}
                         </td>
+
+                        <!-- Contact info (Clickable Phone & Email) -->
                         <td>
-                            <div><a href="mailto:${escapeHtml(r.email || '')}" style="color: var(--accent-gold); text-decoration: none;">${escapeHtml(r.email || '—')}</a></div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;"><a href="tel:${escapeHtml(r.phone || '')}" style="color: #cbd5e1; text-decoration: none;">📞 ${escapeHtml(r.phone || '—')}</a></div>
+                            <div class="card-contacts-bar">
+                                <a href="tel:${escapeHtml(r.phone || '')}" class="card-contact-link">
+                                    <span>📞</span> <span>${escapeHtml(r.phone || 'No phone')}</span>
+                                </a>
+                                <span style="color: rgba(255,255,255,0.2);">•</span>
+                                <a href="mailto:${escapeHtml(r.email || '')}" class="card-contact-link">
+                                    <span>✉️</span> <span>${escapeHtml(r.email || 'No email')}</span>
+                                </a>
+                            </div>
                         </td>
+
+                        <!-- Dept / Level -->
                         <td>
-                            <div>${escapeHtml(r.department || '—')}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(r.level || '—')}</div>
+                            <div style="font-size: 0.84rem; color: #cbd5e1;">
+                                🎓 <strong>${escapeHtml(r.department || 'General')}</strong> &nbsp;•&nbsp; <span style="color: var(--text-muted);">${escapeHtml(r.level || '—')}</span>
+                            </div>
                         </td>
+
+                        <!-- Status -->
                         <td>
-                            <span style="font-size: 0.82rem; color: var(--accent-gold-light);">${escapeHtml(r.currentStatus || '—')}</span>
+                            <div style="font-size: 0.8rem; color: var(--accent-gold-light);">💼 ${escapeHtml(r.currentStatus || 'STUDENT')}</div>
                         </td>
+
+                        <!-- Primary Goal -->
                         <td>
-                            <span style="font-size: 0.82rem;">${escapeHtml(r.primaryGoal || '—')}</span>
+                            <div style="font-size: 0.8rem; color: #cbd5e1;">🎯 ${escapeHtml(r.primaryGoal || 'Acquire practical business skills')}</div>
                         </td>
+
+                        <!-- QA Question -->
                         <td>
-                            <span style="font-size: 0.82rem; color: #cbd5e1; font-style: italic;">${escapeHtml(r.qaQuestion || 'None')}</span>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">💬 "${escapeHtml(r.qaQuestion || 'No specific question')}"</div>
                         </td>
+
+                        <!-- Fee & Ref -->
                         <td>
-                            <div style="color: #4ade80; font-weight: 700;">₦${(r.amountPaid || 1500).toLocaleString()}</div>
-                            <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${escapeHtml(r.reference || '—')}</div>
+                            <div class="card-fee-row">
+                                <div>
+                                    <strong style="color: #4ade80; font-size: 0.95rem;">₦${(r.amountPaid || 1500).toLocaleString()}</strong>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); margin-left: 6px;">${escapeHtml(r.reference || '—')}</span>
+                                </div>
+                                <div style="font-size: 0.76rem; color: var(--text-dim); white-space: nowrap;">
+                                    🗓️ ${dateStr}
+                                </div>
+                            </div>
                         </td>
-                        <td style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">
+
+                        <!-- Date (Desktop only) -->
+                        <td class="desktop-only-toggle" style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">
                             ${dateStr}
                         </td>
-                        <td style="text-align: center; white-space: nowrap;">
-                            <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                                <button type="button" class="btn-action-sm btn-edit" onclick="openEditAttendeeModal('${escapeHtml(r.id || r.reference || r.uniqueCode)}')" title="Edit Attendee Details" style="padding: 5px 10px; font-size: 0.78rem;">
-                                    ✏️
+
+                        <!-- Action Buttons -->
+                        <td>
+                            <div class="card-actions-grid">
+                                <button type="button" class="btn-action-sm btn-edit" onclick="openEditAttendeeModal('${escapeHtml(r.id || r.reference || r.uniqueCode)}')" title="Edit Attendee Details">
+                                    <span>✏️</span> <span>Edit</span>
                                 </button>
-                                <button type="button" class="btn-action-sm" onclick="copyTicketLink('${escapeHtml(r.uniqueCode || '')}')" title="Copy Ticket Pass Link to send to student" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8;">
-                                    🔗
+                                <button type="button" class="btn-action-sm" onclick="copyTicketLink('${escapeHtml(r.uniqueCode || '')}')" title="Copy Ticket Pass Link to send to student" style="background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8;">
+                                    <span>🔗</span> <span>Pass Link</span>
                                 </button>
-                                <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${escapeHtml(r.id || r.reference || r.uniqueCode)}', '${escapeHtml(r.name || 'Participant')}')" style="padding: 5px 10px; font-size: 0.78rem;" title="Delete Registration">
-                                    🗑️
+                                <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${escapeHtml(r.id || r.reference || r.uniqueCode)}', '${escapeHtml(r.name || 'Participant')}')" title="Delete Registration" style="padding: 9px 12px;">
+                                    <span>🗑️</span>
                                 </button>
                             </div>
                         </td>
@@ -1853,17 +2333,17 @@
             if (bodyEl) {
                 if (url.toLowerCase().endsWith('.pdf')) {
                     bodyEl.innerHTML = `
-                        <div style="text-align: center; padding: 30px;">
-                            <div style="font-size: 3.5rem; margin-bottom: 12px;">📑</div>
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">📑</div>
                             <h4 style="color: #fff; margin-bottom: 8px;">PDF Bank Payment Document</h4>
-                            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">Uploaded bank transaction document file.</p>
-                            <a href="${url}" target="_blank" class="btn btn-gold" style="font-size: 0.9rem; padding: 10px 20px;">
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Uploaded bank transaction document file.</p>
+                            <a href="${url}" target="_blank" class="btn btn-gold" style="font-size: 0.88rem; padding: 10px 18px;">
                                 <span>Open PDF Document in Fullscreen ↗</span>
                             </a>
                         </div>
                     `;
                 } else {
-                    bodyEl.innerHTML = `<img src="${url}" alt="Receipt Proof for ${escapeHtml(name)}" style="max-width: 100%; max-height: 62vh; object-fit: contain; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">`;
+                    bodyEl.innerHTML = `<img src="${url}" alt="Receipt Proof for ${escapeHtml(name)}" style="max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">`;
                 }
             }
 
@@ -1940,13 +2420,12 @@
                     throw new Error(data.error || "Failed to add attendee.");
                 }
 
-                showToast(`✅ Successfully registered ${data.registration.name} (Code: ${data.registration.uniqueCode})`);
+                showToast(`✅ Registered ${data.registration.name} (${data.registration.uniqueCode})`);
                 closeAddAttendeeModal();
                 loadRegistrations();
 
-                // Ask if they want to copy the ticket link immediately
                 setTimeout(() => {
-                    if (confirm(`Attendee successfully added!\n\nName: ${data.registration.name}\nTicket Code: ${data.registration.uniqueCode}\n\nWould you like to copy their ticket pass link to send via WhatsApp?`)) {
+                    if (confirm(`Attendee successfully registered!\n\nName: ${data.registration.name}\nTicket Code: ${data.registration.uniqueCode}\n\nWould you like to copy their ticket pass link to send via WhatsApp?`)) {
                         copyTicketLink(data.registration.uniqueCode);
                     }
                 }, 300);
@@ -2128,12 +2607,12 @@
                     throw new Error(data.error || "Failed to batch import attendees.");
                 }
 
-                showToast(`🎉 Successfully imported ${data.importedCount} attendees!`);
+                showToast(`🎉 Imported ${data.importedCount} attendees!`);
                 closeBulkImportModal();
                 document.getElementById("bulkImportTextarea").value = "";
                 loadRegistrations();
 
-                alert(`Bulk Import Complete!\n\nSuccessfully Imported: ${data.importedCount}\nSkipped: ${data.skippedCount || 0}\n\nAll imported attendees have been issued sequential pass codes and saved to MongoDB Atlas.`);
+                alert(`Bulk Import Complete!\n\nImported: ${data.importedCount}\nSkipped: ${data.skippedCount || 0}\n\nAll imported attendees have been issued passes and saved.`);
 
             } catch (err) {
                 alert("Error during bulk import: " + err.message);
@@ -2152,6 +2631,7 @@
                 closeAddAttendeeModal();
                 closeEditAttendeeModal();
                 closeBulkImportModal();
+                toggleMobileSidebar(false);
             }
         });
 
@@ -2272,7 +2752,7 @@
             });
         }
 
-        // Client-side image compression to ensure instant uploads, fast rendering, and reliable DB storage
+        // Client-side image compression
         function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.82) {
             return new Promise((resolve) => {
                 if (!file.type.startsWith("image/")) {
@@ -2312,7 +2792,6 @@
             });
         }
 
-        // Convert files to optimized base64
         async function handleFilesSelected(files) {
             if (!files || files.length === 0) return;
             const fileList = Array.from(files);
@@ -2359,7 +2838,7 @@
             });
         }
 
-        // Load projects from API or LocalStorage (Lazy loaded on demand)
+        // Projects Lazy Loading
         async function loadProjects(force = false) {
             if (!force && projects.length > 0) {
                 updateUI();
