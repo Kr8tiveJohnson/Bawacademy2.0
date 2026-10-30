@@ -624,7 +624,7 @@
                     <span>Unlock Admin Panel</span> <span>→</span>
                 </button>
                 <p id="authError" style="color: #f87171; font-size: 0.82rem; margin-top: 10px; display: none;">
-                    Invalid passcode. Default is: spotless2026
+                    Invalid passcode. Contact the administrator if you have forgotten it.
                 </p>
             </form>
         </div>
@@ -1092,7 +1092,6 @@
     </div>
 
     <script>
-        const AUTH_PASSCODE = "spotless2026";
         let projects = [];
         let currentPhotos = [];
         let registrations = [];
@@ -1726,33 +1725,58 @@
             }
         }
 
-        // Auth handling
-        function checkAuth() {
-            if (sessionStorage.getItem("tbba_admin_auth") === "true") {
-                document.getElementById("authOverlay").style.display = "none";
-                const activeTab = sessionStorage.getItem("tbba_active_tab") || "registrations";
-                switchAdminTab(activeTab);
-            } else {
+        // Auth handling — server-side validation only, passcode is NEVER in HTML/JS source
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/verify', { credentials: 'include' });
+                const data = await res.json();
+                if (data.authenticated) {
+                    document.getElementById("authOverlay").style.display = "none";
+                    const activeTab = sessionStorage.getItem("tbba_active_tab") || "registrations";
+                    switchAdminTab(activeTab);
+                } else {
+                    document.getElementById("authOverlay").style.display = "flex";
+                }
+            } catch (err) {
                 document.getElementById("authOverlay").style.display = "flex";
             }
         }
 
-        function handleAuth(e) {
+        async function handleAuth(e) {
             e.preventDefault();
             const val = document.getElementById("passcodeInput").value.trim();
-            if (val === AUTH_PASSCODE) {
-                sessionStorage.setItem("tbba_admin_auth", "true");
-                document.getElementById("authOverlay").style.display = "none";
-                document.getElementById("authError").style.display = "none";
-                const activeTab = sessionStorage.getItem("tbba_active_tab") || "registrations";
-                switchAdminTab(activeTab);
-            } else {
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span>Verifying...</span>'; }
+            try {
+                const res = await fetch('/api/admin/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ passcode: val })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    document.getElementById("authOverlay").style.display = "none";
+                    document.getElementById("authError").style.display = "none";
+                    const activeTab = sessionStorage.getItem("tbba_active_tab") || "registrations";
+                    switchAdminTab(activeTab);
+                } else {
+                    document.getElementById("authError").style.display = "block";
+                    document.getElementById("authError").textContent = data.error || 'Invalid passcode.';
+                }
+            } catch (err) {
                 document.getElementById("authError").style.display = "block";
+                document.getElementById("authError").textContent = 'Server error. Please try again.';
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<span>Unlock Admin Panel</span> <span>→</span>'; }
             }
         }
 
-        function handleLogout() {
-            sessionStorage.removeItem("tbba_admin_auth");
+        async function handleLogout() {
+            try {
+                await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+            } catch (e) {}
+            sessionStorage.removeItem("tbba_active_tab");
             location.reload();
         }
 

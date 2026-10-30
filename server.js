@@ -2,10 +2,75 @@ require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { MongoClient } = require('mongodb');
 const zlib = require('zlib');
 
 const PORT = process.env.PORT || 3000;
+
+// ── Admin Auth Config ──
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'changeme';
+const ADMIN_SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || 'default-insecure-secret';
+const ADMIN_TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+function generateAdminToken() {
+  const now = Date.now();
+  const payload = `${now}`;
+  const sig = crypto.createHmac('sha256', ADMIN_SESSION_SECRET).update(payload).digest('hex');
+  return `${payload}.${sig}`;
+}
+
+function verifyAdminToken(token) {
+  if (!token || typeof token !== 'string') return false;
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  const [ts, sig] = parts;
+  const expected = crypto.createHmac('sha256', ADMIN_SESSION_SECRET).update(ts).digest('hex');
+  // Constant-time comparison to prevent timing attacks
+  if (!crypto.timingSafeEqual(Buffer.from(sig, 'hex').length === Buffer.from(expected, 'hex').length
+      ? Buffer.from(sig, 'hex') : Buffer.alloc(0),
+      Buffer.from(expected, 'hex').length === Buffer.from(sig, 'hex').length
+      ? Buffer.from(expected, 'hex') : Buffer.alloc(1))) {
+    return false;
+  }
+  const issued = parseInt(ts, 10);
+  if (isNaN(issued) || Date.now() - issued > ADMIN_TOKEN_TTL_MS) return false;
+  return true;
+}
+
+function parseCookies(req) {
+  const header = req.headers['cookie'] || '';
+  const cookies = {};
+  header.split(';').forEach(part => {
+    const idx = part.indexOf('=');
+    if (idx < 0) return;
+    const key = part.slice(0, idx).trim();
+    const val = part.slice(idx + 1).trim();
+    cookies[key] = decodeURIComponent(val);
+  });
+  return cookies;
+}
+
+// Returns true if the request carries a valid admin session token (cookie or Authorization header)
+function isAdminAuthenticated(req) {
+  // Check Authorization header: "Bearer <token>"
+  const authHeader = req.headers['authorization'] || '';
+  if (authHeader.startsWith('Bearer ')) {
+    const token = authHeader.slice(7).trim();
+    if (verifyAdminToken(token)) return true;
+  }
+  // Check cookie
+  const cookies = parseCookies(req);
+  const cookieToken = cookies['tbba_admin_token'];
+  if (cookieToken && verifyAdminToken(cookieToken)) return true;
+  return false;
+}
+
+// Middleware: rejects request with 401 if not admin-authenticated
+function requireAdminAuth(res) {
+  res.writeHead(401, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'Unauthorized. Admin authentication required.' }));
+}
 const DATA_FILE = path.join(__dirname, 'projects.json');
 const REGISTRATIONS_FILE = path.join(__dirname, 'registrations.json');
 const UPLOAD_DIR = path.join(__dirname, 'assets', 'projects');
@@ -721,6 +786,60 @@ const server = http.createServer(async (req, res) => {
     return send404(res);
   }
 
+  // ── Admin Login Endpoint ──
+  if (reqPath === '/api/admin/auth' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req, 1024);
+      const passcode = String(body.passcode || '').trim();
+      if (!passcode) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Passcode is required.' }));
+        return;
+      }
+      // Constant-time compare to prevent timing attacks on the passcode
+      const expected = Buffer.from(ADMIN_PASSCODE);
+      const provided = Buffer.from(passcode);
+      const match = expected.length === provided.length &&
+        crypto.timingSafeEqual(expected, provided);
+      if (!match) {
+        // Artificial delay to slow brute-force attacks
+        await new Promise(r => setTimeout(r, 800));
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid passcode.' }));
+        return;
+      }
+      const token = generateAdminToken();
+      const maxAge = Math.floor(ADMIN_TOKEN_TTL_MS / 1000);
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Set-Cookie': `tbba_admin_token=${encodeURIComponent(token)}; HttpOnly; SameSite=Strict; Max-Age=${maxAge}; Path=/`
+      });
+      res.end(JSON.stringify({ success: true, token, expiresIn: ADMIN_TOKEN_TTL_MS }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Auth failed.' }));
+    }
+    return;
+  }
+
+  // ── Admin Session Verify Endpoint ──
+  if (reqPath === '/api/admin/verify' && req.method === 'GET') {
+    const valid = isAdminAuthenticated(req);
+    res.writeHead(valid ? 200 : 401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ authenticated: valid }));
+    return;
+  }
+
+  // ── Admin Logout Endpoint ──
+  if (reqPath === '/api/admin/logout' && req.method === 'POST') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Set-Cookie': 'tbba_admin_token=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/'
+    });
+    res.end(JSON.stringify({ success: true }));
+    return;
+  }
+
   // Database status endpoint
   if (reqPath === '/api/db-status' && req.method === 'GET') {
     const list = await getProjects();
@@ -751,6 +870,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST') {
+      if (!isAdminAuthenticated(req)) { requireAdminAuth(res); return; }
       try {
         const parsed = await parseJsonBody(req, 15 * 1024 * 1024);
         if (Array.isArray(parsed)) {
@@ -826,6 +946,7 @@ const server = http.createServer(async (req, res) => {
 
   // ── Admin: Batch / Bulk Attendee Import Endpoint ──
   if (reqPath === '/api/admin/registrations/batch' && req.method === 'POST') {
+    if (!isAdminAuthenticated(req)) { requireAdminAuth(res); return; }
     try {
       const body = await parseJsonBody(req, 10 * 1024 * 1024);
       const items = Array.isArray(body) ? body : (body.attendees || []);
@@ -916,6 +1037,7 @@ const server = http.createServer(async (req, res) => {
 
   // ── Admin: Manual Attendee Creation Endpoint ──
   if (reqPath === '/api/admin/registrations' && req.method === 'POST') {
+    if (!isAdminAuthenticated(req)) { requireAdminAuth(res); return; }
     try {
       const body = await parseJsonBody(req, 1024 * 512);
       const {
@@ -1002,6 +1124,7 @@ const server = http.createServer(async (req, res) => {
 
   // ── Admin: Attendee Update Endpoint ──
   if (reqPath.startsWith('/api/admin/registrations/') && req.method === 'PUT') {
+    if (!isAdminAuthenticated(req)) { requireAdminAuth(res); return; }
     try {
       const rawId = reqPath.slice('/api/admin/registrations/'.length);
       const id = decodeURIComponent(rawId).trim();
@@ -1043,6 +1166,7 @@ const server = http.createServer(async (req, res) => {
   // ── Workshop Registrations Endpoints ──
   if (reqPath === '/api/registrations') {
     if (req.method === 'GET') {
+      if (!isAdminAuthenticated(req)) { requireAdminAuth(res); return; }
       try {
         const list = await getRegistrations();
         sendCompressedJson(req, res, 200, list);
@@ -1163,6 +1287,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'DELETE') {
+      if (!isAdminAuthenticated(req)) { requireAdminAuth(res); return; }
       try {
         const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
         const id = (urlObj.searchParams.get('id') || urlObj.searchParams.get('reference') || urlObj.searchParams.get('code') || '').trim();
@@ -1195,6 +1320,7 @@ const server = http.createServer(async (req, res) => {
 
   // DELETE /api/registrations/:id or /api/registrations/clear-all
   if (reqPath.startsWith('/api/registrations/') && req.method === 'DELETE') {
+    if (!isAdminAuthenticated(req)) { requireAdminAuth(res); return; }
     try {
       const rawId = reqPath.slice('/api/registrations/'.length);
       const id = decodeURIComponent(rawId).trim();
