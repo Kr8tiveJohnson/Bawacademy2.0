@@ -2402,35 +2402,18 @@
 
         // Initialize Form on Page Load
         async function initPage() {
-            // Check if user is looking up their ticket with ?code= or ?reference=
-            const codeParam = getQueryParam('code') || getQueryParam('uniqueCode');
-            if (codeParam) {
+            // Check if user is looking up their ticket with ?code= or ?ticket= or ?pass=
+            const ticketLookup = getQueryParam('code') || getQueryParam('ticket') || getQueryParam('pass') || getQueryParam('uniqueCode');
+            if (ticketLookup) {
                 try {
-                    const res = await fetch(`/api/referrals/verify?code=${encodeURIComponent(codeParam)}`);
+                    const res = await fetch(`/api/ticket?code=${encodeURIComponent(ticketLookup)}`);
                     const data = await res.json();
-                    if (data && data.valid && data.registration) {
+                    if (data && data.success && data.registration) {
                         renderTicket(data.registration);
                         return;
                     }
-                } catch (e) { }
-            }
-
-            // Generate unique code — fetch sequential BAW-200, BAW-201… from server
-            const codeInput = document.getElementById('uniqueCodeInput');
-            if (codeInput && !codeInput.value) {
-                try {
-                    const codeRes = await fetch('/api/generate-code');
-                    const codeData = await codeRes.json();
-                    const newCode = codeData.code || `BAW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-                    const disp = document.getElementById('uniqueCodeDisplay');
-                    if (disp) disp.textContent = newCode;
-                    codeInput.value = newCode;
                 } catch (e) {
-                    // Fallback to random on network error
-                    const newCode = `BAW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-                    const disp = document.getElementById('uniqueCodeDisplay');
-                    if (disp) disp.textContent = newCode;
-                    codeInput.value = newCode;
+                    console.warn('Could not retrieve ticket via lookup:', e);
                 }
             }
 
@@ -2758,12 +2741,10 @@
 
                 const challengeVal = document.querySelector('input[name="participateChallenge"]:checked')?.value || 'Yes';
                 const refInput = document.getElementById('referredByInput');
-                const uniqueCode = document.getElementById('uniqueCodeInput').value.trim();
                 const trfRef = `BAW-KUDA-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
                 const payload = {
                     reference: trfRef,
-                    uniqueCode: uniqueCode,
                     name: document.getElementById('studentName').value.trim(),
                     department: document.getElementById('studentDept').value.trim(),
                     level: document.getElementById('studentLevel').value,
@@ -2788,8 +2769,14 @@
                     throw new Error(data.error || 'Failed to submit registration form.');
                 }
 
-                // Render official ticket
+                // Render official ticket with verified details
                 renderTicket(data.registration);
+
+                // Preserve ticket URL state for easy bookmarking and refreshing
+                if (window.history && window.history.replaceState && data.registration && data.registration.uniqueCode) {
+                    const newUrl = window.location.pathname + '?code=' + encodeURIComponent(data.registration.uniqueCode);
+                    window.history.replaceState(null, '', newUrl);
+                }
 
             } catch (err) {
                 alert('Error: ' + err.message);

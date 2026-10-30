@@ -3,6 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { MongoClient } = require('mongodb');
+const zlib = require('zlib');
 
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'projects.json');
@@ -54,7 +55,7 @@ const SENSITIVE_FILES = new Set([
 ]);
 
 // Allowed HTTP methods
-const ALLOWED_METHODS = new Set(['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS']);
+const ALLOWED_METHODS = new Set(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS']);
 
 // ── In-Memory Rate Limiter (Anti-DDoS / Anti-Brute-Force) ──
 const rateLimitMap = new Map();
@@ -173,6 +174,30 @@ function parseJsonBody(req, maxSize = 15 * 1024 * 1024) {
   });
 }
 
+function sendCompressedJson(req, res, statusCode, data) {
+  const jsonStr = typeof data === 'string' ? data : JSON.stringify(data);
+  const acceptEncoding = (req && req.headers && req.headers['accept-encoding']) || '';
+
+  if (acceptEncoding.includes('gzip') && jsonStr.length > 512) {
+    zlib.gzip(Buffer.from(jsonStr, 'utf8'), (err, zipped) => {
+      if (!err && zipped) {
+        res.writeHead(statusCode, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Encoding': 'gzip',
+          'Vary': 'Accept-Encoding'
+        });
+        res.end(zipped);
+      } else {
+        res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(jsonStr);
+      }
+    });
+  } else {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(jsonStr);
+  }
+}
+
 // --- Local File Storage Helpers ---
 function readProjectsFromFile() {
   try {
@@ -289,6 +314,19 @@ async function initMongoDB() {
       cachedProjects = readProjectsFromFile();
     }
     console.log(`[Database] 🚀 Project cache warmed with ${cachedProjects.length} projects.`);
+
+    // Sync registrations cache to local file on startup
+    try {
+      const regDocs = await registrationsCollection.find({}).sort({ registeredAt: -1 }).toArray();
+      const cleanRegs = regDocs.map(d => {
+        const { _id, ...rest } = d;
+        return { id: rest.id || (_id ? _id.toString() : 'reg-' + Date.now()), ...rest };
+      });
+      writeRegistrationsToFile(cleanRegs);
+      console.log(`[Database] 🚀 Registrations cache synced with ${cleanRegs.length} records.`);
+    } catch (e) {
+      console.warn('[Database] Could not pre-sync registrations file:', e.message);
+    }
   } catch (err) {
     console.error('[Database] ❌ MongoDB Atlas connection error:', err.message);
     console.log('[Database] ⚠️  Falling back to local file storage.');
@@ -392,7 +430,7 @@ async function findRegistrationByReference(ref) {
 
 async function findRegistrationByUniqueCode(code) {
   if (!code) return null;
-  const clean = code.trim().toUpperCase();
+  const clean = String(code).trim().toUpperCase();
   if (isMongoConnected && registrationsCollection) {
     try {
       const doc = await registrationsCollection.findOne({ uniqueCode: clean });
@@ -406,6 +444,81 @@ async function findRegistrationByUniqueCode(code) {
   }
   const all = readRegistrationsFromFile();
   return all.find(r => (r.uniqueCode || '').trim().toUpperCase() === clean) || null;
+}
+
+async function findRegistrationByEmail(email) {
+  if (!email) return null;
+  const clean = String(email).trim().toLowerCase();
+  if (isMongoConnected && registrationsCollection) {
+    try {
+      const doc = await registrationsCollection.findOne({ email: clean });
+      if (doc) {
+        const { _id, ...rest } = doc;
+        return rest;
+      }
+    } catch (err) {
+      console.error('[Database] Error finding registration by email in MongoDB:', err.message);
+    }
+  }
+  const all = readRegistrationsFromFile();
+  return all.find(r => (r.email || '').trim().toLowerCase() === clean) || null;
+}
+
+async function findRegistrationById(identifier) {
+  if (!identifier) return null;
+  const clean = String(identifier).trim();
+  const cleanUpper = clean.toUpperCase();
+  const cleanLower = clean.toLowerCase();
+
+  if (isMongoConnected && registrationsCollection) {
+    try {
+      const doc = await registrationsCollection.findOne({
+        $or: [
+          { id: clean },
+          { reference: clean },
+          { uniqueCode: cleanUpper },
+          { email: cleanLower },
+          { phone: clean }
+        ]
+      });
+      if (doc) {
+        const { _id, ...rest } = doc;
+        return rest;
+      }
+    } catch (err) {
+      console.error('[Database] Error finding registration by identifier in MongoDB:', err.message);
+    }
+  }
+  const all = readRegistrationsFromFile();
+  return all.find(r =>
+    r.id === clean ||
+    r.reference === clean ||
+    (r.uniqueCode || '').toUpperCase() === cleanUpper ||
+    (r.email || '').toLowerCase() === cleanLower ||
+    (r.phone || '').trim() === clean
+  ) || null;
+}
+
+async function generateNextUniqueCode() {
+  const all = await getRegistrations();
+  const numericCodes = all
+    .map(r => {
+      const m = (r.uniqueCode || '').match(/^BAW-(\d+)$/i);
+      return m ? parseInt(m[1], 10) : null;
+    })
+    .filter(n => n !== null && n >= 200);
+
+  let nextNum = numericCodes.length > 0 ? Math.max(...numericCodes) + 1 : 200;
+
+  // Collision-free guard: ensure candidate code is strictly unused
+  while (true) {
+    const candidate = `BAW-${nextNum}`;
+    const taken = await findRegistrationByUniqueCode(candidate);
+    if (!taken) {
+      return candidate;
+    }
+    nextNum++;
+  }
 }
 
 async function getReferralsForCode(code) {
@@ -460,6 +573,54 @@ async function saveRegistration(regDoc) {
     }
   }
   return true;
+}
+
+async function updateRegistration(identifier, updateFields) {
+  if (!identifier) return null;
+  const clean = String(identifier).trim();
+  const cleanUpper = clean.toUpperCase();
+
+  // Update in local file cache
+  const list = readRegistrationsFromFile();
+  const idx = list.findIndex(r =>
+    r.id === clean ||
+    r.reference === clean ||
+    (r.uniqueCode || '').toUpperCase() === cleanUpper
+  );
+  if (idx >= 0) {
+    list[idx] = { ...list[idx], ...updateFields };
+    writeRegistrationsToFile(list);
+  }
+
+  // Update in MongoDB
+  if (isMongoConnected && registrationsCollection) {
+    try {
+      await registrationsCollection.updateOne(
+        {
+          $or: [
+            { id: clean },
+            { reference: clean },
+            { uniqueCode: cleanUpper }
+          ]
+        },
+        { $set: updateFields }
+      );
+      const updated = await registrationsCollection.findOne({
+        $or: [
+          { id: clean },
+          { reference: clean },
+          { uniqueCode: cleanUpper }
+        ]
+      });
+      if (updated) {
+        const { _id, ...rest } = updated;
+        return rest;
+      }
+    } catch (err) {
+      console.error('[Database] Error updating registration in MongoDB:', err.message);
+    }
+  }
+  return idx >= 0 ? list[idx] : null;
 }
 
 async function deleteRegistration(identifier) {
@@ -581,8 +742,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET') {
       try {
         const projects = await getProjects();
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(projects));
+        sendCompressedJson(req, res, 200, projects);
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Failed to retrieve projects' }));
@@ -617,20 +777,265 @@ const server = http.createServer(async (req, res) => {
   // Returns next BAW-200, BAW-201, etc. based on existing registrations
   if (reqPath === '/api/generate-code' && req.method === 'GET') {
     try {
-      const all = await getRegistrations();
-      // Extract all numeric codes in BAW-NNN format (200+)
-      const numericCodes = all
-        .map(r => {
-          const m = (r.uniqueCode || '').match(/^BAW-(\d+)$/i);
-          return m ? parseInt(m[1], 10) : null;
-        })
-        .filter(n => n !== null && n >= 200);
-      const nextNum = numericCodes.length > 0 ? Math.max(...numericCodes) + 1 : 200;
+      const nextCode = await generateNextUniqueCode();
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ code: `BAW-${nextNum}` }));
+      res.end(JSON.stringify({ code: nextCode }));
     } catch (err) {
+      console.error('[Generate Code Error]:', err.message);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Could not generate code' }));
+    }
+    return;
+  }
+
+  // ── Ticket Lookup Endpoint (Search by Code, Email, Phone, or Reference) ──
+  if (reqPath === '/api/ticket' && req.method === 'GET') {
+    try {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const query = (
+        urlObj.searchParams.get('code') ||
+        urlObj.searchParams.get('query') ||
+        urlObj.searchParams.get('email') ||
+        urlObj.searchParams.get('ref') ||
+        urlObj.searchParams.get('uniqueCode') ||
+        ''
+      ).trim();
+
+      if (!query) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Search query (code, email, or reference) is required.' }));
+        return;
+      }
+
+      const attendee = await findRegistrationById(query);
+      if (!attendee) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Registration not found for the provided information.' }));
+        return;
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, registration: attendee }));
+    } catch (err) {
+      console.error('[Ticket Lookup Error]:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Failed to look up ticket.' }));
+    }
+    return;
+  }
+
+  // ── Admin: Batch / Bulk Attendee Import Endpoint ──
+  if (reqPath === '/api/admin/registrations/batch' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req, 10 * 1024 * 1024);
+      const items = Array.isArray(body) ? body : (body.attendees || []);
+      if (!Array.isArray(items) || items.length === 0) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Expected non-empty array of attendees.' }));
+        return;
+      }
+
+      const results = [];
+      const skipped = [];
+      const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 1500;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const name = String(item.name || '').trim();
+        const email = String(item.email || '').trim().toLowerCase();
+        if (!name) {
+          skipped.push({ item, reason: 'Name is missing' });
+          continue;
+        }
+
+        const finalEmail = email || `attendee_${Date.now()}_${i}@bawacademy.com`;
+
+        // Check if already registered by email
+        const existing = await findRegistrationByEmail(finalEmail);
+        if (existing) {
+          skipped.push({ item, reason: `Email ${finalEmail} already registered (Code: ${existing.uniqueCode})` });
+          continue;
+        }
+
+        let code = (item.customCode || item.uniqueCode || '').trim().toUpperCase();
+        if (!code) {
+          code = await generateNextUniqueCode();
+        } else {
+          const taken = await findRegistrationByUniqueCode(code);
+          if (taken) {
+            code = await generateNextUniqueCode();
+          }
+        }
+
+        const isChallenge = String(item.participateChallenge || '').trim().toLowerCase() === 'yes';
+
+        const newAttendee = {
+          id: `reg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          reference: `BAW-BULK-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+          uniqueCode: code,
+          name: name,
+          department: String(item.department || '').trim(),
+          level: String(item.level || '100 Level').trim(),
+          phone: String(item.phone || '').trim(),
+          email: finalEmail,
+          currentStatus: String(item.currentStatus || 'STUDENT').trim(),
+          primaryGoal: String(item.primaryGoal || 'Acquire digital and business skills').trim(),
+          qaQuestion: String(item.qaQuestion || '').trim(),
+          participateChallenge: isChallenge ? 'Yes' : 'No',
+          referredBy: String(item.referredBy || '').trim().toUpperCase(),
+          receiptUrl: String(item.receiptUrl || 'Batch Verified via Kuda Bank Statement').trim(),
+          amountPaid: feeNGN,
+          paymentMethod: 'Batch Import Verification (KUDA: 2013539577)',
+          bankDetails: {
+            bank: 'KUDA',
+            accountNumber: '2013539577',
+            accountName: 'BAKARE FATIMOH OLASHUBOMI'
+          },
+          registeredAt: item.registeredAt || new Date().toISOString()
+        };
+
+        await saveRegistration(newAttendee);
+        results.push(newAttendee);
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        importedCount: results.length,
+        skippedCount: skipped.length,
+        imported: results,
+        skipped: skipped
+      }));
+    } catch (err) {
+      console.error('[Admin Batch Import Error]:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message || 'Batch import failed' }));
+    }
+    return;
+  }
+
+  // ── Admin: Manual Attendee Creation Endpoint ──
+  if (reqPath === '/api/admin/registrations' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req, 1024 * 512);
+      const {
+        name,
+        email,
+        phone,
+        department,
+        level,
+        currentStatus,
+        primaryGoal,
+        qaQuestion,
+        participateChallenge,
+        referredBy,
+        receiptUrl,
+        customCode
+      } = body;
+
+      if (!name || !email) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Attendee Name and Email are required.' }));
+        return;
+      }
+
+      const cleanEmail = String(email).trim().toLowerCase();
+      // Check if duplicate email
+      const existing = await findRegistrationByEmail(cleanEmail);
+      if (existing) {
+        res.writeHead(409, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: `An attendee with email "${cleanEmail}" is already registered (Code: ${existing.uniqueCode}, Name: ${existing.name}).` }));
+        return;
+      }
+
+      let codeToAssign = (customCode || '').trim().toUpperCase();
+      if (!codeToAssign) {
+        codeToAssign = await generateNextUniqueCode();
+      } else {
+        const codeTaken = await findRegistrationByUniqueCode(codeToAssign);
+        if (codeTaken) {
+          res.writeHead(409, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: `Code ${codeToAssign} is already taken by ${codeTaken.name}.` }));
+          return;
+        }
+      }
+
+      const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 1500;
+      const isChallenge = String(participateChallenge || '').trim().toLowerCase() === 'yes';
+
+      const newAttendee = {
+        id: `reg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        reference: `BAW-MANUAL-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+        uniqueCode: codeToAssign,
+        name: String(name || '').trim(),
+        department: String(department || '').trim(),
+        level: String(level || '100 Level').trim(),
+        phone: String(phone || '').trim(),
+        email: cleanEmail,
+        currentStatus: String(currentStatus || 'STUDENT').trim(),
+        primaryGoal: String(primaryGoal || 'Acquire digital and business skills').trim(),
+        qaQuestion: String(qaQuestion || '').trim(),
+        participateChallenge: isChallenge ? 'Yes' : 'No',
+        referredBy: String(referredBy || '').trim().toUpperCase(),
+        receiptUrl: String(receiptUrl || '').trim(),
+        amountPaid: feeNGN,
+        paymentMethod: 'Manual Admin Verification (KUDA: 2013539577)',
+        bankDetails: {
+          bank: 'KUDA',
+          accountNumber: '2013539577',
+          accountName: 'BAKARE FATIMOH OLASHUBOMI'
+        },
+        registeredAt: new Date().toISOString()
+      };
+
+      await saveRegistration(newAttendee);
+
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, registration: newAttendee }));
+    } catch (err) {
+      console.error('[Admin Add Attendee Error]:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message || 'Failed to add attendee.' }));
+    }
+    return;
+  }
+
+  // ── Admin: Attendee Update Endpoint ──
+  if (reqPath.startsWith('/api/admin/registrations/') && req.method === 'PUT') {
+    try {
+      const rawId = reqPath.slice('/api/admin/registrations/'.length);
+      const id = decodeURIComponent(rawId).trim();
+      if (!id) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Attendee ID or Code required.' }));
+        return;
+      }
+      const body = await parseJsonBody(req, 1024 * 512);
+      const updateData = {};
+      if (body.name !== undefined) updateData.name = String(body.name).trim();
+      if (body.email !== undefined) updateData.email = String(body.email).trim().toLowerCase();
+      if (body.phone !== undefined) updateData.phone = String(body.phone).trim();
+      if (body.department !== undefined) updateData.department = String(body.department).trim();
+      if (body.level !== undefined) updateData.level = String(body.level).trim();
+      if (body.currentStatus !== undefined) updateData.currentStatus = String(body.currentStatus).trim();
+      if (body.primaryGoal !== undefined) updateData.primaryGoal = String(body.primaryGoal).trim();
+      if (body.qaQuestion !== undefined) updateData.qaQuestion = String(body.qaQuestion).trim();
+      if (body.participateChallenge !== undefined) updateData.participateChallenge = body.participateChallenge === 'Yes' ? 'Yes' : 'No';
+      if (body.referredBy !== undefined) updateData.referredBy = String(body.referredBy).trim().toUpperCase();
+      if (body.receiptUrl !== undefined) updateData.receiptUrl = String(body.receiptUrl).trim();
+
+      const updated = await updateRegistration(id, updateData);
+      if (!updated) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Attendee not found.' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, registration: updated }));
+    } catch (err) {
+      console.error('[Admin Update Attendee Error]:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message || 'Failed to update attendee.' }));
     }
     return;
   }
@@ -640,8 +1045,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET') {
       try {
         const list = await getRegistrations();
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(list));
+        sendCompressedJson(req, res, 200, list);
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Failed to retrieve registrations' }));
@@ -654,7 +1058,6 @@ const server = http.createServer(async (req, res) => {
         const body = await parseJsonBody(req, 1024 * 512);
         const {
           reference,
-          uniqueCode,
           name,
           department,
           level,
@@ -667,28 +1070,30 @@ const server = http.createServer(async (req, res) => {
           receiptUrl
         } = body;
 
-        if (!uniqueCode || !name || !email) {
+        if (!name || !email) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Unique Code, Name, and Email are required.' }));
+          res.end(JSON.stringify({ error: 'Full Name and Email are required.' }));
           return;
         }
 
-        const cleanUniqueCode = String(uniqueCode).trim().toUpperCase();
-        const cleanRef = String(reference || `BAW-TRF-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`).trim();
+        const cleanEmail = String(email || '').trim().toLowerCase();
+        const cleanRef = String(reference || `BAW-KUDA-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`).trim();
         const cleanReceiptUrl = String(receiptUrl || '').trim();
 
-        // Check if already registered by unique code or reference
-        const existingByCode = await findRegistrationByUniqueCode(cleanUniqueCode);
-        if (existingByCode) {
-          if (cleanReceiptUrl && !existingByCode.receiptUrl) {
-            existingByCode.receiptUrl = cleanReceiptUrl;
-            await saveRegistration(existingByCode);
+        // 1. Check if user with this email is ALREADY registered
+        // If so, update their receipt if missing and return their existing registration without creating duplicates
+        const existingByEmail = cleanEmail ? await findRegistrationByEmail(cleanEmail) : null;
+        if (existingByEmail) {
+          if (cleanReceiptUrl && !existingByEmail.receiptUrl) {
+            existingByEmail.receiptUrl = cleanReceiptUrl;
+            await saveRegistration(existingByEmail);
           }
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true, alreadyRegistered: true, registration: existingByCode }));
+          res.end(JSON.stringify({ success: true, alreadyRegistered: true, registration: existingByEmail }));
           return;
         }
 
+        // 2. Also check if reference was explicitly re-submitted by the same browser
         const existingByRef = await findRegistrationByReference(cleanRef);
         if (existingByRef) {
           if (cleanReceiptUrl && !existingByRef.receiptUrl) {
@@ -700,12 +1105,15 @@ const server = http.createServer(async (req, res) => {
           return;
         }
 
+        // 3. Generate brand new, guaranteed unique sequential code on the server (ATOMIC & COLLISION-FREE)
+        const assignedCode = await generateNextUniqueCode();
+
         const feeNGN = parseInt(process.env.WORKSHOP_FEE_NGN) || 1500;
         const cleanReferredBy = String(referredBy || '').trim().toUpperCase();
         let finalReferredBy = '';
 
-        // Validate referrer strictly against the database
-        if (cleanReferredBy && cleanReferredBy !== cleanUniqueCode) {
+        // Validate referrer strictly against the database (cannot refer self)
+        if (cleanReferredBy && cleanReferredBy !== assignedCode) {
           const referrerDoc = await findRegistrationByUniqueCode(cleanReferredBy);
           if (referrerDoc && referrerDoc.participateChallenge === 'Yes') {
             finalReferredBy = referrerDoc.uniqueCode;
@@ -715,14 +1123,14 @@ const server = http.createServer(async (req, res) => {
         const isOptedChallenge = String(body.participateChallenge || '').trim().toLowerCase() === 'yes';
 
         const regDoc = {
-          id: `reg-${Date.now()}`,
+          id: `reg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           reference: cleanRef,
-          uniqueCode: isOptedChallenge ? cleanUniqueCode : '',
+          uniqueCode: assignedCode, // EVERY attendee receives their own guaranteed unique ticket pass code!
           name: String(name || '').trim(),
           department: String(department || '').trim(),
           level: String(level || '').trim(),
           phone: String(phone || '').trim(),
-          email: String(email || '').trim().toLowerCase(),
+          email: cleanEmail,
           currentStatus: String(currentStatus || '').trim(),
           primaryGoal: String(primaryGoal || '').trim(),
           qaQuestion: String(qaQuestion || '').trim(),
@@ -834,6 +1242,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         valid: true,
+        registration: student,
         uniqueCode: student.uniqueCode,
         name: student.name,
         department: student.department || ''

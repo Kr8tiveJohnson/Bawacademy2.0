@@ -677,16 +677,16 @@
 
         <!-- Section Navigation Tabs -->
         <div class="admin-tab-bar">
-            <button class="admin-tab-btn is-active" id="tabBtnProjects" onclick="switchAdminTab('projects')">
+            <button class="admin-tab-btn" id="tabBtnProjects" onclick="switchAdminTab('projects')">
                 📁 Projects &amp; Portfolio Gallery
             </button>
-            <button class="admin-tab-btn" id="tabBtnRegistrations" onclick="switchAdminTab('registrations')">
+            <button class="admin-tab-btn is-active" id="tabBtnRegistrations" onclick="switchAdminTab('registrations')">
                 🎟️ Workshop 2.0 Registrations (<span id="tabBadgeRegs">0</span>)
             </button>
         </div>
 
         <!-- Projects Workspace Section -->
-        <div id="projectsSection">
+        <div id="projectsSection" style="display: none;">
             <div class="admin-workspace">
             <!-- Left: Add / Edit Form -->
             <section class="admin-panel">
@@ -771,6 +771,12 @@
                             <option value="with_receipt">🧾 With Uploaded Receipt</option>
                             <option value="wa_only">📱 WhatsApp DM Only</option>
                         </select>
+                        <button class="button" onclick="openAddAttendeeModal()" style="font-size: 0.88rem; padding: 10px 16px; background: #22c55e; border-color: #22c55e; color: #03140b; font-weight: 700;">
+                            <span>➕ Add Attendee</span>
+                        </button>
+                        <button class="button" onclick="openBulkImportModal()" style="font-size: 0.88rem; padding: 10px 16px; background: rgba(56,189,248,0.2); border: 1px solid rgba(56,189,248,0.5); color: #38bdf8; font-weight: 700;">
+                            <span>📋 Bulk Import</span>
+                        </button>
                         <button class="button button-gold" onclick="exportRegistrationsCSV()" style="font-size: 0.88rem; padding: 10px 16px;">
                             <span>📥 Export CSV</span>
                         </button>
@@ -855,6 +861,236 @@
         </div>
     </div>
 
+    <!-- Add Attendee Modal -->
+    <div id="addAttendeeModal" class="receipt-modal-overlay" style="display: none;" onclick="if(event.target === this) closeAddAttendeeModal()">
+        <div class="receipt-modal-card" style="max-width: 640px;">
+            <div class="receipt-modal-header">
+                <div>
+                    <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">➕ Add Workshop Attendee</h3>
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 2px;">Manually record a student (from WhatsApp / Kuda transfer) and issue their official ticket pass code.</p>
+                </div>
+                <button type="button" onclick="closeAddAttendeeModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
+            </div>
+            <form onsubmit="handleAddAttendeeSubmit(event)" style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 120px); display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Full Name *</label>
+                        <input type="text" id="addAttName" required placeholder="Student's Full Name" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Email Address *</label>
+                        <input type="email" id="addAttEmail" required placeholder="student@gmail.com" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Phone Number *</label>
+                        <input type="tel" id="addAttPhone" required placeholder="080... or 090..." style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Department</label>
+                        <input type="text" id="addAttDept" placeholder="e.g. Computer Science" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Level</label>
+                        <select id="addAttLevel" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                            <option value="100 Level">100 Level</option>
+                            <option value="200 Level">200 Level</option>
+                            <option value="300 Level">300 Level</option>
+                            <option value="400 Level">400 Level</option>
+                            <option value="500 Level">500 Level</option>
+                            <option value="Graduate / Alumnus">Graduate / Alumnus</option>
+                            <option value="Non-Student / Professional">Non-Student / Professional</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Super Mega Challenge?</label>
+                        <select id="addAttChallenge" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                            <option value="Yes">Yes (Ambassador Challenge)</option>
+                            <option value="No">No (Standard Attendance)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Current Status</label>
+                        <select id="addAttStatus" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                            <option value="STUDENT">STUDENT</option>
+                            <option value="Aspiring Entrepreneur / Freelancer">Aspiring Entrepreneur / Freelancer</option>
+                            <option value="Working Professional / Career Transitioner">Working Professional / Career Transitioner</option>
+                            <option value="Existing Small Business Owner">Existing Small Business Owner</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Referred By (Code)</label>
+                        <input type="text" id="addAttReferredBy" placeholder="e.g. BAW-205 (optional)" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Custom Pass Code (Optional - leave blank to auto-generate next sequential code)</label>
+                    <input type="text" id="addAttCustomCode" placeholder="e.g. BAW-247 (or leave blank to auto-generate)" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: var(--admin-gold); font-size: 0.9rem; font-family: monospace;">
+                </div>
+
+                <div>
+                    <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Payment Proof URL / Note</label>
+                    <input type="text" id="addAttReceiptUrl" placeholder="assets/receipts/... or Verified via Kuda Bank Statement" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+                    <button type="button" class="btn-action-sm btn-del" onclick="closeAddAttendeeModal()" style="padding: 10px 18px; font-size: 0.88rem;">Cancel</button>
+                    <button type="submit" id="btnAddAttendeeSubmit" class="button" style="background: #22c55e; border-color: #22c55e; color: #03140b; font-weight: 700; padding: 10px 20px; font-size: 0.9rem;">
+                        <span>Save &amp; Issue Ticket Pass</span> <span>🎟️</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Attendee Modal -->
+    <div id="editAttendeeModal" class="receipt-modal-overlay" style="display: none;" onclick="if(event.target === this) closeEditAttendeeModal()">
+        <div class="receipt-modal-card" style="max-width: 640px;">
+            <div class="receipt-modal-header">
+                <div>
+                    <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">✏️ Edit Attendee Details</h3>
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 2px;">Update student information, phone, department, or challenge participation.</p>
+                </div>
+                <button type="button" onclick="closeEditAttendeeModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
+            </div>
+            <form onsubmit="handleEditAttendeeSubmit(event)" style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 120px); display: flex; flex-direction: column; gap: 14px;">
+                <input type="hidden" id="editAttId">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Pass Code (Read-Only)</label>
+                        <input type="text" id="editAttCode" readonly style="width: 100%; padding: 10px; background: rgba(230,183,73,0.1); border: 1px solid rgba(230,183,73,0.3); border-radius: 8px; color: var(--admin-gold); font-size: 0.9rem; font-family: monospace; font-weight: 700;">
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Full Name *</label>
+                        <input type="text" id="editAttName" required style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Email Address *</label>
+                        <input type="email" id="editAttEmail" required style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Phone Number *</label>
+                        <input type="tel" id="editAttPhone" required style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Department</label>
+                        <input type="text" id="editAttDept" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Level</label>
+                        <select id="editAttLevel" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                            <option value="100 Level">100 Level</option>
+                            <option value="200 Level">200 Level</option>
+                            <option value="300 Level">300 Level</option>
+                            <option value="400 Level">400 Level</option>
+                            <option value="500 Level">500 Level</option>
+                            <option value="Graduate / Alumnus">Graduate / Alumnus</option>
+                            <option value="Non-Student / Professional">Non-Student / Professional</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Super Mega Challenge?</label>
+                        <select id="editAttChallenge" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                            <option value="Yes">Yes (Ambassador Challenge)</option>
+                            <option value="No">No (Standard Attendance)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Referred By (Code)</label>
+                        <input type="text" id="editAttReferredBy" placeholder="e.g. BAW-205" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Payment Receipt Proof URL / Note</label>
+                    <input type="text" id="editAttReceiptUrl" placeholder="assets/receipts/... or WhatsApp Verified" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+                    <button type="button" class="btn-action-sm btn-del" onclick="closeEditAttendeeModal()" style="padding: 10px 18px; font-size: 0.88rem;">Cancel</button>
+                    <button type="submit" id="btnEditAttendeeSubmit" class="button button-gold" style="padding: 10px 20px; font-size: 0.9rem;">
+                        <span>Update Attendee Details</span> <span>💾</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Import Modal -->
+    <div id="bulkImportModal" class="receipt-modal-overlay" style="display: none;" onclick="if(event.target === this) closeBulkImportModal()">
+        <div class="receipt-modal-card" style="max-width: 680px;">
+            <div class="receipt-modal-header">
+                <div>
+                    <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">📋 Bulk Import Missing Attendees</h3>
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 2px;">Paste names from your Kuda statement, WhatsApp chat, or Excel to register multiple students in one click.</p>
+                </div>
+                <button type="button" onclick="closeBulkImportModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
+            </div>
+            <form onsubmit="handleBulkImportSubmit(event)" style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+                <div style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.45;">
+                    <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">Paste Format (1 attendee per line):</strong>
+                    <code>Name, Phone, Email, Department</code> &nbsp;<em>(or just Name and Phone)</em><br>
+                    <span style="color: #94a3b8; font-size: 0.78rem;">Example:<br>
+                    Oluwaseun Balogun, 08031234567, seun@gmail.com, Computer Science<br>
+                    Chidinma Okoro, 09059876543, chidinma@yahoo.com, Accounting<br>
+                    Ibrahim Musa, 07011223344
+                    </span>
+                </div>
+
+                <div>
+                    <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>Attendee List (Paste Below) *</span>
+                        <span id="bulkCountBadge" style="color: #4ade80; font-weight: 700;">0 attendees detected</span>
+                    </label>
+                    <textarea id="bulkImportTextarea" oninput="updateBulkCount()" rows="10" required
+                        placeholder="Paste your attendee names here, one per line..."
+                        style="width: 100%; padding: 12px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 10px; color: #fff; font-family: monospace; font-size: 0.88rem; line-height: 1.5; resize: vertical;"></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Enroll in Super Mega Challenge?</label>
+                        <select id="bulkImportChallenge" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.88rem;">
+                            <option value="Yes">Yes (Ambassador Challenge)</option>
+                            <option value="No">No (Standard Attendance)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Default Department (if omitted)</label>
+                        <input type="text" id="bulkDefaultDept" placeholder="e.g. General Participant" style="width: 100%; padding: 10px; background: #03140b; border: 1px solid var(--admin-border); border-radius: 8px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                    <button type="button" class="btn-action-sm btn-del" onclick="closeBulkImportModal()" style="padding: 10px 18px; font-size: 0.88rem;">Cancel</button>
+                    <button type="submit" id="btnBulkImportSubmit" class="button" style="background: #38bdf8; border-color: #38bdf8; color: #03140b; font-weight: 700; padding: 10px 22px; font-size: 0.9rem;">
+                        <span>Import All Attendees &amp; Issue Passes</span> <span>🚀</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const AUTH_PASSCODE = "spotless2026";
         let projects = [];
@@ -872,6 +1108,7 @@
         }
 
         function switchAdminTab(tab) {
+            sessionStorage.setItem("tbba_active_tab", tab);
             const tabBtnProjects = document.getElementById("tabBtnProjects");
             const tabBtnRegistrations = document.getElementById("tabBtnRegistrations");
             const projectsSection = document.getElementById("projectsSection");
@@ -888,6 +1125,9 @@
                 tabBtnRegistrations.classList.remove("is-active");
                 projectsSection.style.display = "block";
                 registrationsSection.style.display = "none";
+                if (projects.length === 0) {
+                    loadProjects();
+                }
             }
         }
 
@@ -1033,9 +1273,17 @@
                             ${dateStr}
                         </td>
                         <td style="text-align: center; white-space: nowrap;">
-                            <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${r.id || r.reference || r.uniqueCode}', '${escapeHtml(r.name || 'Participant')}')" style="padding: 6px 12px; font-size: 0.78rem;">
-                                Delete
-                            </button>
+                            <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                                <button type="button" class="btn-action-sm btn-edit" onclick="openEditAttendeeModal('${escapeHtml(r.id || r.reference || r.uniqueCode)}')" title="Edit Attendee Details" style="padding: 5px 10px; font-size: 0.78rem;">
+                                    ✏️ Edit
+                                </button>
+                                <button type="button" class="btn-action-sm" onclick="copyTicketLink('${escapeHtml(r.uniqueCode || '')}')" title="Copy Ticket Pass Link to send to student" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8;">
+                                    🔗 Pass
+                                </button>
+                                <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${escapeHtml(r.id || r.reference || r.uniqueCode)}', '${escapeHtml(r.name || 'Participant')}')" style="padding: 5px 10px; font-size: 0.78rem;" title="Delete Registration">
+                                    🗑️
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1151,9 +1399,286 @@
             if (modal) modal.style.display = "none";
         }
 
+        // Copy direct link to student's ticket pass
+        function copyTicketLink(code) {
+            if (!code) {
+                alert("This attendee does not have a unique ticket pass code.");
+                return;
+            }
+            const url = window.location.origin + '/register-form.html?code=' + encodeURIComponent(code);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast(`Copied Ticket Link for ${code}!`);
+                }).catch(() => {
+                    prompt("Ticket Link (copy below):", url);
+                });
+            } else {
+                prompt("Ticket Link (copy below):", url);
+            }
+        }
+
+        // Add Attendee Modal Handlers
+        function openAddAttendeeModal() {
+            const modal = document.getElementById("addAttendeeModal");
+            if (modal) {
+                modal.style.display = "flex";
+                document.getElementById("addAttName")?.focus();
+            }
+        }
+
+        function closeAddAttendeeModal() {
+            const modal = document.getElementById("addAttendeeModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        async function handleAddAttendeeSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById("btnAddAttendeeSubmit");
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Saving Attendee...";
+            }
+
+            try {
+                const payload = {
+                    name: document.getElementById("addAttName").value.trim(),
+                    email: document.getElementById("addAttEmail").value.trim().toLowerCase(),
+                    phone: document.getElementById("addAttPhone").value.trim(),
+                    department: document.getElementById("addAttDept").value.trim(),
+                    level: document.getElementById("addAttLevel").value,
+                    participateChallenge: document.getElementById("addAttChallenge").value,
+                    currentStatus: document.getElementById("addAttStatus").value,
+                    referredBy: document.getElementById("addAttReferredBy").value.trim().toUpperCase(),
+                    customCode: document.getElementById("addAttCustomCode").value.trim().toUpperCase(),
+                    receiptUrl: document.getElementById("addAttReceiptUrl").value.trim()
+                };
+
+                const res = await fetch("/api/admin/registrations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || "Failed to add attendee.");
+                }
+
+                showToast(`✅ Successfully registered ${data.registration.name} (Code: ${data.registration.uniqueCode})`);
+                closeAddAttendeeModal();
+                loadRegistrations();
+
+                // Ask if they want to copy the ticket link immediately
+                setTimeout(() => {
+                    if (confirm(`Attendee successfully added!\n\nName: ${data.registration.name}\nTicket Code: ${data.registration.uniqueCode}\n\nWould you like to copy their ticket pass link to send via WhatsApp?`)) {
+                        copyTicketLink(data.registration.uniqueCode);
+                    }
+                }, 300);
+
+            } catch (err) {
+                alert("Error adding attendee: " + err.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>Save &amp; Issue Ticket Pass</span> <span>🎟️</span>`;
+                }
+            }
+        }
+
+        // Edit Attendee Modal Handlers
+        function openEditAttendeeModal(identifier) {
+            const att = registrations.find(r => r.id === identifier || r.reference === identifier || r.uniqueCode === identifier);
+            if (!att) {
+                alert("Attendee record not found.");
+                return;
+            }
+
+            document.getElementById("editAttId").value = att.id || att.reference || att.uniqueCode;
+            document.getElementById("editAttCode").value = att.uniqueCode || '—';
+            document.getElementById("editAttName").value = att.name || '';
+            document.getElementById("editAttEmail").value = att.email || '';
+            document.getElementById("editAttPhone").value = att.phone || '';
+            document.getElementById("editAttDept").value = att.department || '';
+            if (document.getElementById("editAttLevel")) {
+                document.getElementById("editAttLevel").value = att.level || '100 Level';
+            }
+            if (document.getElementById("editAttChallenge")) {
+                document.getElementById("editAttChallenge").value = att.participateChallenge === 'Yes' ? 'Yes' : 'No';
+            }
+            document.getElementById("editAttReferredBy").value = att.referredBy || '';
+            document.getElementById("editAttReceiptUrl").value = att.receiptUrl || '';
+
+            const modal = document.getElementById("editAttendeeModal");
+            if (modal) modal.style.display = "flex";
+        }
+
+        function closeEditAttendeeModal() {
+            const modal = document.getElementById("editAttendeeModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        async function handleEditAttendeeSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById("editAttId").value.trim();
+            if (!id) return;
+
+            const btn = document.getElementById("btnEditAttendeeSubmit");
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Updating...";
+            }
+
+            try {
+                const payload = {
+                    name: document.getElementById("editAttName").value.trim(),
+                    email: document.getElementById("editAttEmail").value.trim().toLowerCase(),
+                    phone: document.getElementById("editAttPhone").value.trim(),
+                    department: document.getElementById("editAttDept").value.trim(),
+                    level: document.getElementById("editAttLevel").value,
+                    participateChallenge: document.getElementById("editAttChallenge").value,
+                    referredBy: document.getElementById("editAttReferredBy").value.trim().toUpperCase(),
+                    receiptUrl: document.getElementById("editAttReceiptUrl").value.trim()
+                };
+
+                const res = await fetch(`/api/admin/registrations/${encodeURIComponent(id)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || "Failed to update attendee.");
+                }
+
+                showToast(`Updated details for ${data.registration.name}`);
+                closeEditAttendeeModal();
+                loadRegistrations();
+            } catch (err) {
+                alert("Error updating attendee: " + err.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>Update Attendee Details</span> <span>💾</span>`;
+                }
+            }
+        }
+
+        // Bulk Import Handlers
+        function openBulkImportModal() {
+            const modal = document.getElementById("bulkImportModal");
+            if (modal) {
+                modal.style.display = "flex";
+                document.getElementById("bulkImportTextarea")?.focus();
+            }
+        }
+
+        function closeBulkImportModal() {
+            const modal = document.getElementById("bulkImportModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        function parseBulkLines(text) {
+            if (!text) return [];
+            const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+            const attendees = [];
+
+            for (const line of lines) {
+                // Support comma, tab, or semicolon separated
+                const parts = line.split(/[,;\t]+/).map(p => p.trim());
+                if (parts.length === 0 || !parts[0]) continue;
+
+                const name = parts[0];
+                let phone = '';
+                let email = '';
+                let dept = '';
+
+                // Detect fields
+                for (let i = 1; i < parts.length; i++) {
+                    const p = parts[i];
+                    if (!email && p.includes('@') && p.includes('.')) {
+                        email = p.toLowerCase();
+                    } else if (!phone && p.match(/^[+0-9\s-]{8,16}$/)) {
+                        phone = p;
+                    } else if (!dept && p.length > 0) {
+                        dept = p;
+                    }
+                }
+
+                attendees.push({
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    department: dept || document.getElementById("bulkDefaultDept")?.value.trim() || 'General Participant',
+                    participateChallenge: document.getElementById("bulkImportChallenge")?.value || 'Yes'
+                });
+            }
+            return attendees;
+        }
+
+        function updateBulkCount() {
+            const text = document.getElementById("bulkImportTextarea")?.value || '';
+            const attendees = parseBulkLines(text);
+            const badge = document.getElementById("bulkCountBadge");
+            if (badge) {
+                badge.textContent = `${attendees.length} attendee(s) detected`;
+                badge.style.color = attendees.length > 0 ? '#4ade80' : '#94a3b8';
+            }
+        }
+
+        async function handleBulkImportSubmit(e) {
+            e.preventDefault();
+            const text = document.getElementById("bulkImportTextarea")?.value || '';
+            const attendees = parseBulkLines(text);
+
+            if (attendees.length === 0) {
+                alert("Please paste at least one valid attendee line.");
+                return;
+            }
+
+            const btn = document.getElementById("btnBulkImportSubmit");
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = `Importing ${attendees.length} attendees...`;
+            }
+
+            try {
+                const res = await fetch("/api/admin/registrations/batch", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(attendees)
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || "Failed to batch import attendees.");
+                }
+
+                showToast(`🎉 Successfully imported ${data.importedCount} attendees!`);
+                closeBulkImportModal();
+                document.getElementById("bulkImportTextarea").value = "";
+                loadRegistrations();
+
+                alert(`Bulk Import Complete!\n\nSuccessfully Imported: ${data.importedCount}\nSkipped: ${data.skippedCount || 0}\n\nAll imported attendees have been issued sequential pass codes and saved to MongoDB Atlas.`);
+
+            } catch (err) {
+                alert("Error during bulk import: " + err.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>Import All Attendees &amp; Issue Passes</span> <span>🚀</span>`;
+                }
+            }
+        }
+
         // Close modal on Escape key
         window.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") closeReceiptModal();
+            if (e.key === "Escape") {
+                closeReceiptModal();
+                closeAddAttendeeModal();
+                closeEditAttendeeModal();
+                closeBulkImportModal();
+            }
         });
 
         async function deleteSingleRegistration(id, name) {
@@ -1205,8 +1730,8 @@
         function checkAuth() {
             if (sessionStorage.getItem("tbba_admin_auth") === "true") {
                 document.getElementById("authOverlay").style.display = "none";
-                loadProjects();
-                loadRegistrations();
+                const activeTab = sessionStorage.getItem("tbba_active_tab") || "registrations";
+                switchAdminTab(activeTab);
             } else {
                 document.getElementById("authOverlay").style.display = "flex";
             }
@@ -1219,7 +1744,8 @@
                 sessionStorage.setItem("tbba_admin_auth", "true");
                 document.getElementById("authOverlay").style.display = "none";
                 document.getElementById("authError").style.display = "none";
-                loadProjects();
+                const activeTab = sessionStorage.getItem("tbba_active_tab") || "registrations";
+                switchAdminTab(activeTab);
             } else {
                 document.getElementById("authError").style.display = "block";
             }
@@ -1331,15 +1857,25 @@
             });
         }
 
-        // Load projects from API or LocalStorage
-        async function loadProjects() {
+        // Load projects from API or LocalStorage (Lazy loaded on demand)
+        async function loadProjects(force = false) {
+            if (!force && projects.length > 0) {
+                updateUI();
+                return;
+            }
+            const container = document.getElementById("projectsListContainer");
+            if (container && projects.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: var(--admin-gold);">
+                        <p style="font-size: 1.8rem; margin-bottom: 8px;">⏳</p>
+                        <p>Loading published projects &amp; gallery media...</p>
+                    </div>
+                `;
+            }
             try {
                 const res = await fetch('/api/projects');
                 if (res.ok) {
                     projects = await res.json();
-                    try {
-                        localStorage.setItem("tbba_past_projects", JSON.stringify(projects));
-                    } catch (e) {}
                     updateUI();
                     return;
                 }
