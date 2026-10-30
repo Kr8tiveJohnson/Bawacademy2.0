@@ -373,6 +373,7 @@ async function initMongoDB() {
   try {
     console.log('[Database] ⏳ Connecting to MongoDB Atlas...');
     dbClient = new MongoClient(uri, {
+      family: 4,                    // Force IPv4 to prevent 10s timeout on networks without IPv6 WAN routing
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 10000,
       socketTimeoutMS: 45000,
@@ -1631,6 +1632,25 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
+// Process-level safety guards to ensure the server never crashes on unhandled socket errors
+process.on('uncaughtException', (err) => {
+  console.error('[Server] ⚠️ Uncaught Exception intercepted:', err.message);
+});
+
+process.on('unhandledRejection', (reason) => {
+  const msg = reason && reason.message ? reason.message : String(reason);
+  console.warn('[Server] ⚠️ Unhandled Rejection intercepted:', msg);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[Server] ❌ Port ${PORT} is already in use by another running instance of node server.js.`);
+    console.error(`[Server] 💡 Please close the other terminal or run: Stop-Process -Name node -Force`);
+  } else {
+    console.error('[Server] Server error:', err.message);
+  }
+});
+
 // Initialize MongoDB Atlas then launch server
 initMongoDB().finally(() => {
   server.listen(PORT, '0.0.0.0', () => {
@@ -1638,3 +1658,4 @@ initMongoDB().finally(() => {
     console.log(`🌐 Local access: http://localhost:${PORT}`);
   });
 });
+
