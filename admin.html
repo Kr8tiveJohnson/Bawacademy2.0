@@ -786,104 +786,174 @@
             border-bottom: none;
         }
 
-        /* ---------------- MOBILE CARD VIEW MODE ---------------- */
-        /* Applied when screen is <= 768px, or when user selects Cards View */
-        body.mode-cards .reg-table-container {
-            border: none;
-            background: transparent;
-            overflow: visible;
-        }
-
-        body.mode-cards .reg-table {
-            display: block;
-            width: 100%;
-        }
-
-        body.mode-cards .reg-table thead {
-            display: none;
-        }
-
-        body.mode-cards .reg-table tbody {
+        /* ---------------- DEDICATED CARDS GRID & CARDS VIEW ---------------- */
+        .reg-cards-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+            margin-top: 10px;
             width: 100%;
         }
 
-        body.mode-cards .reg-table tbody tr {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background: linear-gradient(180deg, rgba(8, 28, 17, 0.9) 0%, rgba(4, 16, 9, 0.95) 100%);
+        .student-card {
+            background: linear-gradient(180deg, rgba(8, 28, 17, 0.9) 0%, rgba(3, 14, 8, 0.96) 100%);
             border: 1px solid var(--border-glass);
             border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-            position: relative;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        body.mode-cards .reg-table tbody tr:hover td {
-            background: transparent;
+        .student-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(230, 183, 73, 0.45);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
         }
 
-        body.mode-cards .reg-table td {
-            padding: 0 !important;
-            border: none !important;
-            display: block;
-        }
-
-        /* Semantic Card Sub-blocks */
-        .card-row-header {
+        .student-card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            flex-wrap: wrap;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .card-student-name {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1.25;
-            letter-spacing: -0.01em;
-        }
-
-        .card-contacts-bar {
+        .student-card-code-row {
             display: flex;
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
-            padding: 10px 12px;
-            background: rgba(3, 14, 8, 0.85);
-            border-radius: 10px;
-            border: 1px solid var(--border-glass-light);
         }
 
-        .card-contact-link {
-            font-size: 0.82rem;
+        .student-card-date {
+            font-size: 0.74rem;
+            color: var(--text-dim);
+        }
+
+        .student-card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .student-card-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+        }
+
+        .student-card-dept {
+            font-size: 0.84rem;
+            color: #cbd5e1;
+        }
+
+        .student-card-contacts {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 10px 12px;
+            background: rgba(2, 10, 6, 0.85);
+            border: 1px solid var(--border-glass-light);
+            border-radius: 10px;
+        }
+
+        .student-card-contacts .card-contact-item {
+            font-size: 0.8rem;
             color: var(--accent-gold-light);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             word-break: break-all;
+            transition: color 0.15s ease;
         }
 
-        .card-badge-strip {
+        .student-card-contacts .card-contact-item:hover {
+            color: #fff;
+        }
+
+        .student-card-tags {
             display: flex;
             align-items: center;
             gap: 6px;
             flex-wrap: wrap;
         }
 
-        .card-tag {
+        .student-card-notes {
+            background: rgba(255, 255, 255, 0.025);
+            border-left: 3px solid var(--accent-gold);
+            padding: 8px 12px;
+            border-radius: 4px 8px 8px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.78rem;
+            color: #cbd5e1;
+        }
+
+        .student-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            flex-wrap: wrap;
+        }
+
+        .student-card-payment {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .student-card-amount {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #4ade80;
+        }
+
+        .student-card-ref {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
+
+        .student-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-wa-only {
+            color: var(--text-muted);
             font-size: 0.76rem;
-            padding: 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .card-tag {
+            font-size: 0.74rem;
+            padding: 3px 9px;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
             color: #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .card-tag.tag-highlight {
@@ -891,29 +961,6 @@
             border-color: rgba(34, 197, 94, 0.4);
             color: #4ade80;
             font-weight: 700;
-        }
-
-        .card-fee-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            font-size: 0.82rem;
-        }
-
-        .card-actions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 8px;
-            margin-top: 4px;
-        }
-
-        .card-actions-grid .btn-action-sm {
-            padding: 9px 12px;
-            font-size: 0.84rem;
-            width: 100%;
         }
 
         /* ---------------- PROJECTS CMS PANEL ---------------- */
@@ -1359,7 +1406,7 @@
     </style>
 </head>
 
-<body class="mode-cards">
+<body>
     <!-- Passcode Auth Overlay -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-card">
@@ -1560,36 +1607,40 @@
                     <!-- Ambassador / Referral Leaderboard Strip -->
                     <div id="referralLeaderboardStrip"></div>
 
-                    <!-- Table of Attendees -->
-                    <div class="reg-table-container">
+                    <!-- Table View of Attendees -->
+                    <div class="reg-table-container" id="regTableContainer">
                         <table class="reg-table">
                             <thead>
                                 <tr>
                                     <th>Pass Code</th>
-                                    <th>Student Name</th>
-                                    <th>Receipt Proof</th>
-                                    <th>Mega Challenge</th>
-                                    <th>Referrals</th>
-                                    <th>Referred By</th>
+                                    <th>Student Info</th>
                                     <th>Contact</th>
-                                    <th>Dept / Level</th>
-                                    <th>Status</th>
-                                    <th>Primary Goal</th>
-                                    <th>Q&amp;A Question</th>
-                                    <th>Fee &amp; Ref</th>
+                                    <th>Dept &amp; Level</th>
+                                    <th>Status &amp; Challenge</th>
+                                    <th>Referrals</th>
+                                    <th>Payment Proof</th>
+                                    <th>Goal &amp; Q&amp;A</th>
                                     <th>Date</th>
                                     <th style="text-align: center;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="registrationsTableBody">
                                 <tr>
-                                    <td colspan="14" style="text-align: center; padding: 48px; color: var(--text-muted);">
+                                    <td colspan="10" style="text-align: center; padding: 48px; color: var(--text-muted);">
                                         <div style="font-size: 1.8rem; margin-bottom: 8px;">⏳</div>
                                         <div>Loading registered students from secure cloud database...</div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Cards Grid View of Attendees -->
+                    <div class="reg-cards-grid" id="regCardsContainer" style="display: none;">
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 48px; color: var(--text-muted); background: rgba(3, 15, 8, 0.6); border: 1px solid var(--border-glass-light); border-radius: 14px;">
+                            <div style="font-size: 1.8rem; margin-bottom: 8px;">⏳</div>
+                            <div>Loading registered students from secure cloud database...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1716,7 +1767,7 @@
             <div class="receipt-modal-header">
                 <div>
                     <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">➕ Add Workshop Attendee</h3>
-                    <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">Manually record a student (WhatsApp / Kuda transfer) and issue their official ticket pass.</p>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">Manually record a student (WhatsApp / Moniepoint transfer) and issue their official ticket pass.</p>
                 </div>
                 <button type="button" onclick="closeAddAttendeeModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
             </div>
@@ -1789,7 +1840,7 @@
 
                 <div>
                     <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Payment Proof URL / Note</label>
-                    <input type="text" id="addAttReceiptUrl" placeholder="assets/receipts/... or Verified via Kuda Bank Statement" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
+                    <input type="text" id="addAttReceiptUrl" placeholder="assets/receipts/... or Verified via Moniepoint Bank Statement" style="width: 100%; padding: 11px; background: var(--bg-input); border: 1px solid var(--border-glass-light); border-radius: 8px; color: #fff; font-size: 16px;">
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
@@ -1891,7 +1942,7 @@
             <div class="receipt-modal-header">
                 <div>
                     <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700;">📋 Bulk Import Attendees</h3>
-                    <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">Paste names from Kuda statement, WhatsApp, or Excel to register multiple students in one click.</p>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">Paste names from Moniepoint statement, WhatsApp, or Excel to register multiple students in one click.</p>
                 </div>
                 <button type="button" onclick="closeBulkImportModal()" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer;">✕</button>
             </div>
@@ -1966,15 +2017,19 @@
             sessionStorage.setItem("tbba_view_mode", mode);
             const btnCards = document.getElementById("btnViewCards");
             const btnTable = document.getElementById("btnViewTable");
+            const tableContainer = document.getElementById("regTableContainer");
+            const cardsContainer = document.getElementById("regCardsContainer");
 
             if (mode === 'cards') {
-                document.body.classList.add("mode-cards");
                 if (btnCards) btnCards.classList.add("is-active");
                 if (btnTable) btnTable.classList.remove("is-active");
+                if (tableContainer) tableContainer.style.display = "none";
+                if (cardsContainer) cardsContainer.style.display = "grid";
             } else {
-                document.body.classList.remove("mode-cards");
                 if (btnCards) btnCards.classList.remove("is-active");
                 if (btnTable) btnTable.classList.add("is-active");
+                if (tableContainer) tableContainer.style.display = "block";
+                if (cardsContainer) cardsContainer.style.display = "none";
             }
         }
 
@@ -2059,6 +2114,7 @@
 
         function renderRegistrationsTable(list) {
             const tbody = document.getElementById("registrationsTableBody");
+            const cardsContainer = document.getElementById("regCardsContainer");
             const leaderboardEl = document.getElementById("referralLeaderboardStrip");
             if (!tbody) return;
 
@@ -2104,139 +2160,134 @@
             if (!list || list.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="14" style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
+                        <td colspan="10" style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
                             <div style="font-size: 1.8rem; margin-bottom: 8px;">🔍</div>
                             <div>No registered students found matching criteria.</div>
                         </td>
                     </tr>
                 `;
+                if (cardsContainer) {
+                    cardsContainer.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 16px; color: var(--text-muted); background: rgba(3, 15, 8, 0.6); border: 1px solid var(--border-glass-light); border-radius: 14px;">
+                            <div style="font-size: 1.8rem; margin-bottom: 8px;">🔍</div>
+                            <div>No registered students found matching criteria.</div>
+                        </div>
+                    `;
+                }
                 return;
             }
 
-            tbody.innerHTML = list.map((r, i) => {
+            // 1. Populate Table View
+            tbody.innerHTML = list.map((r) => {
                 const dateStr = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
                 
                 return `
                     <tr>
-                        <!-- Mobile Card Header / Desktop Col 1 -->
+                        <!-- Pass Code -->
                         <td>
-                            <div class="card-row-header">
-                                <span class="reg-code-badge">${escapeHtml(r.uniqueCode || '—')}</span>
+                            <span class="reg-code-badge">${escapeHtml(r.uniqueCode || '—')}</span>
+                        </td>
+
+                        <!-- Student Info -->
+                        <td>
+                            <div style="font-weight: 700; color: #fff; font-size: 0.95rem; line-height: 1.25;">
+                                ${escapeHtml(r.name || '—')}
+                            </div>
+                        </td>
+
+                        <!-- Contact -->
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem;">
+                                <a href="tel:${escapeHtml(r.phone || '')}" style="color: var(--accent-gold-light); text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                                    <span>📞</span> <span>${escapeHtml(r.phone || 'No phone')}</span>
+                                </a>
+                                <a href="mailto:${escapeHtml(r.email || '')}" style="color: #94a3b8; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.76rem;">
+                                    <span>✉️</span> <span>${escapeHtml(r.email || 'No email')}</span>
+                                </a>
+                            </div>
+                        </td>
+
+                        <!-- Dept & Level -->
+                        <td>
+                            <div style="font-size: 0.84rem; color: #cbd5e1;">
+                                <span style="font-weight: 600;">${escapeHtml(r.department || 'General')}</span>
+                                <div style="color: var(--text-muted); font-size: 0.76rem; margin-top: 2px;">
+                                    ${escapeHtml(r.level || '—')}
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Status & Challenge -->
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                <span class="card-tag" style="background: rgba(230,183,73,0.12); color: var(--accent-gold); font-size: 0.74rem;">
+                                    💼 ${escapeHtml(r.currentStatus || 'STUDENT')}
+                                </span>
+                                ${r.participateChallenge === 'Yes'
+                                    ? `<span class="card-tag tag-highlight" style="font-size: 0.74rem;">🏆 Challenge (Yes)</span>`
+                                    : `<span class="card-tag" style="font-size: 0.74rem; color: var(--text-dim);">Standard</span>`
+                                }
+                            </div>
+                        </td>
+
+                        <!-- Referrals -->
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                ${r.referralCount > 0
+                                    ? `<span style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.76rem;">🎯 ${r.referralCount} Invited</span>`
+                                    : `<span style="color: var(--text-dim); font-size: 0.76rem;">0 Invited</span>`
+                                }
+                                ${r.referredBy
+                                    ? `<span style="color: var(--accent-gold); font-size: 0.74rem; font-family: var(--font-mono);">Ref: ${escapeHtml(r.referredBy)}</span>`
+                                    : `<span style="color: var(--text-dim); font-size: 0.74rem;">Direct</span>`
+                                }
+                            </div>
+                        </td>
+
+                        <!-- Payment Proof -->
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
+                                <strong style="color: #4ade80; font-size: 0.92rem;">₦${(r.amountPaid || 1500).toLocaleString()}</strong>
                                 ${r.receiptUrl ? `
                                     <button type="button" class="btn-receipt-view" onclick="openReceiptModal('${escapeHtml(r.receiptUrl)}', '${escapeHtml(r.name || 'Student')}', '${escapeHtml(r.uniqueCode || '')}', '${escapeHtml(r.reference || '')}', '${r.registeredAt || ''}')">
                                         <span>🧾 View Proof</span>
                                         <span>🔍</span>
                                     </button>
                                 ` : `
-                                    <span style="color: var(--text-muted); font-size: 0.76rem; display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
-                                        <span>📱</span> WA Only
-                                    </span>
+                                    <span class="badge-wa-only">📱 WA Only</span>
                                 `}
                             </div>
                         </td>
 
-                        <!-- Student Name -->
+                        <!-- Goal & Q&A -->
                         <td>
-                            <div class="card-student-name">${escapeHtml(r.name || '—')}</div>
-                        </td>
-
-                        <!-- Receipt Proof (Desktop view fallback) -->
-                        <td class="desktop-only-toggle">
-                            ${r.receiptUrl ? `
-                                <button type="button" class="btn-receipt-view" onclick="openReceiptModal('${escapeHtml(r.receiptUrl)}', '${escapeHtml(r.name || 'Student')}', '${escapeHtml(r.uniqueCode || '')}', '${escapeHtml(r.reference || '')}', '${r.registeredAt || ''}')">
-                                    <span>🧾 View</span>
-                                    <span>🔍</span>
-                                </button>
-                            ` : `
-                                <span style="color: var(--text-muted); font-size: 0.78rem;">📱 WA Only</span>
-                            `}
-                        </td>
-
-                        <!-- Challenge enrolled status -->
-                        <td>
-                            <div class="card-badge-strip">
-                                ${r.participateChallenge === 'Yes'
-                                    ? `<span class="card-tag tag-highlight">🏆 Challenge (Yes)</span>`
-                                    : `<span class="card-tag">Standard Attendance</span>`
-                                }
-                                ${r.referralCount > 0 ? `<span class="card-tag tag-highlight">🎯 ${r.referralCount} Invited</span>` : ''}
-                                ${r.referredBy ? `<span class="card-tag" style="color: var(--accent-gold);">Ref by: ${escapeHtml(r.referredBy)}</span>` : ''}
-                            </div>
-                        </td>
-
-                        <!-- Referrals Made (Desktop) -->
-                        <td class="desktop-only-toggle">
-                            ${r.referralCount > 0 ? `<span style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 0.8rem; white-space: nowrap;">🎯 ${r.referralCount}</span>` : `<span style="color: var(--text-dim); font-size: 0.82rem;">0</span>`}
-                        </td>
-
-                        <!-- Referred By (Desktop) -->
-                        <td class="desktop-only-toggle">
-                            ${r.referredBy ? `<span class="reg-code-badge" style="background: rgba(230,183,73,0.12);">${escapeHtml(r.referredBy)}</span>` : `<span style="color: var(--text-dim); font-size: 0.82rem;">Direct</span>`}
-                        </td>
-
-                        <!-- Contact info (Clickable Phone & Email) -->
-                        <td>
-                            <div class="card-contacts-bar">
-                                <a href="tel:${escapeHtml(r.phone || '')}" class="card-contact-link">
-                                    <span>📞</span> <span>${escapeHtml(r.phone || 'No phone')}</span>
-                                </a>
-                                <span style="color: rgba(255,255,255,0.2);">•</span>
-                                <a href="mailto:${escapeHtml(r.email || '')}" class="card-contact-link">
-                                    <span>✉️</span> <span>${escapeHtml(r.email || 'No email')}</span>
-                                </a>
-                            </div>
-                        </td>
-
-                        <!-- Dept / Level -->
-                        <td>
-                            <div style="font-size: 0.84rem; color: #cbd5e1;">
-                                🎓 <strong>${escapeHtml(r.department || 'General')}</strong> &nbsp;•&nbsp; <span style="color: var(--text-muted);">${escapeHtml(r.level || '—')}</span>
-                            </div>
-                        </td>
-
-                        <!-- Status -->
-                        <td>
-                            <div style="font-size: 0.8rem; color: var(--accent-gold-light);">💼 ${escapeHtml(r.currentStatus || 'STUDENT')}</div>
-                        </td>
-
-                        <!-- Primary Goal -->
-                        <td>
-                            <div style="font-size: 0.8rem; color: #cbd5e1;">🎯 ${escapeHtml(r.primaryGoal || 'Acquire practical business skills')}</div>
-                        </td>
-
-                        <!-- QA Question -->
-                        <td>
-                            <div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">💬 "${escapeHtml(r.qaQuestion || 'No specific question')}"</div>
-                        </td>
-
-                        <!-- Fee & Ref -->
-                        <td>
-                            <div class="card-fee-row">
-                                <div>
-                                    <strong style="color: #4ade80; font-size: 0.95rem;">₦${(r.amountPaid || 1500).toLocaleString()}</strong>
-                                    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); margin-left: 6px;">${escapeHtml(r.reference || '—')}</span>
+                            <div style="max-width: 220px; font-size: 0.78rem; line-height: 1.35;">
+                                <div title="${escapeHtml(r.primaryGoal || '')}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cbd5e1; margin-bottom: 3px;">
+                                    🎯 <strong>Goal:</strong> ${escapeHtml(r.primaryGoal || 'Practical skills')}
                                 </div>
-                                <div style="font-size: 0.76rem; color: var(--text-dim); white-space: nowrap;">
-                                    🗓️ ${dateStr}
-                                </div>
+                                ${r.qaQuestion ? `
+                                    <div title="${escapeHtml(r.qaQuestion)}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); font-style: italic;">
+                                        💬 "${escapeHtml(r.qaQuestion)}"
+                                    </div>
+                                ` : ''}
                             </div>
                         </td>
 
-                        <!-- Date (Desktop only) -->
-                        <td class="desktop-only-toggle" style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">
+                        <!-- Date -->
+                        <td style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap;">
                             ${dateStr}
                         </td>
 
-                        <!-- Action Buttons -->
+                        <!-- Actions -->
                         <td>
-                            <div class="card-actions-grid">
-                                <button type="button" class="btn-action-sm btn-edit" onclick="openEditAttendeeModal('${escapeHtml(r.id || r.reference || r.uniqueCode)}')" title="Edit Attendee Details">
-                                    <span>✏️</span> <span>Edit</span>
+                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                <button type="button" class="btn-action-sm btn-edit" onclick="openEditAttendeeModal('${escapeHtml(r.id || r.reference || r.uniqueCode)}')" title="Edit Attendee Details" style="padding: 7px 10px;">
+                                    <span>✏️</span>
                                 </button>
-                                <button type="button" class="btn-action-sm" onclick="copyTicketLink('${escapeHtml(r.uniqueCode || '')}')" title="Copy Ticket Pass Link to send to student" style="background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8;">
-                                    <span>🔗</span> <span>Pass Link</span>
+                                <button type="button" class="btn-action-sm" onclick="copyTicketLink('${escapeHtml(r.uniqueCode || '')}')" title="Copy Ticket Pass Link to send to student" style="background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; padding: 7px 10px;">
+                                    <span>🔗</span>
                                 </button>
-                                <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${escapeHtml(r.id || r.reference || r.uniqueCode)}', '${escapeHtml(r.name || 'Participant')}')" title="Delete Registration" style="padding: 9px 12px;">
+                                <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${escapeHtml(r.id || r.reference || r.uniqueCode)}', '${escapeHtml(r.name || 'Participant')}')" title="Delete Registration" style="padding: 7px 10px;">
                                     <span>🗑️</span>
                                 </button>
                             </div>
@@ -2244,6 +2295,87 @@
                     </tr>
                 `;
             }).join("");
+
+            // 2. Populate Cards Grid View
+            if (cardsContainer) {
+                cardsContainer.innerHTML = list.map((r) => {
+                    const dateStr = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+
+                    return `
+                        <div class="student-card">
+                            <div class="student-card-header">
+                                <div class="student-card-code-row">
+                                    <span class="reg-code-badge">${escapeHtml(r.uniqueCode || '—')}</span>
+                                    <span class="student-card-date">🗓️ ${dateStr}</span>
+                                </div>
+                                <div>
+                                    ${r.receiptUrl ? `
+                                        <button type="button" class="btn-receipt-view" onclick="openReceiptModal('${escapeHtml(r.receiptUrl)}', '${escapeHtml(r.name || 'Student')}', '${escapeHtml(r.uniqueCode || '')}', '${escapeHtml(r.reference || '')}', '${r.registeredAt || ''}')">
+                                            <span>🧾 Receipt</span>
+                                            <span>🔍</span>
+                                        </button>
+                                    ` : `
+                                        <span class="badge-wa-only">📱 WA Only</span>
+                                    `}
+                                </div>
+                            </div>
+
+                            <div class="student-card-body">
+                                <div>
+                                    <div class="student-card-name">${escapeHtml(r.name || '—')}</div>
+                                    <div class="student-card-dept">
+                                        🎓 <strong>${escapeHtml(r.department || 'General')}</strong> &nbsp;•&nbsp; <span>${escapeHtml(r.level || '—')}</span>
+                                    </div>
+                                </div>
+
+                                <div class="student-card-contacts">
+                                    <a href="tel:${escapeHtml(r.phone || '')}" class="card-contact-item">
+                                        <span>📞</span> <span>${escapeHtml(r.phone || 'No phone')}</span>
+                                    </a>
+                                    <a href="mailto:${escapeHtml(r.email || '')}" class="card-contact-item">
+                                        <span>✉️</span> <span>${escapeHtml(r.email || 'No email')}</span>
+                                    </a>
+                                </div>
+
+                                <div class="student-card-tags">
+                                    <span class="card-tag" style="background: rgba(230,183,73,0.12); color: var(--accent-gold);">💼 ${escapeHtml(r.currentStatus || 'STUDENT')}</span>
+                                    ${r.participateChallenge === 'Yes'
+                                        ? `<span class="card-tag tag-highlight">🏆 Challenge (Yes)</span>`
+                                        : `<span class="card-tag">Standard</span>`
+                                    }
+                                    ${r.referralCount > 0 ? `<span class="card-tag tag-highlight">🎯 ${r.referralCount} Invited</span>` : ''}
+                                    ${r.referredBy ? `<span class="card-tag" style="color: var(--accent-gold);">Ref by: ${escapeHtml(r.referredBy)}</span>` : '<span class="card-tag">Direct</span>'}
+                                </div>
+
+                                ${(r.primaryGoal || r.qaQuestion) ? `
+                                    <div class="student-card-notes">
+                                        ${r.primaryGoal ? `<div style="margin-bottom: 4px;"><strong>🎯 Goal:</strong> <span>${escapeHtml(r.primaryGoal)}</span></div>` : ''}
+                                        ${r.qaQuestion ? `<div style="color: var(--text-muted); font-style: italic;"><strong>💬 Q:</strong> "${escapeHtml(r.qaQuestion)}"</div>` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="student-card-footer">
+                                <div class="student-card-payment">
+                                    <span class="student-card-amount">₦${(r.amountPaid || 1500).toLocaleString()}</span>
+                                    <span class="student-card-ref">${escapeHtml(r.reference || '—')}</span>
+                                </div>
+                                <div class="student-card-actions">
+                                    <button type="button" class="btn-action-sm btn-edit" onclick="openEditAttendeeModal('${escapeHtml(r.id || r.reference || r.uniqueCode)}')" title="Edit Attendee Details">
+                                        <span>✏️</span> <span>Edit</span>
+                                    </button>
+                                    <button type="button" class="btn-action-sm" onclick="copyTicketLink('${escapeHtml(r.uniqueCode || '')}')" title="Copy Ticket Pass Link" style="background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8;">
+                                        <span>🔗</span> <span>Pass</span>
+                                    </button>
+                                    <button type="button" class="btn-action-sm btn-del" onclick="deleteSingleRegistration('${escapeHtml(r.id || r.reference || r.uniqueCode)}', '${escapeHtml(r.name || 'Participant')}')" title="Delete Registration" style="padding: 9px 12px;">
+                                        <span>🗑️</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+            }
         }
 
         function filterRegistrations() {
