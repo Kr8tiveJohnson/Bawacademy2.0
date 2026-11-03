@@ -1060,12 +1060,12 @@ const server = http.createServer(async (req, res) => {
           qaQuestion: String(item.qaQuestion || '').trim(),
           participateChallenge: isChallenge ? 'Yes' : 'No',
           referredBy: String(item.referredBy || '').trim().toUpperCase(),
-          receiptUrl: String(item.receiptUrl || 'Batch Verified via Kuda Bank Statement').trim(),
+          receiptUrl: String(item.receiptUrl || 'Batch Verified via Moniepoint Bank Statement').trim(),
           amountPaid: feeNGN,
-          paymentMethod: 'Batch Import Verification (KUDA: 2013539577)',
+          paymentMethod: 'Batch Import Verification (Moniepoint: 8164575572)',
           bankDetails: {
-            bank: 'KUDA',
-            accountNumber: '2013539577',
+            bank: 'Moniepoint',
+            accountNumber: '8164575572',
             accountName: 'BAKARE FATIMOH OLASHUBOMI'
           },
           registeredAt: item.registeredAt || new Date().toISOString()
@@ -1157,10 +1157,10 @@ const server = http.createServer(async (req, res) => {
         referredBy: String(referredBy || '').trim().toUpperCase(),
         receiptUrl: String(receiptUrl || '').trim(),
         amountPaid: feeNGN,
-        paymentMethod: 'Manual Admin Verification (KUDA: 2013539577)',
+        paymentMethod: 'Manual Admin Verification (Moniepoint: 8164575572)',
         bankDetails: {
-          bank: 'KUDA',
-          accountNumber: '2013539577',
+          bank: 'Moniepoint',
+          accountNumber: '8164575572',
           accountName: 'BAKARE FATIMOH OLASHUBOMI'
         },
         registeredAt: new Date().toISOString()
@@ -1318,10 +1318,10 @@ const server = http.createServer(async (req, res) => {
           referredBy: finalReferredBy,
           receiptUrl: cleanReceiptUrl,
           amountPaid: feeNGN,
-          paymentMethod: 'Direct Bank Transfer (KUDA: 2013539577)',
+          paymentMethod: 'Direct Bank Transfer (Moniepoint: 8164575572)',
           bankDetails: {
-            bank: 'KUDA',
-            accountNumber: '2013539577',
+            bank: 'Moniepoint',
+            accountNumber: '8164575572',
             accountName: 'BAKARE FATIMOH OLASHUBOMI'
           },
           registeredAt: new Date().toISOString()

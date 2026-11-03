@@ -171,7 +171,7 @@ window.closePaystackModal = window.closePaymentModal;
 // ── Copy Kuda Account Number to Clipboard ──
 window.copyKudaAccount = function (e) {
     if (e && e.preventDefault) e.preventDefault();
-    var acc = "2013539577";
+    var acc = "8164575572";
     var btn = document.getElementById("copyAccBtn") || (e && e.currentTarget);
 
     function notifySuccess() {
